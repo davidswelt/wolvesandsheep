@@ -2,7 +2,8 @@
 package was;
 
 /**
- *
+ * This is a general player class.  
+ * 
  * @author reitter
  */
 public abstract class Player {
@@ -15,7 +16,7 @@ public abstract class Player {
     
     /**
      * This calculates the next move.
-     * "return new Move (1,1)" would be a correct move.
+     * "return new Move (1,1)" would be a correct implementation.
      * Players cannot move into an obstacle, or off the grid.
      * If such a move is returned, the player will either not move,
      * or move partially, stopping at the boundary.
@@ -24,28 +25,9 @@ public abstract class Player {
      * @return new object of type Move
      */
     abstract public Move move ();
-
-    /**
-     * Is this a Wolf player?
-     * true if it's a wolf, false otherwise.
-     */
-    public static boolean isWolf = false;
-
     
-    // may override isBeingEaten and isEating.
-        
-    /**
-     * isBeingEaten() is called just before this sheep is eaten
-     * the method is called only if this player is a sheep.
-     */
-    public void isBeingEaten () {};
     
-    /**
-     * isEating() is called just before this wolf is eating a sheep
-     * the method is called only if this player is a wolf.
-     */
-    public void isEating () {};
-    
+    // Don't override these
     
     @Override
     final public boolean equals(Object obj) {

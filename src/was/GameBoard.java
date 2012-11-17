@@ -25,7 +25,7 @@ public class GameBoard {
         int i = 0; // index in board
         int isBusyUntilTime = 0; // wolf is eating
 
-        public Cell(Player player, int index) {
+        Cell(Player player, int index) {
             if (player instanceof SheepPlayer) {
                 this.piece = GamePiece.SHEEP;
             } else if (player instanceof WolfPlayer) {
@@ -38,7 +38,7 @@ public class GameBoard {
             this.i = index;
         }
 
-        public Cell(GamePiece piece, int index) {
+        Cell(GamePiece piece, int index) {
             if (piece == GamePiece.SHEEP || piece == GamePiece.WOLF) {
                 throw new RuntimeException("GameBoard.Cell called with SHEEP or WOLF as game piece.  Must give player object instead.");
             }
@@ -51,32 +51,36 @@ public class GameBoard {
             this.i = index;
         }
 
-        public GamePiece getPiece() {
+        GamePiece getPiece() {
             return piece;
         }
 
-        public Player getPlayer() {
+        Player getPlayer() {
             return player;
         }
 
-        public boolean isBusy() {
+        boolean isBusy() {
             return (GameBoard.this.currentTimeStep < isBusyUntilTime);
         }
 
         @Override
-        public String toString () {
-            
-            switch (piece)
-            {
-                case EMPTY: return " ";
-                case SHEEP: return "s";
-                case WOLF: return "W";
-                case OBSTACLE: return "#";
-                case PASTURE: return ".";
+        public String toString() {
+
+            switch (piece) {
+                case EMPTY:
+                    return " ";
+                case SHEEP:
+                    return "s";
+                case WOLF:
+                    return "W";
+                case OBSTACLE:
+                    return "#";
+                case PASTURE:
+                    return ".";
             }
             return "";
         }
-        
+
         // make a move
         boolean move(Move m) {
 
@@ -90,8 +94,8 @@ public class GameBoard {
 
             x = Math.max(0, x);
             y = Math.max(0, y);
-            x = Math.min(GameBoard.this.cols-1, x);
-            y = Math.min(GameBoard.this.rows-1, y);
+            x = Math.min(GameBoard.this.cols - 1, x);
+            y = Math.min(GameBoard.this.rows - 1, y);
 
             int idx = GameBoard.this.getIndex(x, y);
 
@@ -113,7 +117,7 @@ public class GameBoard {
                 // note score and remove player
                 GameBoard.this.playerWins(player);
 
-                
+
 
             } else if (piece == GamePiece.SHEEP && GameBoard.this.getPiece(idx) == GamePiece.WOLF) {
                 wolfEatSheep(idx, i);
@@ -127,13 +131,14 @@ public class GameBoard {
 
         void wolfEatSheep(int WolfIndex, int SheepIndex) {
             // the sheep dies
-            // maybe notify
+            //  notify
             // the wolf eats
-            // maybe notify
+            //  notify
 
-            Player sheep = GameBoard.this.getPlayer(SheepIndex);
-            Player wolf = GameBoard.this.getPlayer(WolfIndex);
-            
+            // this will cause a runtime exception if they're not sheep/wolf
+            SheepPlayer sheep = (SheepPlayer) GameBoard.this.getPlayer(SheepIndex);
+            WolfPlayer wolf = (WolfPlayer) GameBoard.this.getPlayer(WolfIndex);
+
             wolf.isEating();
             sheep.isBeingEaten();
 
@@ -150,16 +155,14 @@ public class GameBoard {
             GameBoard.this.playerWins(wolf);
             GameBoard.this.playerLoses(sheep);
 
-            
+
         }
     }
-    protected final int cols;
-    protected final int rows;
+    private final int cols;
+    private final int rows;
     private List<Cell> board = new ArrayList<Cell>();
     private List<Cell> players = new ArrayList();
-    protected HashMap<Player, int[]> scores = new HashMap();
-    
-     
+    private HashMap<Player, int[]> scores = new HashMap();
     /**
      * distance in grid squares that a wolf can cover
      */
@@ -168,12 +171,13 @@ public class GameBoard {
      * number of steps it takes the wolf to eat a sheep
      */
     public final int wolfEatingTime = 4;
-    final int MAXTIMESTEP = 30;
+    /**
+     * maximal number of steps before game ends
+     */
+    public final int MAXTIMESTEP = 30;
     final int NUMWOLVES = 1;
-
     int currentTimeStep = 0;
-    
-    
+
     GameBoard() {
         this(30, 30);
     }
@@ -185,6 +189,10 @@ public class GameBoard {
         for (int i = 0; i < cols * rows; i++) {
             board.add(new Cell(GamePiece.EMPTY, i));
         }
+    }
+
+    public int getTime() {
+        return currentTimeStep;
     }
 
     int getX(int index) {
@@ -201,6 +209,7 @@ public class GameBoard {
 
     /**
      * returns true if cell is empty
+     *
      * @param x column
      * @param y row
      * @return
@@ -214,10 +223,12 @@ public class GameBoard {
     }
 
     /**
-     * returns game piece on cell
+     * returns game piece currently present in an x,y position
+     *
      * @param x column
      * @param y row
-     * @return
+     * @return a GameBoard.GamePiece. You may check, e.g. for an obstacle at
+     * position 4,5: mygameboard.getPiece(4.5)==GameBoard.GamePiece.OBSTACLE
      */
     public GamePiece getPiece(int x, int y) {
         return getPiece(getIndex(x, y));
@@ -228,26 +239,28 @@ public class GameBoard {
         return c.piece;
     }
 
-    private ArrayList<Player> getPlayers ()
-    {
+    private ArrayList<Player> getPlayers() {
         ArrayList<Player> ps = new ArrayList();
-        for (Cell p : players)
-        {
-            if (p.player != null)
-            {
+        for (Cell p : players) {
+            if (p.player != null) {
                 ps.add(p.player);
             }
         }
         return ps;
     }
-    public boolean hasPlayer (Player p)
-    {
+
+    boolean hasPlayer(Player p) {
         return scores.containsKey(p);
     }
-    public int numPlayers ()
-    {
+
+    /**
+     *
+     * @return number of players
+     */
+    public int numPlayers() {
         return players.size();
     }
+
     private Player getPlayer(int i) // private because we don't want players to modify each other/call each other's methods.
     {
         Cell c = board.get(i);
@@ -266,29 +279,34 @@ public class GameBoard {
     }
     static Random rand = new Random();
 
-    
-    public void addPlayer(Player p) {
+    void addPlayer(Player p) {
 
         // add a player
-            // choose a cell
+        // choose a cell
 
-            int pos = -1;
+        int pos = -1;
 
-            while (pos < 0 || !isEmptyCell(pos)) {
-                // not efficient
-                pos = rand.nextInt(board.size());
+        while (pos < 0 || !isEmptyCell(pos)) {
+            // not efficient
+            pos = rand.nextInt(board.size());
 
-            }
+        }
 
-            Cell c = new Cell(p, pos);
-            board.set(pos, c);
-            players.add(board.get(pos));
+        Cell c = new Cell(p, pos);
+        board.set(pos, c);
+        players.add(board.get(pos));
 
-            scores.put(p, new int[1]);
-       
+        scores.put(p, new int[1]);
+
 
     }
 
+    /**
+     * Calculates distance that a certain game piece is allowed to move
+     *
+     * @param g: GameBoard.GamePiece, e.g., GameBoard.GamePiece.SHEEP
+     * @return distance in steps
+     */
     public double allowedMoveDistance(GamePiece g) {
         if (g == GamePiece.SHEEP) {
             return 1.42;
@@ -298,18 +316,33 @@ public class GameBoard {
         }
         return 0;
     }
+
+    /**
+     * Calculates distance that a certain player is allowed to move
+     *
+     * @param p: player
+     * @return distance in steps
+     */
+    public double allowedMoveDistance(Player p) {
+        if (p instanceof SheepPlayer) {
+            return allowedMoveDistance(GamePiece.SHEEP);
+        }
+        if (p instanceof WolfPlayer) {
+            return allowedMoveDistance(GamePiece.WOLF);
+        }
+        return 0;
+    }
     // Wolf moves last
     static GamePiece[] moveOrder = new GamePiece[]{GamePiece.SHEEP, GamePiece.WOLF};
 
-    public void makeMove() {
+    void makeMove() {
 
         currentTimeStep++; // advance time
 
         // sheep
         for (GamePiece g : moveOrder) {
             for (Cell c : players) {
-                if (c.player == null)
-                { // player has been removed
+                if (c.player == null) { // player has been removed
                     continue;
                 }
                 if (c.getPiece() != g) {
@@ -325,7 +358,7 @@ public class GameBoard {
                 // check move
                 if (move.length() > allowedMoveDistance(g)) // sqrt(1+1)
                 {
-                    System.err.println("illegal move: too long! "+ move.length());
+                    System.err.println("illegal move: too long! " + move.length());
                     // illegal move
                     // sheep won't move at all
                     continue;
@@ -340,74 +373,62 @@ public class GameBoard {
 
     }
 
-    public  Map<Player, int[]>  playGame ()
-    {
+    Map<Player, int[]> playGame() {
         // while there are any sheep left
-        
-        
-        while (players.size()>NUMWOLVES && currentTimeStep < MAXTIMESTEP)
-        {
+
+
+        while (players.size() > NUMWOLVES && currentTimeStep < MAXTIMESTEP) {
             System.out.println(currentTimeStep);
             makeMove();
             print();
         }
         return scores;
     }
-        
-    public void print ()
-    {
-        
-        for (int i=0; i<board.size(); i++)
-        {
-            if (getX(i) == 0)
-            {
+
+    public void print() {
+
+        for (int i = 0; i < board.size(); i++) {
+            if (getX(i) == 0) {
                 System.out.println();
             }
             System.out.print(board.get(i));
         }
         System.out.println();
     }
-    
+
     private void playerWins(Player p) {
         scores.get(p)[0]++;
         // remove player from list
-        
+
         removePlayer(p);
     }
-    private void playerLoses (Player p)
-    {
+
+    private void playerLoses(Player p) {
         removePlayer(p);
     }
-    private void removePlayer (Player p)
-    {
+
+    private void removePlayer(Player p) {
         // let's make sure there's no cell left
-        
-        for (Cell c : board)
-        {
+
+        for (Cell c : board) {
             c.player = null;
             c.piece = GamePiece.EMPTY;
-        }        
-        for (Cell c : players)
-        {
-            if (c.player == p)
-            {
- //               players.remove(c);
+        }
+        for (Cell c : players) {
+            if (c.player == p) {
+                //               players.remove(c);
                 c.player = null; // player goes (do not remove from list)
                 // removal from list would lead to ConcurrentModificationException
                 c.piece = GamePiece.EMPTY;
-                
+
                 return;
             }
         }
     }
-    
-    void printScores ()
-    {
-        for (Map.Entry<Player, int[]>  s : scores.entrySet())
-        {
+
+    void printScores() {
+        for (Map.Entry<Player, int[]> s : scores.entrySet()) {
             System.out.println(s.getKey() + ": " + s.getValue()[0]);
         }
     }
-    
-    
 }

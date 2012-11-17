@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package was;
 
 import java.lang.reflect.Constructor;
@@ -188,7 +184,7 @@ public class Tournament {
      * starts the tournament.
      *
      */
-    public TreeMap<String, Double> start(boolean printHighscores) {
+     TreeMap<String, Double> start(boolean printHighscores) {
 
 // check players
         
@@ -279,7 +275,7 @@ public class Tournament {
         }
     }
 
-    public Tournament(List<Class> playerClasses) {
+     Tournament(List<Class> playerClasses) {
         //(Class[] playerClasses, int m, int n, int r) {
 
 
