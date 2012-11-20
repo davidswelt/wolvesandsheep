@@ -5,14 +5,11 @@ package was;
     final GameBoard board;
 
     public WasVideoGame(GameBoard board) {
-        super(50, 50, 10);
+        super(board.getCols(), board.getRows(), 48);
         this.board = board;
         setBgColor(java.awt.Color.WHITE);
-                
-        //super(10, 10, 60, java.awt.Color.red, "sprites/reef.gif");
-//    Fish nemo = new Fish();
-//    addActor(nemo, new Location(2, 4));
-//    show();
+              
+        
     }
 
     @Override
@@ -28,9 +25,4 @@ package was;
         }
 
     }
-//
-//  public static void main(String[] args)
-//  {
-//    new WasVideoGame();
-//  }
 }
