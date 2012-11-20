@@ -7,6 +7,11 @@ package was;  // players may not use this package name
  */
 abstract public class WolfPlayer extends Player {
   
+    public GamePiece getPiece() 
+    {
+        return GamePiece.WOLF;
+    }
+    
     // you may override if you like
     
     public String imageFile () {
@@ -14,7 +19,6 @@ abstract public class WolfPlayer extends Player {
     }
     
     
-        
     // this inherits the move() method from Player.
 
     /**

@@ -8,6 +8,12 @@ package was;  // players may not use this package name
  */
 public abstract class SheepPlayer extends Player {
     
+    
+    public GamePiece getPiece() 
+    {
+        return GamePiece.SHEEP;
+    }
+    
     // you may override if you like
     
     public String imageFile () {

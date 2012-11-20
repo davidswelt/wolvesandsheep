@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import was.Player.GamePiece;
 
 /**
  *
@@ -21,46 +22,31 @@ public class GameBoard {
     /**
      * The type describing the state of a single cell in the game grid.
      */
-    public static enum GamePiece {
 
-        EMPTY, SHEEP, WOLF, OBSTACLE, PASTURE
-    };
 
     final class Cell // don't allow extension - cells may move around within the board
     {
-
-        GamePiece piece = GamePiece.EMPTY;
         Player player = null;
         int i = 0; // index in board
 
+        Cell(int index) {
+           
+            this.player = null; // empty
+            setLoc(index);
+        }
+        
         Cell(Player player, int index) {
-            if (player instanceof SheepPlayer) {
-                this.piece = GamePiece.SHEEP;
-            } else if (player instanceof WolfPlayer) {
-                this.piece = GamePiece.WOLF;
-            } else {
-                throw new RuntimeException("GameBoard.Cell called with player that is neither SheepPlayer nor WolfPlayer.");
-            }
+            
 
             this.player = player;
-            this.i = index;
-        }
-
-        Cell(GamePiece piece, int index) {
-            if (piece == GamePiece.SHEEP || piece == GamePiece.WOLF) {
-                throw new RuntimeException("GameBoard.Cell called with SHEEP or WOLF as game piece.  Must give player object instead.");
-            }
-            if (piece != GamePiece.EMPTY && piece != GamePiece.OBSTACLE) {
-                throw new RuntimeException("GameBoard.Cell called with unknown enum as game piece.");
-
-            }
-            this.piece = piece;
-            this.player = null;
-            this.i = index;
+            setLoc(index);
         }
 
         GamePiece getPiece() {
-            return piece;
+            if (player == null) {
+                return GamePiece.EMPTY;
+            }
+            return player.getPiece();
         }
 
         Player getPlayer() {
@@ -69,32 +55,27 @@ public class GameBoard {
 
         @Override
         public String toString() {
-
-            switch (piece) {
-                case EMPTY:
-                    return " ";
-                case SHEEP:
-                    return "s";
-                case WOLF:
-                    return "W";
-                case OBSTACLE:
-                    return "#";
-                case PASTURE:
-                    return ".";
+            if (player == null) {
+                return " ";
             }
-            return "";
+            return player.toString();
+            
         }
 
         // make a move
         boolean move(Move m) {
 
+            if (player == null)
+            {
+                throw new RuntimeException("Cell.move: trying to move an empty cell.");
+            }
             if (player.isBusy()) {
                 return false; // can't make a move
             }
 
 
-            int x = GameBoard.this.getX(i) + m.delta_x;
-            int y = GameBoard.this.getY(i) + m.delta_y;
+            int x = GameBoard.this.getX(i) + (int) m.delta_x;
+            int y = GameBoard.this.getY(i) + (int) m.delta_y;
 
             x = Math.max(0, x);
             y = Math.max(0, y);
@@ -111,21 +92,19 @@ public class GameBoard {
 
                 GameBoard.this.swapCells(i, idx);
                 player.keepBusyFor(1);
-
+                
 
                 return true;
 
-            } else if (piece == GamePiece.SHEEP && GameBoard.this.getPiece(idx) == GamePiece.PASTURE) {
+            } else if (player.getPiece() == GamePiece.SHEEP && GameBoard.this.getPiece(idx) == GamePiece.PASTURE) {
                 // a sheep makes it to the pasture
 
                 // note score and remove player
                 GameBoard.this.playerWins(player);
 
-
-
-            } else if (piece == GamePiece.SHEEP && GameBoard.this.getPiece(idx) == GamePiece.WOLF) {
+            } else if (player.getPiece() == GamePiece.SHEEP && GameBoard.this.getPiece(idx) == GamePiece.WOLF) {
                 wolfEatSheep(idx, i);
-            } else if (piece == GamePiece.WOLF && GameBoard.this.getPiece(idx) == GamePiece.SHEEP) {
+            } else if (player.getPiece() == GamePiece.WOLF && GameBoard.this.getPiece(idx) == GamePiece.SHEEP) {
                 wolfEatSheep(i, idx);
             }
 
@@ -133,11 +112,25 @@ public class GameBoard {
 
         }
 
+        void setLoc(int i)
+        {
+            this.i = i;
+            if (player != null)
+            {
+                int x = GameBoard.this.getX(i);
+                int y = GameBoard.this.getY(i);
+
+                player.setLoc(x,y);
+            }
+        }
+        
         void wolfEatSheep(int WolfIndex, int SheepIndex) {
             // the sheep dies
             //  notify
             // the wolf eats
             //  notify
+            
+            System.out.println("eating!");
 
             // this will cause a runtime exception if they're not sheep/wolf
             SheepPlayer sheep = (SheepPlayer) GameBoard.this.getPlayer(SheepIndex);
@@ -152,7 +145,7 @@ public class GameBoard {
             // move wolf to sheep's position
             GameBoard.this.board.set(SheepIndex, wolfCell);
             // replace wolf cell with empty cell
-            GameBoard.this.board.set(WolfIndex, new Cell(GamePiece.EMPTY, WolfIndex));
+            GameBoard.this.board.set(WolfIndex, new Cell(WolfIndex));
 
             // scoring and removal of objects            
             GameBoard.this.playerWins(wolf);
@@ -190,7 +183,7 @@ public class GameBoard {
         rows = height;
 
         for (int i = 0; i < cols * rows; i++) {
-            board.add(new Cell(GamePiece.EMPTY, i));
+            board.add(new Cell(i));
         }
 
         if (ui) {
@@ -218,6 +211,14 @@ public class GameBoard {
         return y * cols + x;
     }
 
+    public int getRows() {
+        return rows;
+    }
+    public int getCols() {
+        return cols;
+    }
+    
+    
     /**
      * returns true if cell is empty
      *
@@ -230,7 +231,7 @@ public class GameBoard {
     }
 
     boolean isEmptyCell(int i) {
-        return board.get(i).piece == GamePiece.EMPTY;
+        return board.get(i).getPiece() == GamePiece.EMPTY;
     }
 
     /**
@@ -247,7 +248,7 @@ public class GameBoard {
 
     GamePiece getPiece(int i) {
         Cell c = board.get(i);
-        return c.piece;
+        return c.getPiece();
     }
 
     private ArrayList<Player> getPlayers() {
@@ -286,15 +287,17 @@ public class GameBoard {
         board.set(i2, m);
 
         // update cell objects
-        board.get(i1).i = i1;  // maybe use "notifyMove" instead
-        board.get(i2).i = i2;
+
+        board.get(i1).setLoc(i1);
+        board.get(i2).setLoc(i2);
+        
+        
 
     }
     static Random rand = new Random();
 
     void addPlayer(Player p) {
 
-        System.out.println("adding pl" + p);
         p.setGameBoard(this);
 
         p.setMaxAllowedDistance(
@@ -314,6 +317,7 @@ public class GameBoard {
 
         while (pos < 0 || !isEmptyCell(pos)) {
             // not efficient
+            // choose random position
             pos = rand.nextInt(board.size());
 
         }
@@ -377,6 +381,13 @@ public class GameBoard {
                // callback from game backend
     void noteMove(Player p, Move move)
     {
+        for(Cell c : players)
+        {
+            if (c.player==p) // cell found
+            {
+                c.move(move); // check for collisions etc
+            }
+        }
 //        Cell c = getCellForPlayer(p);
 //        c.move(move);
     }
@@ -452,14 +463,13 @@ public class GameBoard {
 
         for (Cell c : board) {
             c.player = null;
-            c.piece = GamePiece.EMPTY;
         }
         for (Cell c : players) {
             if (c.player == p) {
                 //               players.remove(c);
                 c.player = null; // player goes (do not remove from list)
                 // removal from list would lead to ConcurrentModificationException
-                c.piece = GamePiece.EMPTY;
+                
 
                 return;
             }
