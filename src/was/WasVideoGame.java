@@ -7,6 +7,8 @@ package was;
     public WasVideoGame(GameBoard board) {
         super(50, 50, 10);
         this.board = board;
+        setBgColor(java.awt.Color.WHITE);
+                
         //super(10, 10, 60, java.awt.Color.red, "sprites/reef.gif");
 //    Fish nemo = new Fish();
 //    addActor(nemo, new Location(2, 4));
