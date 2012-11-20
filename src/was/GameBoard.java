@@ -1,10 +1,14 @@
 package was;
 
+import ch.aplu.jgamegrid.GameGrid;
+import ch.aplu.jgamegrid.Location;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -12,6 +16,11 @@ import java.util.Random;
  */
 public class GameBoard {
 
+    WasGameBackend wasgamegrid = null;
+
+    /**
+     * The type describing the state of a single cell in the game grid.
+     */
     public static enum GamePiece {
 
         EMPTY, SHEEP, WOLF, OBSTACLE, PASTURE
@@ -23,7 +32,6 @@ public class GameBoard {
         GamePiece piece = GamePiece.EMPTY;
         Player player = null;
         int i = 0; // index in board
-        int isBusyUntilTime = 0; // wolf is eating
 
         Cell(Player player, int index) {
             if (player instanceof SheepPlayer) {
@@ -59,10 +67,6 @@ public class GameBoard {
             return player;
         }
 
-        boolean isBusy() {
-            return (GameBoard.this.currentTimeStep < isBusyUntilTime);
-        }
-
         @Override
         public String toString() {
 
@@ -84,7 +88,7 @@ public class GameBoard {
         // make a move
         boolean move(Move m) {
 
-            if (isBusy()) {
+            if (player.isBusy()) {
                 return false; // can't make a move
             }
 
@@ -106,7 +110,7 @@ public class GameBoard {
                 // swap empty cell
 
                 GameBoard.this.swapCells(i, idx);
-                isBusyUntilTime = GameBoard.this.currentTimeStep + 1; // for safety
+                player.keepBusyFor(1);
 
 
                 return true;
@@ -143,8 +147,7 @@ public class GameBoard {
             sheep.isBeingEaten();
 
             Cell wolfCell = GameBoard.this.board.get(WolfIndex);
-            wolfCell.isBusyUntilTime = GameBoard.this.currentTimeStep + GameBoard.this.wolfEatingTime;
-
+            wolf.keepBusyFor(GameBoard.this.wolfEatingTime);
 
             // move wolf to sheep's position
             GameBoard.this.board.set(SheepIndex, wolfCell);
@@ -179,15 +182,23 @@ public class GameBoard {
     int currentTimeStep = 0;
 
     GameBoard() {
-        this(30, 30);
+        this(30, 30, false);
     }
 
-    GameBoard(int width, int height) {
+    GameBoard(int width, int height, boolean ui) {
         cols = width;
         rows = height;
 
         for (int i = 0; i < cols * rows; i++) {
             board.add(new Cell(GamePiece.EMPTY, i));
+        }
+
+        if (ui) {
+            // if UI, then this game board is backed by a wasvideogame (GameGrid)
+            wasgamegrid = new WasVideoGame(this);
+        } else
+        {
+            wasgamegrid = new WasBlankGame(this);
         }
     }
 
@@ -248,7 +259,9 @@ public class GameBoard {
         }
         return ps;
     }
-
+     List<Cell> getCells() {
+        return players;
+    }
     boolean hasPlayer(Player p) {
         return scores.containsKey(p);
     }
@@ -281,6 +294,19 @@ public class GameBoard {
 
     void addPlayer(Player p) {
 
+        System.out.println("adding pl" + p);
+        p.setGameBoard(this);
+
+        p.setMaxAllowedDistance(
+                (p instanceof SheepPlayer)
+                ? allowedMoveDistance(GamePiece.SHEEP)
+                : (p instanceof WolfPlayer)
+                ? allowedMoveDistance(GamePiece.WOLF)
+                : 0);
+
+
+
+
         // add a player
         // choose a cell
 
@@ -298,6 +324,11 @@ public class GameBoard {
 
         scores.put(p, new int[1]);
 
+        String image = null;
+        
+        PlayerProxy pprox = new PlayerProxy(p);
+        wasgamegrid.addActor(pprox, new Location(getX(pos), getY(pos)));
+        p.setPlayerProxy(pprox);
 
     }
 
@@ -318,70 +349,76 @@ public class GameBoard {
     }
 
     /**
-     * Calculates distance that a certain player is allowed to move
+     * Gets distance that a certain player is allowed to move
      *
      * @param p: player
      * @return distance in steps
      */
     public double allowedMoveDistance(Player p) {
-        if (p instanceof SheepPlayer) {
-            return allowedMoveDistance(GamePiece.SHEEP);
-        }
-        if (p instanceof WolfPlayer) {
-            return allowedMoveDistance(GamePiece.WOLF);
-        }
-        return 0;
+        return p.getMaxAllowedDistance();
     }
-    // Wolf moves last
-    static GamePiece[] moveOrder = new GamePiece[]{GamePiece.SHEEP, GamePiece.WOLF};
 
     void makeMove() {
 
+       
+
+
+
+    }
+    
+//    
+//    to do:
+//    implement second variant of the backing game (both implemnent the same interface)
+//       thread waiting interface
+//       gameNextTimeStep callback
+//       and a callback to update move (and check legality)  cell.move(move)
+//               
+               
+               // callback from game backend
+    void noteMove(Player p, Move move)
+    {
+//        Cell c = getCellForPlayer(p);
+//        c.move(move);
+    }
+            
+    
+
+       // callback from game backend
+    void gameNextTimeStep() {
         currentTimeStep++; // advance time
+    }
 
-        // sheep
-        for (GamePiece g : moveOrder) {
-            for (Cell c : players) {
-                if (c.player == null) { // player has been removed
-                    continue;
-                }
-                if (c.getPiece() != g) {
-                    continue;
-                }
-
-                if (c.isBusy()) {
-                    // Wolf is eating
-                    continue;
-                }
-                Move move = c.getPlayer().move();
-
-                // check move
-                if (move.length() > allowedMoveDistance(g)) // sqrt(1+1)
-                {
-                    System.err.println("illegal move: too long! " + move.length());
-                    // illegal move
-                    // sheep won't move at all
-                    continue;
-                }
-
-                c.move(move); // let the cell make a move
-
-            }
-        }
-
-
-
+    // callback from game backend
+    boolean isFinished() {
+        return !(players.size() > NUMWOLVES && currentTimeStep < MAXTIMESTEP);
     }
 
     Map<Player, int[]> playGame() {
         // while there are any sheep left
 
+        if (wasgamegrid != null) {
+            wasgamegrid.show();
 
-        while (players.size() > NUMWOLVES && currentTimeStep < MAXTIMESTEP) {
-            System.out.println(currentTimeStep);
-            makeMove();
+            // we're not calling make move
+
+            wasgamegrid.doRun();  
+            
+            // the JGameGrid version will spawn a separate thread,
+            // so we'll wait for it to finish:
+
+            while (!isFinished()) {
+                synchronized (this) {
+                    try {
+                        this.wait();
+                    } catch (InterruptedException ex) {
+                        Logger.getLogger(GameBoard.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+            }
+            wasgamegrid.hide();
             print();
-        }
+
+        } 
         return scores;
     }
 
@@ -408,6 +445,9 @@ public class GameBoard {
     }
 
     private void removePlayer(Player p) {
+
+        wasgamegrid.removeActor(p.playerProxy);
+
         // let's make sure there's no cell left
 
         for (Cell c : board) {

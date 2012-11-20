@@ -8,6 +8,15 @@ package was;  // players may not use this package name
  */
 public abstract class SheepPlayer extends Player {
     
+    // you may override if you like
+    
+    public String imageFile () {
+        return "pics/sheep_head_small.jpg";
+    }
+    
+    
+    
+    
     // this inherits the move() method from Player.
     
     /**

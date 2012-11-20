@@ -1,11 +1,8 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package was;
 
 /**
- *
+ * A move made by a player described in terms of its relative x and y movement
  * @author dr
  */
 public class Move {
@@ -28,7 +25,7 @@ public class Move {
      * Calculate length of a move
      * @return calculate the distance covered by this move
      */
-    public double length() {
+    final public double length() {
         return Math.sqrt((delta_x*delta_x) + (delta_y*delta_y));
     }
 }

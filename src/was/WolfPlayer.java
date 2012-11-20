@@ -6,7 +6,15 @@ package was;  // players may not use this package name
  * @author dr
  */
 abstract public class WolfPlayer extends Player {
-
+  
+    // you may override if you like
+    
+    public String imageFile () {
+        return "pics/wolf_head_small.gif";
+    }
+    
+    
+        
     // this inherits the move() method from Player.
 
     /**

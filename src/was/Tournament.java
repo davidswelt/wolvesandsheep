@@ -167,7 +167,7 @@ public class Tournament {
 
         t = new Tournament(playerClasses);
 
-        int totalgames = r * playerClasses.size() * (playerClasses.size() - 1);
+        int totalgames = r * playerClasses.size() * (playerClasses.size() - 1) * (playerClasses.size() - 2) * (playerClasses.size() - 3);
 
         System.err.println("Total trials: " + totalgames);
 
