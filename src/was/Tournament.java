@@ -156,16 +156,28 @@ public class Tournament {
      *
      * @param playerClasses: Array of classes of players. Each player has to
      * implement the was.Player interface.
-     * @param m height of board
-     * @param n width of board
-     * @param k number of pieces in a row required to win
      * @param r number of repetitions to run
      */
     static public void run(List<Class> playerClasses, int r) {
 
+        run(playerClasses, 40, 40, r, false);
+    }
+   /**
+     * creates and runs a tournament, printing the results.
+     *
+     * @param playerClasses: Array of classes of players. Each player has to
+     * implement the was.Player interface.
+     * @param m height of board
+     * @param n width of board
+     * @param k number of pieces in a row required to win
+     * @param r number of repetitions to run
+     * @param ui true if UI is to be shown
+     */
+    static public void run(List<Class> playerClasses, int m, int n, int r, boolean ui) {
+
         Tournament t;
 
-        t = new Tournament(playerClasses);
+        t = new Tournament(playerClasses, m,n,r,ui);
 
         int totalgames = r * playerClasses.size() * (playerClasses.size() - 1) * (playerClasses.size() - 2) * (playerClasses.size() - 3);
 
@@ -229,7 +241,7 @@ public class Tournament {
             // reached number of sheep (plus wolf), or have selected all available players
             if (selectedPlayers.size() > numSheep) // termination condition
             {
-                GameBoard board = new GameBoard();
+                GameBoard board = new GameBoard(boardWidth, boardHeight, boardUI);
 
                 for (Integer i : selectedPlayers) {
 
@@ -274,10 +286,16 @@ public class Tournament {
             Logger.getLogger(Tournament.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+    int boardWidth = 30;
+    int boardHeight = 30;
+    boolean boardUI = false;
 
-     Tournament(List<Class> playerClasses) {
+     Tournament(List<Class> playerClasses, int m, int n, int r, boolean ui) {
         //(Class[] playerClasses, int m, int n, int r) {
 
+        boardWidth = m;
+        boardHeight = n;
+        boardUI = ui;
 
         // Security Policy
         //System.setProperty("java.security.policy", "file:sandbox.policy");
@@ -304,6 +322,7 @@ public class Tournament {
         int n = 30;
         int k = 4;
         int r = 100;
+        boolean ui = false;
         
         // parse the command line
         int i = 0;
@@ -316,7 +335,10 @@ public class Tournament {
                 n = Integer.parseInt(st.nextToken());
                 k = Integer.parseInt(st.nextToken());
                     
-            } else 
+            } else if (s.equals("-u")) {
+                ui = true;
+            }
+            else 
                 if (s.equals("-r")) {
 
                 r = Integer.parseInt(args[i++]);
@@ -328,12 +350,14 @@ public class Tournament {
 
                     
         if (players.size() > 1) {
-            was.Tournament.run(players,  r); // m, n, k,
+            was.Tournament.run(players,  m,n, r, ui); // m, n, k,
         } else {
-            System.err.println("Usage: java -jar WolvesAndSheep.jar -t M,N,K -r R CLASS1 CLASS2 (...)");
+            System.err.println("Usage: java -jar WolvesAndSheep.jar -t M,N,K -r R CLASS1 CLASS2 CLASS3 CLASS4 CLASS5 (...)");
             System.err.println("       -t M,N,K  ==> play a M*N board with K sheep.");
             System.err.println("       -r R      ==> play R repeats of each game.");
-            System.err.println("Example: java WolvesAndSheep.jar -t 4,4,3 -r 400 reitter.SheepPlayer reitter.WolfPlayer");
+            System.err.println("       -u        ==> show the graphical user interface ");
+            System.err.println("Example: java -jar WolvesAndSheep.jar -t 4,4,3 -r 400 reitter.SheepPlayer reitter.WolfPlayer reitter.SheepPlayer reitter.SheepPlayer reitter.SheepPlayer");
+            System.err.println("Example for NetBeans (Run Configuration, Program arguments): -t 4,4,3 -r 400 reitter.SheepPlayer reitter.WolfPlayer reitter.SheepPlayer reitter.SheepPlayer reitter.SheepPlayer");
             // do not run a default case to make sure it doesn't confusion.
             //run("reitter.GamePlayerH2,reitter.GamePlayerH1,reitter.RandomPlayer", m, n, k, r);
         }
