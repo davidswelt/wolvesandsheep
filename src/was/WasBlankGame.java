@@ -22,6 +22,10 @@ import was.Player.GamePiece;
     public void hide() {
         // empty        
     }
+     public void doPause()
+     {
+         
+     }
     
     @Override
     public void addActor(Actor actor, Location location) {

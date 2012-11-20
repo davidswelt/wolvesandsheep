@@ -17,6 +17,7 @@ interface WasGameBackend {
     public void show();
 
     public void hide();
+    public void doPause();
 
     public boolean removeActor(Actor actor);
 }

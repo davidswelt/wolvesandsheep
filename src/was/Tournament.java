@@ -243,6 +243,9 @@ public class Tournament {
             {
                 GameBoard board = new GameBoard(boardWidth, boardHeight, boardUI);
 
+                board.addPlayer(new Pasture());
+                board.addPlayer(new Pasture());
+                board.addPlayer(new Pasture());
                 for (Integer i : selectedPlayers) {
 
                     board.addPlayer(playerFactory(players.get(i), (isWolf(players.get(i)) ? "w" : "s")));

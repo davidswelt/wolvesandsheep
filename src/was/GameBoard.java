@@ -426,7 +426,9 @@ public class GameBoard {
                     }
                 }
             }
+            wasgamegrid.doPause();
             wasgamegrid.hide();
+            wasgamegrid = null; // go away!
             print();
 
         } 
@@ -457,6 +459,10 @@ public class GameBoard {
 
     private void removePlayer(Player p) {
 
+        if (p == null || wasgamegrid == null)
+        {
+            return;
+        }
         wasgamegrid.removeActor(p.playerProxy);
 
         // let's make sure there's no cell left
