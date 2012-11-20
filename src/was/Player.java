@@ -54,6 +54,7 @@ public abstract class Player {
         return (gb.currentTimeStep < isBusyUntilTime);
     }
 
+    // called by PlayerProxy
     final Move calcMove() {
 
         if (isBusy()) {

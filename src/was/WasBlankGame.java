@@ -56,7 +56,7 @@ import was.Player.GamePiece;
                         // Wolf is eating
                         continue;
                     }
-                    Move move = c.getPlayer().move();
+                    Move move = c.getPlayer().calcMove();
 
                     // check move
                     if (move.length() > c.getPlayer().getMaxAllowedDistance()) // sqrt(1+1)
@@ -66,9 +66,8 @@ import was.Player.GamePiece;
                         // sheep won't move at all
                         continue;
                     }
-
-                    c.move(move); // let the cell make a move
-
+                    board.noteMove(c.getPlayer(), move);
+                    
                 }
             }
         }

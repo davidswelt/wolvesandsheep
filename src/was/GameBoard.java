@@ -106,6 +106,8 @@ public class GameBoard {
                 wolfEatSheep(idx, i);
             } else if (player.getPiece() == GamePiece.WOLF && GameBoard.this.getPiece(idx) == GamePiece.SHEEP) {
                 wolfEatSheep(i, idx);
+            } else if (player.getPiece() == GamePiece.WOLF && GameBoard.this.getPiece(idx) == GamePiece.PASTURE) {
+                // wolf can't move onto pasture
             }
 
             return false;
@@ -327,8 +329,6 @@ public class GameBoard {
         players.add(board.get(pos));
 
         scores.put(p, new int[1]);
-
-        String image = null;
         
         PlayerProxy pprox = new PlayerProxy(p);
         wasgamegrid.addActor(pprox, new Location(getX(pos), getY(pos)));
@@ -379,17 +379,18 @@ public class GameBoard {
 //               
                
                // callback from game backend
-    void noteMove(Player p, Move move)
+    boolean noteMove(Player p, Move move)
     {
         for(Cell c : players)
         {
             if (c.player==p) // cell found
             {
-                c.move(move); // check for collisions etc
+                return c.move(move); // check for collisions etc
             }
         }
 //        Cell c = getCellForPlayer(p);
 //        c.move(move);
+        return false;
     }
             
     

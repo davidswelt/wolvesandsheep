@@ -1,3 +1,7 @@
+/*
+ * This class acts as a bridge between the JGameGrid framework and the 
+ */
+
 package was;
 
 import ch.aplu.jgamegrid.*;
