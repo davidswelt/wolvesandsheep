@@ -2,6 +2,7 @@ package was;
 
 import ch.aplu.jgamegrid.Actor;
 import ch.aplu.jgamegrid.Location;
+import was.Player.GamePiece;
 
  class WasBlankGame implements WasGameBackend {
 
@@ -29,7 +30,7 @@ import ch.aplu.jgamegrid.Location;
     public boolean removeActor(Actor actor) { return true;}
 
         // Wolf moves last
-    static GameBoard.GamePiece[] moveOrder = new GameBoard.GamePiece[]{GameBoard.GamePiece.SHEEP, GameBoard.GamePiece.WOLF};
+    static GamePiece[] moveOrder = new GamePiece[]{GamePiece.SHEEP, GamePiece.WOLF};
 
     @Override
     public void doRun() {
@@ -38,7 +39,7 @@ import ch.aplu.jgamegrid.Location;
             board.gameNextTimeStep();
 
             // sheep
-            for (GameBoard.GamePiece g : moveOrder) {
+            for (GamePiece g : moveOrder) {
                 for (GameBoard.Cell c : board.getCells()) {
                     if (c.player == null) { // player has been removed
                         continue;

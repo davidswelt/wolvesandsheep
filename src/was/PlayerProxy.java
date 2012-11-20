@@ -20,8 +20,13 @@ class PlayerProxy extends Actor {
     final public void act() {
         Move theMove = player.calcMove(); // this asks the player to decide its move
 
-        int target_x = getX() + theMove.delta_x;
-        int target_y = getY() + theMove.delta_y;
+        if (theMove == null)
+        {
+            return;
+        }
+        
+        int target_x = getX() + (int) theMove.delta_x;
+        int target_y = getY() + (int) theMove.delta_y;
 
 
         // determine new direction
