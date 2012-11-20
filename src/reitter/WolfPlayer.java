@@ -8,9 +8,11 @@ import was.Move;
  */
 public class WolfPlayer extends was.WolfPlayer {
 
+    
+    
     @Override
     public Move move() {
-        return new Move(-1,0);
+        return new Move(2,1).scaledToLength(getMaxAllowedDistance());
     }
     
 }
