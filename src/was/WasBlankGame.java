@@ -4,7 +4,7 @@ import ch.aplu.jgamegrid.Actor;
 import ch.aplu.jgamegrid.Location;
 import was.Player.GamePiece;
 
- class WasBlankGame implements WasGameBackend {
+class WasBlankGame implements WasGameBackend {
 
     final GameBoard board;
 
@@ -22,18 +22,19 @@ import was.Player.GamePiece;
     public void hide() {
         // empty        
     }
-     public void doPause()
-     {
-         
-     }
-    
+
+    public void doPause() {
+    }
+
     @Override
     public void addActor(Actor actor, Location location) {
     }
-    @Override
-    public boolean removeActor(Actor actor) { return true;}
 
-        // Wolf moves last
+    @Override
+    public boolean removeActor(Actor actor) {
+        return true;
+    }
+    // Wolf moves last
     static GamePiece[] moveOrder = new GamePiece[]{GamePiece.SHEEP, GamePiece.WOLF};
 
     @Override
@@ -58,16 +59,19 @@ import was.Player.GamePiece;
                     }
                     Move move = c.getPlayer().calcMove();
 
-                    // check move
-                    if (move.length() > c.getPlayer().getMaxAllowedDistance()) // sqrt(1+1)
+                    if (move != null) // valid move
                     {
-                        System.err.println("illegal move: too long! " + move.length());
-                        // illegal move
-                        // sheep won't move at all
-                        continue;
+                        // check move
+                        if (move.length() > c.getPlayer().getMaxAllowedDistance()) // sqrt(1+1)
+                        {
+                            System.err.println("illegal move: too long! " + move.length());
+                            // illegal move
+                            // sheep won't move at all
+                            continue;
+                        }
+                        board.noteMove(c.getPlayer(), move);
+
                     }
-                    board.noteMove(c.getPlayer(), move);
-                    
                 }
             }
         }
@@ -95,5 +99,4 @@ import was.Player.GamePiece;
 //  {
 //    new WasVideoGame();
 //  }
-
 }
