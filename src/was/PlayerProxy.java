@@ -1,5 +1,6 @@
 /*
  * This class acts as a bridge between the JGameGrid framework and the 
+ * players derived from SheepPlayer and WolfPlayer.
  */
 
 package was;
@@ -15,13 +16,11 @@ class PlayerProxy extends Actor {
         super(player.imageFile());
         this.player = player;
         
-        java.awt.image.BufferedImage bi = getImage();
-        
-        
     }
 
     @Override
     final public void act() {
+        
         Move theMove = player.calcMove(); // this asks the player to decide its move
 
         if (theMove == null)

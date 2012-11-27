@@ -12,7 +12,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *
+ * The Tournament class describes and manages the game tournament.
+ * This is the main (entry) class.
  * @author dr
  */
 public class Tournament {

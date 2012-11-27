@@ -12,7 +12,11 @@ import java.util.logging.Logger;
 import was.Player.GamePiece;
 
 /**
- *
+ * The GameBoard class represents the state of the shared game board.
+ * The class makes information about the board, the player positions available.
+ * Internally, it handles updates to all of these data and calls on players to
+ * make their moves.  The GameBoard class implements some of the game rules that
+ * involve collisions of players.
  * @author dr
  */
 public class GameBoard {
@@ -228,11 +232,11 @@ public class GameBoard {
     
     
     /**
-     * returns true if cell is empty
+     * $Returns true if cell is empty
      *
      * @param x column
      * @param y row
-     * @return
+     * @return true if cell X, Y is empty.
      */
     public boolean isEmptyCell(int x, int y) {
         return isEmptyCell(getIndex(x, y));
@@ -243,7 +247,7 @@ public class GameBoard {
     }
 
     /**
-     * returns game piece currently present in an x,y position
+     * Returns game piece currently present in an x,y position
      *
      * @param x column
      * @param y row
@@ -276,7 +280,7 @@ public class GameBoard {
     }
 
     /**
-     *
+     * Returns the number of players present on the board.
      * @return number of players
      */
     public int numPlayers() {

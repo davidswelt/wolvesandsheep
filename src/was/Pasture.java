@@ -1,8 +1,8 @@
-
 package was;
 
 /**
- *
+ * A pasture is a form of player that does not move.
+ * Pastures are added to the board as if they were players.
  * @author dr
  */
 public class Pasture extends Player{
