@@ -97,6 +97,11 @@ public abstract class Player {
         return maxAllowedDistance;
     }
 
+    /**
+     * Returns the name of the image file representing this player
+     * Implement this function to return a custom sprite.
+     * @return a string with the path and file name of the image file
+     */
     abstract public String imageFile();
 
     // must override move.
