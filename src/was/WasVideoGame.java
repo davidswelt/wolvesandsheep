@@ -1,6 +1,12 @@
 package was;
 
- class WasVideoGame extends ch.aplu.jgamegrid.GameGrid implements WasGameBackend {
+/*
+ * The WasVideoGame is the a form of game grid, based on the JGameGrid package.
+ * It is used by the GameBoard whenever the graphical UI is used.
+ * If the graphical UI is not in use, GameBoard uses WasBlankGame instead, 
+ * which also implemeents the WasGameBackend interface, but does essentially nothing.
+ */
+class WasVideoGame extends ch.aplu.jgamegrid.GameGrid implements WasGameBackend {
 
     final GameBoard board;
 
@@ -8,8 +14,8 @@ package was;
         super(board.getCols(), board.getRows(), 48);
         this.board = board;
         setBgColor(java.awt.Color.WHITE);
-              
-        
+
+
     }
 
     @Override

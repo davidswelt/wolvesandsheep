@@ -4,6 +4,12 @@ import ch.aplu.jgamegrid.Actor;
 import ch.aplu.jgamegrid.Location;
 import was.Player.GamePiece;
 
+
+/*
+ * The WasBlankGame is used to avoid visualizing the game porgress.
+ * If the graphical UI is not in use, GameBoard uses WasBlankGame instead of WasVideoGame
+ * which also implemeents the WasGameBackend interface.
+ */
 class WasBlankGame implements WasGameBackend {
 
     final GameBoard board;
