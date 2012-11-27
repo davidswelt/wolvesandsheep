@@ -83,6 +83,10 @@ public class GameBoard {
             y = Math.min(GameBoard.this.rows - 1, y);
 
             int idx = GameBoard.this.getIndex(x, y);
+            
+            
+            final GamePiece playerCellPiece = player.getPiece();
+            final GamePiece targetCellPiece = GameBoard.this.getPiece(idx);
 
             // check if new x,y is free
 
@@ -96,20 +100,22 @@ public class GameBoard {
 
                 return true;
 
-            } else if (player.getPiece() == GamePiece.SHEEP && GameBoard.this.getPiece(idx) == GamePiece.PASTURE) {
+            } else if (playerCellPiece == GamePiece.SHEEP && targetCellPiece == GamePiece.PASTURE) {
                 // a sheep makes it to the pasture
 
                 // note score and remove player
                 GameBoard.this.playerWins(player);
 
-            } else if (player.getPiece() == GamePiece.SHEEP && GameBoard.this.getPiece(idx) == GamePiece.WOLF) {
+            } else if (playerCellPiece == GamePiece.SHEEP && targetCellPiece == GamePiece.WOLF) {
                 wolfEatSheep(idx, i);
-            } else if (player.getPiece() == GamePiece.WOLF && GameBoard.this.getPiece(idx) == GamePiece.SHEEP) {
+            } else if (playerCellPiece == GamePiece.WOLF && targetCellPiece == GamePiece.SHEEP) {
                 wolfEatSheep(i, idx);
-            } else if (player.getPiece() == GamePiece.WOLF && GameBoard.this.getPiece(idx) == GamePiece.PASTURE) {
+            } else if (playerCellPiece == GamePiece.WOLF && targetCellPiece == GamePiece.PASTURE) {
                 // wolf can't move onto pasture
             }
-
+            // else: still can't move.
+            
+            // do not execute the move.  return false to inform caller.
             return false;
 
         }
