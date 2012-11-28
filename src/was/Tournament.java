@@ -3,6 +3,7 @@ package was;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -132,6 +133,16 @@ public class Tournament {
     AverageScore timing = new AverageScore();
     HighScore highscore = new HighScore();
 
+    static ArrayList<Class> string2classlist(String listofPlayerClassNames) {
+        ArrayList<Class> players = new ArrayList<Class>();
+        StringTokenizer st = new StringTokenizer(listofPlayerClassNames, ", ");
+
+        while (st.hasMoreElements()) {
+            players.add(name2class(st.nextToken()));
+        }
+        return players;
+    }
+
     /**
      * Create a new tournament and run it.
      *
@@ -144,13 +155,8 @@ public class Tournament {
      */
     static public void run(String listofPlayerClassNames, int repeats) {
 
-        ArrayList<Class> players = new ArrayList<Class>();
-        StringTokenizer st = new StringTokenizer(listofPlayerClassNames, ", ");
 
-        while (st.hasMoreElements()) {
-            players.add(name2class(st.nextToken()));
-        }
-        run(players, repeats);
+        run(string2classlist(listofPlayerClassNames), repeats);
 
     }
 
@@ -163,7 +169,7 @@ public class Tournament {
      */
     static public void run(List<Class> playerClasses, int r) {
 
-        run(playerClasses, 40, 40, r, false);
+        run(playerClasses, 40, 40, r, false, 0);
     }
 
     /**
@@ -176,8 +182,9 @@ public class Tournament {
      * @param k number of pieces in a row required to win
      * @param r number of repetitions to run
      * @param ui true if UI is to be shown
+     * @param scenario number of the scenario to be used
      */
-    static public void run(List<Class> playerClasses, int m, int n, int r, boolean ui) {
+    static public void run(List<Class> playerClasses, int m, int n, int r, boolean ui, int scenario) {
 
         Tournament t;
 
@@ -188,7 +195,7 @@ public class Tournament {
         System.err.println("Total trials: " + totalgames);
 
 
-        t.start(totalgames > 100000);
+        t.start(totalgames > 100000, scenario);
 
         t.highscore.print();
         t.timing.print();
@@ -200,7 +207,7 @@ public class Tournament {
      * starts the tournament.
      *
      */
-    TreeMap<String, Double> start(boolean printHighscores) {
+    TreeMap<String, Double> start(boolean printHighscores, int scenario) {
 
 // check players
 
@@ -225,7 +232,7 @@ public class Tournament {
         }
 
 
-        startT(printHighscores, new ArrayList<Integer>());
+        startT(printHighscores, new ArrayList<Integer>(), scenario);
 
         return highscore;
 
@@ -235,7 +242,7 @@ public class Tournament {
         return WolfPlayer.class.isAssignableFrom(c);
     }
 
-    void startT(boolean printHighscores, ArrayList<Integer> selectedPlayers) {
+    void startT(boolean printHighscores, ArrayList<Integer> selectedPlayers, int scenario) {
 
 
         try {
@@ -244,14 +251,12 @@ public class Tournament {
             {
                 GameBoard board = new GameBoard(boardWidth, boardHeight, boardUI);
 
-                board.addPlayer(new Pasture());
-                board.addPlayer(new Pasture());
-                board.addPlayer(new Pasture());
                 for (Integer i : selectedPlayers) {
 
                     board.addPlayer(playerFactory(players.get(i), (isWolf(players.get(i)) ? "w" : "s")));
 
                 }
+                addScenario(scenario, board);
 
                 Map<Player, int[]> s = board.playGame();
 
@@ -275,7 +280,7 @@ public class Tournament {
                                 || !isWolf(p1) && selectedPlayers.size() < numSheep) {
                             selectedPlayers.add(i);
 
-                            startT(printHighscores, selectedPlayers);
+                            startT(printHighscores, selectedPlayers, scenario);
                             selectedPlayers.remove(selectedPlayers.size() - 1); // so we don't have to make a copy
                         }
                     }
@@ -317,9 +322,51 @@ public class Tournament {
                 }
             }
         }
-
         // adjust timeout
         //TIMEOUT = (long) ((float) TIMEOUT * (float) Benchmark.runBenchmark());
+    }
+
+    final void addScenario(int scenario, GameBoard board) {
+        
+                board.addPlayer(new Pasture());
+                board.addPlayer(new Pasture());
+                board.addPlayer(new Pasture());
+    }
+
+    public static void ist240() {
+        String[] sheepteams = new String[]{
+            "CHHITH,GEISER,HAFAIRI,HOFBAUER",
+            "CONTINO,GARRITY,HOFFMAN,TAILOR",
+            "BROADWATER,DERHAMMER,CHAN,TUBERGEN",
+            "BONCHONSKY,HE,SUON,USCAMAYTA"
+        };
+
+        String[] wolves = new String[]{
+            "MONDELL,MULLEN,MUNOZ",
+            "CHEETHAM,KIDNEY,LAFFERTY",
+            "REIZNER,SICINSKI,ZIELINSKY",
+            "NORANTE,RAUGH,ULIANA",
+            "GREENE,WILKINSON,YOSUA"
+        };
+
+        for (String s : sheepteams) { // each sheep team
+            for (String w : wolves) { // each wolf team
+
+                ArrayList<Class> wolves2 = string2classlist(w);
+
+                for (Class w2 : wolves2) // for each wolf within a group
+                {
+
+                    ArrayList p = string2classlist(s); // all sheep
+                    p.add(w2); // one wolf
+
+                    // randomize order of sheep
+                    Collections.shuffle(p);
+                    
+                    run(p, 20, 20, 5, false, 0);
+                }
+            }
+        }
     }
 
     public static void main(String args[]) {
@@ -357,7 +404,7 @@ public class Tournament {
 
 
         if (players.size() > 1) {
-            was.Tournament.run(players, m, n, r, ui); // m, n, k,
+            was.Tournament.run(players, m, n, r, ui, 0); // m, n, k,
         } else {
             System.err.println("Usage: java -jar WolvesAndSheep.jar -t M,N,K -r R CLASS1 CLASS2 CLASS3 CLASS4 CLASS5 (...)");
             System.err.println("       -t M,N,K  ==> play a M*N board with K sheep.");
