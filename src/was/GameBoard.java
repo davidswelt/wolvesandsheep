@@ -236,12 +236,12 @@ public class GameBoard {
     
     /**
      * Find the wolf
-     * @return a Location object
+     * @return a was.GameLocation object
      */
-    public Location getWolfPosition() {
+    public was.GameLocation getWolfPosition() {
         for (Cell p : players) {
             if (p.player != null && p.player instanceof was.WolfPlayer) {
-                return new Location(p.player.x, p.player.y);
+                return new was.GameLocation(p.player.x, p.player.y);
             }
         }
         return null;
@@ -249,13 +249,13 @@ public class GameBoard {
     
     /**
      * Get the positions of all the sheep on the board
-     * @return an ArrayList containing Location objects, with x,y positions
+     * @return an ArrayList containing was.GameLocation objects, with x,y positions
      */
-    public ArrayList<Location> getSheepPositions() {
-        ArrayList<Location> sp = new ArrayList();
+    public ArrayList<was.GameLocation> getSheepPositions() {
+        ArrayList<was.GameLocation> sp = new ArrayList();
         for (Cell p : players) {
             if (p.player != null && p.player instanceof was.SheepPlayer) {
-                sp.add(new Location (p.player.x, p.player.y));
+                sp.add(new was.GameLocation (p.player.x, p.player.y));
             }
         }
         return sp;
