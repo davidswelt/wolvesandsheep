@@ -6,17 +6,53 @@
 package was;
 
 import ch.aplu.jgamegrid.*;
+import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 class PlayerProxy extends Actor {
 
     Player player;
 
+    static final int cellSize = 10;
+    
     PlayerProxy(Player player) {
         //                super("sprites/nemo.gif");
-        super(player.imageFile());
+//bim.createGraphics().drawImage(newImg, 0, 0, null);
+//FileOutputStream fos = new FileOutputStream(ofName);
+//javax.imageio.ImageIO.write(bim, "jpg", fos);
+//fos.close();
+
+        super(true, scaledImage(player.imageFile()));
         this.player = player;
         
     }
+      static BufferedImage imageToBufferedImage(Image im) {
+     BufferedImage bi = new BufferedImage
+        (im.getWidth(null),im.getHeight(null),BufferedImage.TYPE_INT_RGB);
+     Graphics bg = bi.getGraphics();
+     bg.drawImage(im, 0, 0, null);
+     bg.dispose();
+     return bi;
+  }
+  
+    static BufferedImage scaledImage(String file)
+    {
+        try {
+            return imageToBufferedImage(javax.imageio.ImageIO.read(new File(file)).getScaledInstance(cellSize, cellSize,Image.SCALE_SMOOTH));
+        } catch (IOException ex) {
+            Logger.getLogger(PlayerProxy.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    
+    
+        //java.awt.image.BufferedImage bim = new java.awt.image.BufferedImage(10, 10, java.awt.image.BufferedImage.TYPE_INT_RGB);
+        return null;
+    }
+    
 
     @Override
     final public void act() {
