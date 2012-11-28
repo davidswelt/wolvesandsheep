@@ -1,7 +1,5 @@
 package was;
 
-import ch.aplu.jgamegrid.GameGrid;
-import ch.aplu.jgamegrid.Location;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -238,10 +236,10 @@ public class GameBoard {
      * Find the wolf
      * @return a was.GameLocation object
      */
-    public was.GameLocation getWolfPosition() {
+    public GameLocation getWolfPosition() {
         for (Cell p : players) {
             if (p.player != null && p.player instanceof was.WolfPlayer) {
-                return new was.GameLocation(p.player.x, p.player.y);
+                return new GameLocation(p.player.x, p.player.y);
             }
         }
         return null;
@@ -251,11 +249,11 @@ public class GameBoard {
      * Get the positions of all the sheep on the board
      * @return an ArrayList containing was.GameLocation objects, with x,y positions
      */
-    public ArrayList<was.GameLocation> getSheepPositions() {
+    public ArrayList<GameLocation> getSheepPositions() {
         ArrayList<was.GameLocation> sp = new ArrayList();
         for (Cell p : players) {
             if (p.player != null && p.player instanceof was.SheepPlayer) {
-                sp.add(new was.GameLocation (p.player.x, p.player.y));
+                sp.add(new GameLocation (p.player.x, p.player.y));
             }
         }
         return sp;
@@ -371,7 +369,7 @@ public class GameBoard {
         scores.put(p, new int[1]);
         
         PlayerProxy pprox = new PlayerProxy(p);
-        wasgamegrid.addActor(pprox, new ch.aplu.jgamegrid.Location(getX(pos), getY(pos)));
+        wasgamegrid.addActor(pprox, new GameLocation(getX(pos), getY(pos)));
         p.setPlayerProxy(pprox);
 
     }

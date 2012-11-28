@@ -33,7 +33,7 @@ class WasBlankGame implements WasGameBackend {
     }
 
     @Override
-    public void addActor(Actor actor, Location location) {
+    public void addActor(Actor actor, GameLocation location) {
     }
 
     @Override

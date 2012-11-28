@@ -1,7 +1,6 @@
 package was;
 
 import ch.aplu.jgamegrid.Actor;
-import ch.aplu.jgamegrid.Location;
 
 /**
  * This interface is used to update the display of the game board.
@@ -12,7 +11,7 @@ import ch.aplu.jgamegrid.Location;
 interface WasGameBackend {
 
     public void addActor(Actor actor,
-            Location location);
+            GameLocation location);
 
     public void doRun();
 
