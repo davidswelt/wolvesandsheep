@@ -23,11 +23,6 @@ public class GameBoard {
 
     WasGameBackend wasgamegrid = null;
 
-    /**
-     * The type describing the state of a single cell in the game grid.
-     */
-
-
     final class Cell // don't allow extension - cells may move around within the board
     {
         Player player = null;
@@ -223,13 +218,48 @@ public class GameBoard {
         return y * cols + x;
     }
 
+    /**
+     * Get height
+     * @return number of rows
+     */
     public int getRows() {
         return rows;
     }
+    /**
+     * Get width
+     * @return number of columns
+     */
     public int getCols() {
         return cols;
     }
     
+    
+    /**
+     * Find the wolf
+     * @return a Location object
+     */
+    public Location getWolfPosition() {
+        for (Cell p : players) {
+            if (p.player != null && p.player instanceof was.WolfPlayer) {
+                return new Location(p.player.x, p.player.y);
+            }
+        }
+        return null;
+    }
+    
+    /**
+     * Get the positions of all the sheep on the board
+     * @return an ArrayList containing Location objects, with x,y positions
+     */
+    public ArrayList<Location> getSheepPositions() {
+        ArrayList<Location> sp = new ArrayList();
+        for (Cell p : players) {
+            if (p.player != null && p.player instanceof was.SheepPlayer) {
+                sp.add(new Location (p.player.x, p.player.y));
+            }
+        }
+        return sp;
+    }
     
     /**
      * $Returns true if cell is empty
@@ -341,7 +371,7 @@ public class GameBoard {
         scores.put(p, new int[1]);
         
         PlayerProxy pprox = new PlayerProxy(p);
-        wasgamegrid.addActor(pprox, new Location(getX(pos), getY(pos)));
+        wasgamegrid.addActor(pprox, new ch.aplu.jgamegrid.Location(getX(pos), getY(pos)));
         p.setPlayerProxy(pprox);
 
     }
