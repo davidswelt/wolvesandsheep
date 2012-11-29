@@ -5,7 +5,7 @@ import java.util.Random;
 
 /**
  * This is a general player class.
- *
+ * 
  * @author reitter
  */
 public abstract class Player {
@@ -14,16 +14,17 @@ public abstract class Player {
 
         EMPTY, SHEEP, WOLF, OBSTACLE, PASTURE
     };
+        
     private static int counter = 0;
     private int count = counter++;
     private double maxAllowedDistance = -1;
     Actor playerProxy = null;
     private int isBusyUntilTime = 0; // wolf is eating
     GameBoard gb = null;
-    int x, y;
-
+    int x=0, y=0;
+    
     abstract GamePiece getPiece();
-
+   
     final void setGameBoard(GameBoard gb) // available only to was class members
     {
         if (this.gb == null) {
@@ -37,6 +38,18 @@ public abstract class Player {
         gb = null;
     }
 
+    /**
+     * Initialize the player.
+     * Override this method to do any initialization of the player.
+     * This will be called once before each game, and after the game board has been set up.
+     */
+    public void initialize ()
+    {
+        
+    }
+    
+    
+    
     /**
      * Get the Gameboard for this player.
      *
@@ -67,7 +80,10 @@ public abstract class Player {
      * @return a GameLocation object
      */
     public final GameLocation getLocation() {
-        
+        if (gb==null)
+        {
+            throw new RuntimeException("can't call getLocation before board has been initialized.");
+        }
         return new GameLocation(x, y); // copies location
     }
 

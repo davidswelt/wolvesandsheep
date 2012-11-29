@@ -250,9 +250,11 @@ public class Tournament {
             {
                 GameBoard board = new GameBoard(boardWidth, boardHeight, boardUI);
 
+                
                 for (Integer i : selectedPlayers) {
+                    GameLocation initialLocation = board.randomEmptyLocation();
 
-                    board.addPlayer(playerFactory(players.get(i), (isWolf(players.get(i)) ? "w" : "s")));
+                    board.addPlayer(playerFactory(players.get(i), (isWolf(players.get(i)) ? "w" : "s")), initialLocation);
 
                 }
                 addScenario(scenario, board);
@@ -327,10 +329,10 @@ public class Tournament {
 
     final void addScenario(int scenario, GameBoard board) {
         
-                board.addPlayer(new Pasture());
-                board.addPlayer(new Pasture());
-                board.addPlayer(new Pasture());
-                board.addPlayer(new Obstacle());
+                board.addPlayer(new Pasture(),null);
+                board.addPlayer(new Pasture(),null);
+                board.addPlayer(new Pasture(),null);
+                board.addPlayer(new Obstacle(),null);
     }
 
     public static void ist240() {

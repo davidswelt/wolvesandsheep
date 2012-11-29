@@ -354,7 +354,20 @@ public class GameBoard {
     }
     static Random rand = new Random();
 
-    void addPlayer(Player p) {
+    GameLocation randomEmptyLocation()
+    {
+        int pos = -1;
+
+        while (pos < 0 || !isEmptyCell(pos)) {
+            // not efficient
+            // choose random position
+            pos = rand.nextInt(board.size());
+
+        }
+        return new GameLocation(getX(pos),getY(pos));
+    }
+    
+    void addPlayer(Player p, GameLocation loc) {
 
         p.setGameBoard(this);
 
@@ -369,22 +382,20 @@ public class GameBoard {
         // add a player
         // choose a cell
 
-        int pos = -1;
-
-        while (pos < 0 || !isEmptyCell(pos)) {
-            // not efficient
-            // choose random position
-            pos = rand.nextInt(board.size());
-
+        if (loc==null)
+        {
+            loc = randomEmptyLocation();
         }
-        p.setLoc(getX(pos), getY(pos));
-        board.set(pos, p);
+        int locI = getIndex(loc.x,loc.y);
+        
+        p.setLoc(loc.x,loc.y);
+        board.set(locI, p);
         players.add(p);
 
         scores.put(p, new int[1]);
         
         PlayerProxy pprox = new PlayerProxy(p);
-        wasgamegrid.addActor(pprox, new GameLocation(getX(pos), getY(pos)));
+        wasgamegrid.addActor(pprox, loc);
         p.setPlayerProxy(pprox);
 
     }
@@ -461,9 +472,16 @@ public class GameBoard {
     }
 
     Map<Player, int[]> playGame() {
-        // while there are any sheep left
-
+        
+        
+        // initialize the players
+        for (Player p : players) {
+            p.initialize();
+        }
+        
         if (wasgamegrid != null) {
+            
+            
             wasgamegrid.show();
 
             // we're not calling make movePlayer
