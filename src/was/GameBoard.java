@@ -253,6 +253,13 @@ public class GameBoard {
         return findAllPlayers(GamePiece.SHEEP);
     }
     /**
+     * Get the positions of all the pastures on the board
+     * @return an ArrayList containing was.GameLocation objects, with x,y positions
+     */
+    public ArrayList<GameLocation> getPasturePositions() {
+        return findAllPlayers(GamePiece.PASTURE);
+    }
+    /**
      * Get the positions of all the obstacles on the board
      * @return an ArrayList containing was.GameLocation objects, with x,y positions
      */
