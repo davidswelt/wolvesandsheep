@@ -194,7 +194,6 @@ public class Tournament {
 
         System.err.println("Total trials: " + totalgames);
 
-
         t.start(totalgames > 100000, scenario);
 
         t.highscore.print();
@@ -331,6 +330,7 @@ public class Tournament {
                 board.addPlayer(new Pasture());
                 board.addPlayer(new Pasture());
                 board.addPlayer(new Pasture());
+                board.addPlayer(new Obstacle());
     }
 
     public static void ist240() {

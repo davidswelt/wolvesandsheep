@@ -237,11 +237,11 @@ public class GameBoard {
      * @return a was.GameLocation object
      */
     public GameLocation getWolfPosition() {
-        for (Cell p : players) {
-            if (p.player != null && p.player instanceof was.WolfPlayer) {
-                return new GameLocation(p.player.x, p.player.y);
-            }
+        ArrayList<was.GameLocation> p = findAllPlayers(GamePiece.SHEEP);
+        if (p.size()>0) {
+            return p.get(0);
         }
+        
         return null;
     }
     
@@ -250,15 +250,26 @@ public class GameBoard {
      * @return an ArrayList containing was.GameLocation objects, with x,y positions
      */
     public ArrayList<GameLocation> getSheepPositions() {
+        return findAllPlayers(GamePiece.SHEEP);
+    }
+    /**
+     * Get the positions of all the obstacles on the board
+     * @return an ArrayList containing was.GameLocation objects, with x,y positions
+     */
+    public ArrayList<GameLocation> getObstaclePositions() {
+        return findAllPlayers(GamePiece.OBSTACLE);
+    }
+    
+    ArrayList<GameLocation> findAllPlayers(GamePiece type) {
         ArrayList<was.GameLocation> sp = new ArrayList();
         for (Cell p : players) {
-            if (p.player != null && p.player instanceof was.SheepPlayer) {
+            if (p.player != null && p.player.getPiece() == type) {
                 sp.add(new GameLocation (p.player.x, p.player.y));
             }
         }
         return sp;
     }
-    
+        
     /**
      * $Returns true if cell is empty
      *
