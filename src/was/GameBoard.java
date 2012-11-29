@@ -438,7 +438,7 @@ public class GameBoard {
 //               
                
                // callback from game backend
-    boolean noteMove(Player p, Move move)
+    synchronized boolean  noteMove(Player p, Move move)
     {
         for(Cell c : players)
         {
