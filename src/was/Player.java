@@ -32,16 +32,15 @@ public abstract class Player {
             throw new RuntimeException("Player's gameboard is already set.  Player added twice?");
         }
     }
-    
+
     /**
      * Get the Gameboard for this player.
+     *
      * @return a gameboard object
      */
-    final protected GameBoard getGameBoard()
-    {
+    final public GameBoard getGameBoard() {
         return gb;
     }
-    
 
     final void setMaxAllowedDistance(double d) {
         maxAllowedDistance = d;
@@ -56,13 +55,14 @@ public abstract class Player {
         this.x = x;
         this.y = y;
     }
-    
+
     /**
      * Get this player's location
+     *
      * @return a GameLocation object
      */
-    public final GameLocation getLocation () {
-        return new GameLocation(x,y);
+    public final GameLocation getLocation() {
+        return new GameLocation(x, y);
     }
 
     final void keepBusyFor(int steps) {
@@ -77,35 +77,41 @@ public abstract class Player {
     final Move calcMove() {
 
         if (isBusy()) {
+
             return null; // can't make a move
         }
-
+        
         Move m = move(); // move is defined by extending class
 
-        if (m.length() > maxAllowedDistance + 0.000005) {
-            System.err.println(this.getClass() + " - illegal move: too long! " + m.length() + " > " + maxAllowedDistance);
-            // trim move
-            m = m.scaledToLength(maxAllowedDistance);
+        if (m == null) {
+            m = new Move(0, 0);
+        } else {
+            if (m.length() > maxAllowedDistance + 0.000005) {
+                System.err.println(this.getClass() + " - illegal move: too long! " + m.length() + " > " + maxAllowedDistance);
+                // trim move
+                m = m.scaledToLength(maxAllowedDistance);
+            }
+            m = m.quantized();
+
+            // keep move inside boundaries
+
+            int tx = x + (int) m.delta_x;
+            int ty = y + (int) m.delta_y;
+            tx = Math.max(0, tx);
+            ty = Math.max(0, ty);
+            tx = Math.min(gb.getCols() - 1, tx);
+            ty = Math.min(gb.getRows() - 1, ty);
+
+            m = new Move(tx - x, ty - y);
         }
-        m = m.quantized();
-
-        // keep move inside boundaries
-
-        int tx = x + (int) m.delta_x;
-        int ty = y + (int) m.delta_y;
-        tx = Math.max(0, tx);
-        ty = Math.max(0, ty);
-        tx = Math.min(gb.getCols() - 1, tx);
-        ty = Math.min(gb.getRows() - 1, ty);
-
-        m = new Move(tx-x, ty-y);
-
 
         if (gb.noteMove(this, m)) {
+            
+            System.err.println("notMove OK.");
             return m;
-        }
-        else {
-            return new Move(0,0); // move was impossible (e.g., obstacle)
+        } else {
+            System.err.println("notMove returned null.");
+            return new Move(0, 0); // move was impossible (e.g., obstacle)
         }
 
     }
@@ -121,8 +127,9 @@ public abstract class Player {
     }
 
     /**
-     * Returns the name of the image file representing this player
-     * Implement this function to return a custom sprite.
+     * Returns the name of the image file representing this player Implement
+     * this function to return a custom sprite.
+     *
      * @return a string with the path and file name of the image file
      */
     abstract public String imageFile();

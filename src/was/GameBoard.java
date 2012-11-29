@@ -449,6 +449,7 @@ public class GameBoard {
         }
 //        Cell c = getCellForPlayer(p);
 //        c.move(move);
+        System.err.println("player not found." + players.size());
         return false;
     }
             
@@ -522,16 +523,19 @@ public class GameBoard {
 
     private void removePlayer(Player p) {
 
+        
         if (p == null || wasgamegrid == null)
         {
             return;
-        }
+        } 
         wasgamegrid.removeActor(p.playerProxy);
 
         // let's make sure there's no cell left
 
         for (Cell c : board) {
-            c.player = null;
+            if (c.player == p) {
+                c.player = null;    
+            }
         }
         for (Cell c : players) {
             if (c.player == p) {
