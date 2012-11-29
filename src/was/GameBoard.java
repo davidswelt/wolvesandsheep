@@ -40,7 +40,7 @@ public class GameBoard {
     /**
      * maximal number of steps before game ends
      */
-    public final int MAXTIMESTEP = 30;
+    public final int MAXTIMESTEP = 80;
     final int NUMWOLVES = 1;
     int currentTimeStep = 0;
 
@@ -222,7 +222,7 @@ public class GameBoard {
      * @return a was.GameLocation object
      */
     public GameLocation getWolfPosition() {
-        ArrayList<was.GameLocation> p = findAllPlayersLoc(GamePiece.SHEEP);
+        ArrayList<was.GameLocation> p = findAllPlayersLoc(GamePiece.WOLF);
         if (p.size()>0) {
             return p.get(0);
         }
