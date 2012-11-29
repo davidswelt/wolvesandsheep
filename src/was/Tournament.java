@@ -410,8 +410,8 @@ public class Tournament {
             System.err.println("       -t M,N,K  ==> play a M*N board with K sheep.");
             System.err.println("       -r R      ==> play R repeats of each game.");
             System.err.println("       -c        ==> do not show the graphical user interface ");
-            System.err.println("Example: java -jar WolvesAndSheep.jar -t 20,20,4 -r 400 reitter.Sheep reitter.Wolf reitter.Sheep reitter.Sheep reitter.Sheep");
-            System.err.println("Example for NetBeans (Run Configuration, Program arguments): -t 20,20,4 -r 400 reitter.Sheep reitter.WolfPlayer reitter.SheepPlayer reitter.Sheep reitter.Sheep");
+            System.err.println("Example: java -jar WolvesAndSheep.jar -t 20,20,4 -r 400 players.BasicSheep players.BasicWolf players.BasicSheep players.BasicSheep players.BasicSheep");
+            System.err.println("Example for NetBeans (Run Configuration, Program arguments): -t 20,20,4 -r 400 players.BasicSheep players.BasicWolf players.BasicSheep players.BasicSheep players.BasicSheep");
             // do not run a default case to make sure it doesn't cause confusion.
             //            was.Tournament.run("reitter.SheepPlayer,reitter.WolfPlayer,reitter.SheepPlayer,reitter.SheepPlayer, reitter.SheepPlayer", 100);
         }
