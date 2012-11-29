@@ -82,8 +82,12 @@ public abstract class Player {
         m = new Move(tx-x, ty-y);
 
 
-        gb.noteMove(this, m); // callback
-        return m;
+        if (gb.noteMove(this, m)) {
+            return m;
+        }
+        else {
+            return new Move(0,0); // move was impossible (e.g., obstacle)
+        }
 
     }
 
