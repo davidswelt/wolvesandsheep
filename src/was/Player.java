@@ -32,6 +32,16 @@ public abstract class Player {
             throw new RuntimeException("Player's gameboard is already set.  Player added twice?");
         }
     }
+    
+    /**
+     * Get the Gameboard for this player.
+     * @return a gameboard object
+     */
+    final protected GameBoard getGameBoard()
+    {
+        return gb;
+    }
+    
 
     final void setMaxAllowedDistance(double d) {
         maxAllowedDistance = d;
@@ -41,9 +51,18 @@ public abstract class Player {
         playerProxy = a;
     }
 
+    // can't be called by inheriting classes
     final void setLoc(int x, int y) {
         this.x = x;
         this.y = y;
+    }
+    
+    /**
+     * Get this player's location
+     * @return a GameLocation object
+     */
+    public final GameLocation getLocation () {
+        return new GameLocation(x,y);
     }
 
     final void keepBusyFor(int steps) {
