@@ -52,4 +52,9 @@ public class Move {
         return new Move ((int) (dx), (int) (dy));
     
     }
+    @Override
+    public String toString() {
+  
+        return "M("+String.format("%.3g",delta_x)+","+String.format("%.3g",delta_y)+")";
+    }
 }

@@ -24,4 +24,9 @@ final public class GameLocation {
         this.y = y;
     }
     
+    @Override
+    public String toString() {
+  
+        return "L("+x+","+y+")";
+    }
 }
