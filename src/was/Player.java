@@ -32,6 +32,10 @@ public abstract class Player {
             throw new RuntimeException("Player's gameboard is already set.  Player added twice?");
         }
     }
+    final void markDeleted()
+    {
+        gb = null;
+    }
 
     /**
      * Get the Gameboard for this player.
@@ -54,6 +58,7 @@ public abstract class Player {
     final void setLoc(int x, int y) {
         this.x = x;
         this.y = y;
+        LOG("player "+this + "new loc: "+new GameLocation(x,y));
     }
 
     /**
@@ -62,7 +67,8 @@ public abstract class Player {
      * @return a GameLocation object
      */
     public final GameLocation getLocation() {
-        return new GameLocation(x, y);
+        
+        return new GameLocation(x, y); // copies location
     }
 
     final void keepBusyFor(int steps) {
@@ -70,7 +76,7 @@ public abstract class Player {
     }
 
     final boolean isBusy() {
-        return (gb.currentTimeStep < isBusyUntilTime);
+        return (gb==null || gb.currentTimeStep < isBusyUntilTime);
     }
 
     // called by PlayerProxy
@@ -84,10 +90,12 @@ public abstract class Player {
         Move m = move(); // move is defined by extending class
 
         if (m == null) {
+            
+            LOG("move() returned null.");
             m = new Move(0, 0);
         } else {
             if (m.length() > maxAllowedDistance + 0.000005) {
-                System.err.println(this.getClass() + " - illegal move: too long! " + m.length() + " > " + maxAllowedDistance);
+                LOG(this.getClass() + " - illegal move: too long! " + m.length() + " > " + maxAllowedDistance);
                 // trim move
                 m = m.scaledToLength(maxAllowedDistance);
             }
@@ -107,10 +115,9 @@ public abstract class Player {
 
         if (gb.noteMove(this, m)) {
             
-            System.err.println("notMove OK.");
             return m;
         } else {
-            System.err.println("notMove returned null.");
+            LOG("noteMove returned null.");
             return new Move(0, 0); // move was impossible (e.g., obstacle)
         }
 
@@ -149,22 +156,35 @@ public abstract class Player {
 
     @Override
     public String toString() {
-
+        String s="";
         switch (getPiece()) {
             case EMPTY:
-                return " ";
+                s= " "; break;
             case SHEEP:
-                return "s";
+                s= "s"; break;
             case WOLF:
-                return "W";
+                s= "W"; break;
             case OBSTACLE:
-                return "#";
+                s= "#"; break;
             case PASTURE:
-                return ".";
+                s= "."; break;
         }
-        return "";
+        if (isBusy())
+        {
+            s = s + "!";
+        }
+        if (gb==null)
+        {
+            s = "D"+s;
+        }
+        return s;
     }
 
+    static void LOG (String s)
+    {
+        
+    }
+    
     // Don't override these
     @Override
     final public boolean equals(Object obj) {

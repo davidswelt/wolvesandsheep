@@ -46,38 +46,25 @@ class WasBlankGame implements WasGameBackend {
     @Override
     public void doRun() {
         while (!board.isFinished()) {
-            System.out.println(board.getTime());
+            
             board.gameNextTimeStep();
 
             // sheep
             for (GamePiece g : moveOrder) {
-                for (GameBoard.Cell c : board.getCells()) {
-                    if (c.player == null) { // player has been removed
+                for (Player c : board.players) {
+                    if (c == null) { // player has been removed
                         continue;
                     }
                     if (c.getPiece() != g) {
                         continue;
                     }
 
-                    if (c.player.isBusy()) {
+                    if (c.isBusy()) {
                         // Wolf is eating
                         continue;
                     }
-                    Move move = c.getPlayer().calcMove();
+                    Move move = c.calcMove(); // calls gameboard.noteMove
 
-                    if (move != null) // valid move
-                    {
-                        // check move
-                        if (move.length() > c.getPlayer().getMaxAllowedDistance()) // sqrt(1+1)
-                        {
-                            System.err.println("illegal move: too long! " + move.length());
-                            // illegal move
-                            // sheep won't move at all
-                            continue;
-                        }
-                        board.noteMove(c.getPlayer(), move);
-
-                    }
                 }
             }
         }
