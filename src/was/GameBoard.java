@@ -102,11 +102,14 @@ public class GameBoard {
 
                 // note score and remove player
                 GameBoard.this.playerWins(player);
+                return true;
 
             } else if (playerCellPiece == GamePiece.SHEEP && targetCellPiece == GamePiece.WOLF) {
                 wolfEatSheep(idx, i);
+                return true;
             } else if (playerCellPiece == GamePiece.WOLF && targetCellPiece == GamePiece.SHEEP) {
                 wolfEatSheep(i, idx);
+                return true;
             } else if (playerCellPiece == GamePiece.WOLF && targetCellPiece == GamePiece.PASTURE) {
                 // wolf can't move onto pasture
             }
@@ -507,7 +510,10 @@ public class GameBoard {
         scores.get(p)[0]++;
         // remove player from list
 
-        removePlayer(p);
+        if (p instanceof SheepPlayer)
+        {
+            removePlayer(p);
+        }
     }
 
     private void playerLoses(Player p) {
