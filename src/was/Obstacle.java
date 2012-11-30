@@ -5,7 +5,7 @@ package was;
  * Obstacles are added to the board as if they were players.
  * @author dr
  */
-public class Obstacle extends Player{
+final public class Obstacle extends Player{
 
     @Override
     Player.GamePiece getPiece() {
