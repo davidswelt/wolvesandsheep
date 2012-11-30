@@ -2,11 +2,15 @@ package was;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.text.CollationKey;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.logging.Level;
@@ -104,6 +108,8 @@ public class Tournament {
 
     public class HighScore extends TreeMap<String, Double> {
 
+        TreeMap<String, Integer> uses = new TreeMap();
+        
         void inc(String s) {
             inc(s, 1.0);
         }
@@ -112,6 +118,14 @@ public class Tournament {
             put(s, new Double(get(s) + by));
         }
 
+        void noteUse(String s)
+        {
+            Integer prev = uses.get(s);
+            
+            uses.put(s, new Integer(prev==null? 1 : prev+1));
+            
+        }
+        
         public double get(String s) {
             Double f = super.get(s);
             if (f == null) {
@@ -120,13 +134,76 @@ public class Tournament {
                 return f.floatValue();
             }
         }
-
-        public void print() {
-            System.out.println("Highscore:");
-            for (Map.Entry<String, Double> k : this.entrySet()) {
-                System.out.println(k.getKey() + ":\t" + ((Double) k.getValue()));
+       public double getNormalized(String s) {
+            Double f = super.get(s);
+            if (f == null) {
+                return 0.0;
+            } else {
+                Integer n = uses.get(s);
+                if (n==null || n.equals(0))
+                {
+                    return f.floatValue();
+                }
+                return f.floatValue()/n;
             }
         }
+     
+       
+        public void print() {
+            System.out.println("Highscore:");
+            printKeys (new ArrayList(keySet()), false);
+            
+        }
+
+    public class TreeValueComparator implements Comparator<String> {
+
+	@Override
+	public int compare(String a, String b) {
+		return ((Double) HighScore.this.get(a)).compareTo(HighScore.this.get(b));
+	}
+        };
+
+        public void printKeys (List<String> keys, boolean sorted)
+        {
+            
+            
+            // sort it
+            Collections.sort(keys, new TreeValueComparator());
+            
+            for (String k :  keys) {
+                System.out.println(k+ ":\t" + String.format("%.3g", getNormalized(k)));
+            }
+        }
+        
+        public void printByCategory() {
+            System.out.println("Highscore:");
+            
+            Set<String> keys = keySet();
+            Map<String, List<String>> cats = new TreeMap(); // categories
+            
+            for (String k : keys)
+            {
+                StringTokenizer t = new StringTokenizer(k, ".");
+                t.nextToken();
+                String classname = t.nextToken();
+                if (cats.get(classname)==null)
+                {
+                    cats.put(classname, new ArrayList());
+                }
+                cats.get(classname).add(k); // add whole key
+            }            
+            
+            // for each category, print it, sorted
+            
+            for (String k : cats.keySet())
+            {
+                System.out.println();
+                printKeys(cats.get(k), true);
+            }
+            
+            
+        }
+        
     }
     AverageScore timing = new AverageScore();
     HighScore highscore = new HighScore();
@@ -194,7 +271,7 @@ public class Tournament {
 
         t.start(totalgames > 100000, scenario);
 
-        t.highscore.print();
+        t.highscore.printByCategory();
         t.timing.print();
 
 
@@ -248,14 +325,14 @@ public class Tournament {
             {
                 GameBoard board = new GameBoard(boardWidth, boardHeight, boardUI);
 
-                
+                addScenario(scenario, board); // add scenario first to occupy these spaces
+
                 for (Integer i : selectedPlayers) {
                     GameLocation initialLocation = board.randomEmptyLocation();
 
                     board.addPlayer(playerFactory(players.get(i), (isWolf(players.get(i)) ? "w" : "s")), initialLocation);
-
+                    highscore.noteUse(players.get(i).getName());
                 }
-                addScenario(scenario, board);
 
                 Map<Player, int[]> s = board.playGame();
 
@@ -265,7 +342,7 @@ public class Tournament {
                 if (printHighscores) {
                     //final String ESC = "\033[";
                     //System.out.println(ESC + "2J"); 
-                    highscore.print();
+                    highscore.printByCategory();
                 }
 
 
