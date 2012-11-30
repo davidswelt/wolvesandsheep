@@ -18,7 +18,7 @@ class PlayerProxy extends Actor {
 
     Player player;
 
-    static final int cellSize = 10;
+    static final int cellSize = 12;
     
     PlayerProxy(Player player) {
         //                super("sprites/nemo.gif");
