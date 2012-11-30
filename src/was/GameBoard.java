@@ -455,12 +455,10 @@ public class GameBoard {
     {
         test(1);
         return movePlayer(p, move);
-        
     }
-            
-    
+             
 
-       // callback from game backend
+    // callback from game backend
     void gameNextTimeStep() {
         test(7);
         currentTimeStep++; // advance time
@@ -468,7 +466,7 @@ public class GameBoard {
 
     // callback from game backend
     boolean isFinished() {
-        return !(players.size() > NUMWOLVES && currentTimeStep < MAXTIMESTEP);
+        return !(getSheepPositions().size() > 0 && currentTimeStep < MAXTIMESTEP);
     }
 
     Map<Player, int[]> playGame() {
