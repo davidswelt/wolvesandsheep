@@ -21,11 +21,11 @@ public class PlayerTest {
                 System.err.println("Class is neither derived from was.WolfPlayer nor from was.SheepPlayer.");
                 return false;
             }
-            if (Class.forName("reitter.WolfPlayer").isAssignableFrom(playerClass) && Class.forName("reitter.WolfPlayer") != playerClass) {
-                System.err.println("Class inherits from reitter.WolfPlayer.");
+            if (Class.forName("reitter.Wolf").isAssignableFrom(playerClass) && Class.forName("reitter.Wolf") != playerClass) {
+                System.err.println("Class inherits from reitter.Wolf.");
                 return false;
-            } else if (Class.forName("reitter.SheepPlayer").isAssignableFrom(playerClass)&& Class.forName("reitter.SheepPlayer") != playerClass) {
-                System.err.println("Class inherits from reitter.WolfPlayer.");
+            } else if (Class.forName("reitter.Sheep").isAssignableFrom(playerClass)&& Class.forName("reitter.Sheep") != playerClass) {
+                System.err.println("Class inherits from reitter.Wolf.");
                 return false;
             }
             return true;
