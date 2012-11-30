@@ -19,8 +19,6 @@ import java.util.logging.Logger;
  * @author dr
  */
 public class Tournament {
-
-    protected long TIMEOUT = 35;
     protected ArrayList<Class> disqualifiedPlayers = new ArrayList<Class>();
     protected GameBoard eboard;
     protected ArrayList<Class> players = new ArrayList<Class>();
@@ -329,10 +327,11 @@ public class Tournament {
 
     final void addScenario(int scenario, GameBoard board) {
         
-                board.addPlayer(new Pasture(),null);
-                board.addPlayer(new Pasture(),null);
-                board.addPlayer(new Pasture(),null);
-                board.addPlayer(new Obstacle(),null);
+                board.addPlayer(new Pasture(),new GameLocation(1,1));
+                board.addPlayer(new Pasture(),new GameLocation(1,2));
+                board.addPlayer(new Pasture(),new GameLocation(2,3));
+                board.addPlayer(new Obstacle(),new GameLocation(15,15));
+                board.addPlayer(new Obstacle(),new GameLocation(16,15));
     }
 
     public static void ist240() {
