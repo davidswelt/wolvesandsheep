@@ -17,7 +17,7 @@ class WasVideoGame extends ch.aplu.jgamegrid.GameGrid implements WasGameBackend 
         this.board = board;
         setBgColor(java.awt.Color.WHITE);
 
-
+        setSimulationPeriod(150);
     }
 
      @Override
