@@ -380,7 +380,7 @@ public class GameBoard {
     void setPlayerAt(int i, Player p) {
         Player ep = board.get(i);
         if (ep != null) {
-            throw new RuntimeException("setPlayerAt - trying to override existing player.");
+            throw new RuntimeException("setPlayerAt - trying to step on existing player.");
         }
 
         board.set(i, p);
