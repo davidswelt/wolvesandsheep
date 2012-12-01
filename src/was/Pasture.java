@@ -16,7 +16,11 @@ final public class Pasture extends Player{
     public String imageFile() {
         return "pics/pasture_small.png";
     }
-
+    @Override
+    public String shortName()
+    {
+        return null;
+    }
     static Move emptyMove = new Move(0,0);
     @Override
     public Move move() {

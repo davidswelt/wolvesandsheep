@@ -16,6 +16,12 @@ final public class Obstacle extends Player{
     public String imageFile() {
         return "pics/obstacle_small.jpg";
     }
+    
+    @Override
+    public String shortName()
+    {
+        return null;
+    }
 
     static Move emptyMove = new Move(0,0);
     @Override

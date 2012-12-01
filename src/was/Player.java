@@ -23,7 +23,30 @@ public abstract class Player {
     private int isBusyUntilTime = 0; // wolf is eating
     GameBoard gb = null;
     private int x = 0, y = 0;
-
+    String team;
+    
+    
+    
+    /**
+     * The track color for this player
+     * Override this method to return your own color!
+     * @return a color to visualize it.  null if no track to be shown.
+     */
+    public java.awt.Color trackColor()
+            {
+                return new java.awt.Color(getClass().getName().hashCode());
+            }        
+    
+    /**
+     * Get a short name for this player
+     * @return a String
+     */
+    public String shortName()
+    {
+        return getClass().getPackage().getName();
+    }
+    
+            
     abstract GamePiece getPiece();
 
     final void setGameBoard(GameBoard gb) // available only to was class members
@@ -40,6 +63,13 @@ public abstract class Player {
     }
     final boolean isGone() {
         return (gb==null);
+    }
+    
+    final void setTeam(String s) {
+        team = s;
+    }
+    final String getTeam() {
+        return team;
     }
     
     /**

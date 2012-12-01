@@ -9,7 +9,7 @@ import ch.aplu.jgamegrid.Actor;
  * which also implemeents the WasGameBackend interface, but does essentially nothing.
  */
 class WasVideoGame extends ch.aplu.jgamegrid.GameGrid implements WasGameBackend {
-
+    
     final GameBoard board;
 
     public WasVideoGame(GameBoard board) {
@@ -28,6 +28,9 @@ class WasVideoGame extends ch.aplu.jgamegrid.GameGrid implements WasGameBackend 
     
     @Override
     public void act() {
+        
+        getBg().clear();
+        
         board.gameNextTimeStep();
 
         if (board.isFinished()) {
