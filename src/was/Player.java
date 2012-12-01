@@ -155,7 +155,7 @@ public abstract class Player {
                     // trim move
                     m = m.scaledToLength(maxAllowedDistance);
                 }
-                m = m.quantized();
+                m = m.quantized(maxAllowedDistance);
             }
             // keep move inside boundaries
 
