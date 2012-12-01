@@ -52,27 +52,23 @@ class WasBlankGame implements WasGameBackend {
             // sheep
             for (GamePiece g : moveOrder) {
                 for (Player c : board.players) {
-                    if (c == null) { // player has been removed
+                    if (c == null || c.isGone()) { // player has been removed
                         continue;
                     }
                     if (c.getPiece() != g) {
                         continue;
                     }
-
                     if (c.isBusy()) {
                         // Wolf is eating
                         continue;
                     }
                     Move move = c.calcMove(); // calls gameboard.noteMove
-
                 }
             }
         }
-
         synchronized (board) {
             board.notify();
         }
-
     }
 
     public void act() {
@@ -83,9 +79,7 @@ class WasBlankGame implements WasGameBackend {
             synchronized (board) {
                 board.notify();
             }
-
         }
-
     }
 //
 //  public static void main(String[] args)

@@ -2,10 +2,12 @@ package was;
 
 import ch.aplu.jgamegrid.Actor;
 import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * This is a general player class.
- * 
+ *
  * @author reitter
  */
 public abstract class Player {
@@ -14,17 +16,16 @@ public abstract class Player {
 
         EMPTY, SHEEP, WOLF, OBSTACLE, PASTURE
     };
-        
     private static int counter = 0;
     private int count = counter++;
     private double maxAllowedDistance = -1;
     Actor playerProxy = null;
     private int isBusyUntilTime = 0; // wolf is eating
     GameBoard gb = null;
-    int x=0, y=0;
-    
+    private int x = 0, y = 0;
+
     abstract GamePiece getPiece();
-   
+
     final void setGameBoard(GameBoard gb) // available only to was class members
     {
         if (this.gb == null) {
@@ -33,23 +34,22 @@ public abstract class Player {
             throw new RuntimeException("Player's gameboard is already set.  Player added twice?");
         }
     }
-    final void markDeleted()
-    {
+
+    final void markDeleted() {
         gb = null;
     }
-
-    /**
-     * Initialize the player.
-     * Override this method to do any initialization of the player.
-     * This will be called once before each game, and after the game board has been set up.
-     */
-    public void initialize ()
-    {
-        
+    final boolean isGone() {
+        return (gb==null);
     }
     
-    
-    
+    /**
+     * Initialize the player. Override this method to do any initialization of
+     * the player. This will be called once before each game, and after the game
+     * board has been set up.
+     */
+    public void initialize() {
+    }
+
     /**
      * Get the Gameboard for this player.
      *
@@ -69,9 +69,13 @@ public abstract class Player {
 
     // can't be called by inheriting classes
     final void setLoc(int x, int y) {
+
+        gb.checkPlayerAt(this,x,y);
+        
+        
         this.x = x;
         this.y = y;
-        LOG("player "+this + "new loc: "+new GameLocation(x,y));
+        LOG("player " + this + "new loc: " + new GameLocation(x, y));
     }
 
     /**
@@ -80,8 +84,7 @@ public abstract class Player {
      * @return a GameLocation object
      */
     public final GameLocation getLocation() {
-        if (gb==null)
-        {
+        if (gb == null) {
             throw new RuntimeException("can't call getLocation before board has been initialized.");
         }
         return new GameLocation(x, y); // copies location
@@ -92,7 +95,7 @@ public abstract class Player {
     }
 
     final boolean isBusy() {
-        return (gb==null || gb.currentTimeStep < isBusyUntilTime);
+        return (gb == null || gb.currentTimeStep < isBusyUntilTime);
     }
 
     // called by PlayerProxy
@@ -102,11 +105,17 @@ public abstract class Player {
 
             return null; // can't make a move
         }
-        
-        Move m = move(); // move is defined by extending class
 
+        Move m;
+        try {
+            m = move(); // move is defined by extending class
+        } catch (RuntimeException ex) {
+            LOG("Player " + this.getClass().getName() + " runtime exception " + ex);
+            Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex);
+            m = null;
+        }
         if (m == null) {
-            
+
             LOG("move() returned null.");
             m = new Move(0, 0);
         } else {
@@ -130,7 +139,7 @@ public abstract class Player {
         }
 
         if (gb.noteMove(this, m)) {
-            
+
             return m;
         } else {
             LOG("noteMove returned null.");
@@ -172,35 +181,36 @@ public abstract class Player {
 
     @Override
     public String toString() {
-        String s="";
+        String s = "";
         switch (getPiece()) {
             case EMPTY:
-                s= " "; break;
+                s = " ";
+                break;
             case SHEEP:
-                s= "s"; break;
+                s = "s";
+                break;
             case WOLF:
-                s= "W"; break;
+                s = "W";
+                break;
             case OBSTACLE:
-                s= "#"; break;
+                s = "#";
+                break;
             case PASTURE:
-                s= "."; break;
+                s = ".";
+                break;
         }
-        if (isBusy())
-        {
+        if (isBusy()) {
             s = s + "!";
         }
-        if (gb==null)
-        {
-            s = "D"+s;
+        if (gb == null) {
+            s = "D" + s;
         }
         return s;
     }
 
-    static void LOG (String s)
-    {
-        
+    static void LOG(String s) {
     }
-    
+
     // Don't override these
     @Override
     final public boolean equals(Object obj) {

@@ -57,8 +57,14 @@ class PlayerProxy extends Actor {
     @Override
     final public  void act() {
         
-        int prev_x = player.x;
-        int prev_y = player.y;
+        if (player.isGone())
+        {
+            return;
+        }
+        
+        GameLocation l = player.getLocation();
+        int prev_x = l.x;
+        int prev_y = l.y;
         
         Move theMove = player.calcMove(); // this asks the player to decide its move
 
@@ -67,8 +73,9 @@ class PlayerProxy extends Actor {
             return;
         }
         
-        int target_x = player.x; // getX() + (int) theMove.delta_x;
-        int target_y = player.y; // getY() + (int) theMove.delta_y;
+        GameLocation targetloc = player.getLocation();
+        int target_x = targetloc.x; // getX() + (int) theMove.delta_x;
+        int target_y = targetloc.y; // getY() + (int) theMove.delta_y;
 
 
         // determine new direction
