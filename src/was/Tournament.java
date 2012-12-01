@@ -30,7 +30,7 @@ public class Tournament {
     protected ArrayList<Class> players = new ArrayList<Class>();
     protected Random random = new Random();
     int numSheep = 4;
-    protected static Map<String,String> teams = new HashMap();
+    protected static Map<String, String> teams = new HashMap();
 
     static Class name2class(String name) {
         try {
@@ -347,7 +347,7 @@ public class Tournament {
                     GameLocation initialLocation = board.randomEmptyLocation();
 
                     board.addPlayer(playerFactory(players.get(i), (isWolf(players.get(i)) ? "w" : "s")), initialLocation);
-                    
+
                     highscore.noteUse(players.get(i).getName());
                 }
 
@@ -356,8 +356,7 @@ public class Tournament {
                 for (Map.Entry<Player, int[]> score : s.entrySet()) {
                     String clname = score.getKey().getClass().getName();
                     highscore.inc(clname, score.getValue()[0]);
-                    if (teams.get(clname) != null)
-                    {
+                    if (teams.get(clname) != null) {
                         highscore.inc(teams.get(clname), score.getValue()[0]);
                     }
                 }
@@ -426,11 +425,60 @@ public class Tournament {
 
     final void addScenario(int scenario, GameBoard board) {
 
-        board.addPlayer(new Pasture(), new GameLocation(1, 1));
-        board.addPlayer(new Pasture(), new GameLocation(1, 2));
-        board.addPlayer(new Pasture(), new GameLocation(2, 3));
-        board.addPlayer(new Obstacle(), new GameLocation(15, 15));
-        board.addPlayer(new Obstacle(), new GameLocation(16, 15));
+        // scnario 0 is randomly chosen from several
+
+        if (scenario == 0) {
+            scenario = random.nextInt(4)+1;
+        }
+
+        switch (scenario) {
+            case 1:
+
+                board.addPlayer(new Pasture(), new GameLocation(1, 1));
+                board.addPlayer(new Pasture(), new GameLocation(1, 2));
+                board.addPlayer(new Pasture(), new GameLocation(2, 2));
+                board.addPlayer(new Obstacle(), new GameLocation(15, 15));
+                board.addPlayer(new Obstacle(), new GameLocation(16, 15));
+                break;
+            case 2:
+
+                board.addPlayer(new Pasture(), new GameLocation(28, 1));
+                board.addPlayer(new Pasture(), new GameLocation(27, 1));
+                board.addPlayer(new Pasture(), new GameLocation(29, 1));
+                board.addPlayer(new Obstacle(), new GameLocation(15, 20));
+                board.addPlayer(new Obstacle(), new GameLocation(16, 20));
+                board.addPlayer(new Obstacle(), new GameLocation(14, 20));
+                break;
+            case 3:
+
+                board.addPlayer(new Pasture(), new GameLocation(2, 2));
+                board.addPlayer(new Pasture(), new GameLocation(3, 2));
+                board.addPlayer(new Pasture(), new GameLocation(28, 1));
+                board.addPlayer(new Pasture(), new GameLocation(27, 1));
+                board.addPlayer(new Pasture(), new GameLocation(27, 2));
+                board.addPlayer(new Pasture(), new GameLocation(28, 2));
+
+                board.addPlayer(new Obstacle(), new GameLocation(15, 20));
+                board.addPlayer(new Obstacle(), new GameLocation(16, 20));
+                board.addPlayer(new Obstacle(), new GameLocation(14, 20));
+                break;
+                            case 4:
+                board.addPlayer(new Pasture(), new GameLocation(1, 1));
+                board.addPlayer(new Pasture(), new GameLocation(1, 2));
+                board.addPlayer(new Pasture(), new GameLocation(2, 1));
+                board.addPlayer(new Pasture(), new GameLocation(2, 2));
+                
+
+                board.addPlayer(new Obstacle(), new GameLocation(0, 4));
+                board.addPlayer(new Obstacle(), new GameLocation(1, 4));
+                board.addPlayer(new Obstacle(), new GameLocation(2, 4));
+                board.addPlayer(new Obstacle(), new GameLocation(3, 4));
+                board.addPlayer(new Obstacle(), new GameLocation(4, 3));
+                board.addPlayer(new Obstacle(), new GameLocation(4, 4));
+                board.addPlayer(new Obstacle(), new GameLocation(5, 2));
+                board.addPlayer(new Obstacle(), new GameLocation(5, 3));
+                                break;
+        }
     }
 
     public static void ist240() {
@@ -462,13 +510,12 @@ public class Tournament {
                     teams.put(w2.getName(), wolfteam);
 
                     ArrayList<Class> p = string2classlist(s); // all sheep
-                    
-                    for (Class sh : p)
-                    {
+
+                    for (Class sh : p) {
                         teams.put(sh.getName(), sheepteam);
 
                     }
-                    
+
                     p.add(w2); // one wolf
 
                     // randomize order of sheep
