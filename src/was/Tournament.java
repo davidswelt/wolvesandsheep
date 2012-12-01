@@ -6,6 +6,7 @@ import java.text.CollationKey;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -23,11 +24,13 @@ import java.util.logging.Logger;
  * @author dr
  */
 public class Tournament {
+
     protected ArrayList<Class> disqualifiedPlayers = new ArrayList<Class>();
     protected GameBoard eboard;
     protected ArrayList<Class> players = new ArrayList<Class>();
     protected Random random = new Random();
     int numSheep = 4;
+    protected static Map<String,String> teams = new HashMap();
 
     static Class name2class(String name) {
         try {
@@ -109,7 +112,7 @@ public class Tournament {
     public class HighScore extends TreeMap<String, Double> {
 
         TreeMap<String, Integer> uses = new TreeMap();
-        
+
         void inc(String s) {
             inc(s, 1.0);
         }
@@ -118,14 +121,13 @@ public class Tournament {
             put(s, new Double(get(s) + by));
         }
 
-        void noteUse(String s)
-        {
+        void noteUse(String s) {
             Integer prev = uses.get(s);
-            
-            uses.put(s, new Integer(prev==null? 1 : prev+1));
-            
+
+            uses.put(s, new Integer(prev == null ? 1 : prev + 1));
+
         }
-        
+
         public double get(String s) {
             Double f = super.get(s);
             if (f == null) {
@@ -134,88 +136,102 @@ public class Tournament {
                 return f.floatValue();
             }
         }
-       public double getNormalized(String s) {
+
+        public double getNormalized(String s) {
             Double f = super.get(s);
             if (f == null) {
                 return 0.0;
             } else {
                 Integer n = uses.get(s);
-                if (n==null || n.equals(0))
-                {
+                if (n == null || n.equals(0)) {
                     return f.floatValue();
                 }
-                return f.floatValue()/n;
+                return f.floatValue() / n;
             }
         }
-     
-       
+
         public void print() {
+            System.out.println("____________________________________\n");
             System.out.println("Highscore:");
-            printKeys (new ArrayList(keySet()), false);
-            
+            printKeys(new ArrayList(keySet()), false);
+
         }
 
-    public class TreeValueComparator implements Comparator<String> {
+        public class TreeValueComparator implements Comparator<String> {
 
-	@Override
-	public int compare(String a, String b) {
-		return ((Double) HighScore.this.get(a)).compareTo(HighScore.this.get(b));
-	}
+            @Override
+            public int compare(String a, String b) {
+                return ((Double) HighScore.this.get(a)).compareTo(HighScore.this.get(b));
+            }
         };
 
-        public void printKeys (List<String> keys, boolean sorted)
-        {
-            
-            
+        public void printKeys(List<String> keys, boolean sorted) {
+
+
             // sort it
             Collections.sort(keys, new TreeValueComparator());
-            
-            for (String k :  keys) {
-                System.out.println(k+ ":\t" + String.format("%.3g", getNormalized(k)));
+
+            for (String k : keys) {
+                System.out.println(k + ":\t" + String.format("%.3g", getNormalized(k)));
             }
         }
-        
+
         public void printByCategory() {
+            System.out.println("____________________________________\n");
             System.out.println("Highscore:");
-            
+
             Set<String> keys = keySet();
             Map<String, List<String>> cats = new TreeMap(); // categories
-            
-            for (String k : keys)
-            {
+
+            for (String k : keys) {
                 StringTokenizer t = new StringTokenizer(k, ".");
                 t.nextToken();
                 String classname = t.nextToken();
-                if (cats.get(classname)==null)
-                {
+                if (cats.get(classname) == null) {
                     cats.put(classname, new ArrayList());
                 }
                 cats.get(classname).add(k); // add whole key
-            }            
-            
+            }
+
             // for each category, print it, sorted
-            
-            for (String k : cats.keySet())
-            {
+
+            for (String k : cats.keySet()) {
                 System.out.println();
                 printKeys(cats.get(k), true);
             }
-            
-            
+
+
         }
-        
     }
     AverageScore timing = new AverageScore();
     HighScore highscore = new HighScore();
 
     static ArrayList<Class> string2classlist(String listofPlayerClassNames) {
+
+        StringTokenizer st = new StringTokenizer(listofPlayerClassNames, ":");
+        if (st.hasMoreElements()) {
+            st.nextToken();
+            if (st.hasMoreElements()) {
+                listofPlayerClassNames = st.nextToken();
+            }
+        }
+
+
         ArrayList<Class> players = new ArrayList<Class>();
-        StringTokenizer st = new StringTokenizer(listofPlayerClassNames, ", ");
+        st = new StringTokenizer(listofPlayerClassNames, ", ");
 
         while (st.hasMoreElements()) {
             players.add(name2class(st.nextToken()));
         }
         return players;
+    }
+
+    static String prefix(String s) {
+        StringTokenizer st = new StringTokenizer(s, ": ");
+        if (st.hasMoreElements()) {
+            return st.nextToken();
+        }
+        return "";
     }
 
     /**
@@ -331,13 +347,19 @@ public class Tournament {
                     GameLocation initialLocation = board.randomEmptyLocation();
 
                     board.addPlayer(playerFactory(players.get(i), (isWolf(players.get(i)) ? "w" : "s")), initialLocation);
+                    
                     highscore.noteUse(players.get(i).getName());
                 }
 
                 Map<Player, int[]> s = board.playGame();
 
                 for (Map.Entry<Player, int[]> score : s.entrySet()) {
-                    highscore.inc(score.getKey().getClass().getName(), score.getValue()[0]);
+                    String clname = score.getKey().getClass().getName();
+                    highscore.inc(clname, score.getValue()[0]);
+                    if (teams.get(clname) != null)
+                    {
+                        highscore.inc(teams.get(clname), score.getValue()[0]);
+                    }
                 }
                 if (printHighscores) {
                     //final String ESC = "\033[";
@@ -403,44 +425,55 @@ public class Tournament {
     }
 
     final void addScenario(int scenario, GameBoard board) {
-        
-                board.addPlayer(new Pasture(),new GameLocation(1,1));
-                board.addPlayer(new Pasture(),new GameLocation(1,2));
-                board.addPlayer(new Pasture(),new GameLocation(2,3));
-                board.addPlayer(new Obstacle(),new GameLocation(15,15));
-                board.addPlayer(new Obstacle(),new GameLocation(16,15));
+
+        board.addPlayer(new Pasture(), new GameLocation(1, 1));
+        board.addPlayer(new Pasture(), new GameLocation(1, 2));
+        board.addPlayer(new Pasture(), new GameLocation(2, 3));
+        board.addPlayer(new Obstacle(), new GameLocation(15, 15));
+        board.addPlayer(new Obstacle(), new GameLocation(16, 15));
     }
 
     public static void ist240() {
         String[] sheepteams = new String[]{
-            "CHHITH,GEISER,HAFAIRI,HOFBAUER",
-            "CONTINO,GARRITY,HOFFMAN,TAILOR",
-            "BROADWATER,DERHAMMER,CHAN,TUBERGEN",
-            "BONCHONSKY,HE,SUON,USCAMAYTA"
+            "Black Sheep:CHHITH,GEISER,HAFAIRI,HOFBAUER",
+            "Creepy Sheepies:SCONTINO,GARRITY,HOFFMAN,TAILOR",
+            "Dolly's Den:BROADWATER,DERHAMMER,CHAN,TUBERGEN",
+            "White Sheep:BONCHONSKY,HE,SUON,USCAMAYTA"
         };
 
         String[] wolves = new String[]{
-            "MONDELL,MULLEN,MUNOZ",
-            "CHEETHAM,KIDNEY,LAFFERTY",
-            "REIZNER,SICINSKI,ZIELINSKY",
-            "NORANTE,RAUGH,ULIANA",
-            "GREENE,WILKINSON,YOSUA"
+            "Hungry Beast:MONDELL,MULLEN,MUNOZ",
+            "Lone Hunters:CHEETHAM,KIDNEY,LAFFERTY",
+            "Furry Fury:REIZNER,SICINSKI,ZIELINSKY",
+            "The Gray:NORANTE,RAUGH,ULIANA",
+            "Wolf in Sheep's Clothing:GREENE,WILKINSON,YOSUA"
         };
 
         for (String s : sheepteams) { // each sheep team
+            String sheepteam = prefix(s);
+
             for (String w : wolves) { // each wolf team
 
                 ArrayList<Class> wolves2 = string2classlist(w);
+                String wolfteam = prefix(w);
 
                 for (Class w2 : wolves2) // for each wolf within a group
                 {
+                    teams.put(w2.getName(), wolfteam);
 
-                    ArrayList p = string2classlist(s); // all sheep
+                    ArrayList<Class> p = string2classlist(s); // all sheep
+                    
+                    for (Class sh : p)
+                    {
+                        teams.put(sh.getName(), sheepteam);
+
+                    }
+                    
                     p.add(w2); // one wolf
 
                     // randomize order of sheep
                     Collections.shuffle(p);
-                    
+
                     run(p, 20, 20, 5, false, 0);
                 }
             }
