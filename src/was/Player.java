@@ -24,29 +24,26 @@ public abstract class Player {
     GameBoard gb = null;
     private int x = 0, y = 0;
     String team;
-    
-    
-    
+
     /**
-     * The track color for this player
-     * Override this method to return your own color!
-     * @return a color to visualize it.  null if no track to be shown.
+     * The track color for this player Override this method to return your own
+     * color!
+     *
+     * @return a color to visualize it. null if no track to be shown.
      */
-    public java.awt.Color trackColor()
-            {
-                return new java.awt.Color(getClass().getName().hashCode());
-            }        
-    
+    public java.awt.Color trackColor() {
+        return new java.awt.Color(getClass().getName().hashCode());
+    }
+
     /**
      * Get a short name for this player
+     *
      * @return a String
      */
-    public String shortName()
-    {
+    public String shortName() {
         return getClass().getPackage().getName();
     }
-    
-            
+
     abstract GamePiece getPiece();
 
     final void setGameBoard(GameBoard gb) // available only to was class members
@@ -61,17 +58,19 @@ public abstract class Player {
     final void markDeleted() {
         gb = null;
     }
+
     final boolean isGone() {
-        return (gb==null);
+        return (gb == null);
     }
-    
+
     final void setTeam(String s) {
         team = s;
     }
+
     final String getTeam() {
         return team;
     }
-    
+
     /**
      * Initialize the player. Override this method to do any initialization of
      * the player. This will be called once before each game, and after the game
@@ -100,9 +99,9 @@ public abstract class Player {
     // can't be called by inheriting classes
     final void setLoc(int x, int y) {
 
-        gb.checkPlayerAt(this,x,y);
-        
-        
+        gb.checkPlayerAt(this, x, y);
+
+
         this.x = x;
         this.y = y;
         LOG("player " + this + "new loc: " + new GameLocation(x, y));
@@ -149,13 +148,15 @@ public abstract class Player {
             LOG("move() returned null.");
             m = new Move(0, 0);
         } else {
-            if (m.length() > maxAllowedDistance + 0.000005) {
-                LOG(this.getClass() + " - illegal move: too long! " + m.length() + " > " + maxAllowedDistance);
-                // trim move
-                m = m.scaledToLength(maxAllowedDistance);
+            if (m.length() > 0.1) {
+//            System.err.println("Len: "+m.length()+" maxallowed: "+ maxAllowedDistance);
+                if (m.length() > maxAllowedDistance + 0.000005) {
+                    System.err.println(this.getClass() + " - illegal move: too long! " + m.length() + " > " + maxAllowedDistance);
+                    // trim move
+                    m = m.scaledToLength(maxAllowedDistance);
+                }
+                m = m.quantized();
             }
-            m = m.quantized();
-
             // keep move inside boundaries
 
             int tx = x + (int) m.delta_x;

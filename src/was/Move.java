@@ -22,7 +22,7 @@ public class Move {
      */
     public Move(double dx, double dy) {
         delta_x = dx;
-        delta_y = dy;
+        delta_y = dy;        
     }
     
     /**
@@ -37,7 +37,12 @@ public class Move {
             double ratio = length() / length;
             return new Move((delta_x / ratio ), (delta_y / ratio ));
     }
-    public Move quantized()
+    public Move quantized ()
+    {
+        
+        return new Move ((int) (delta_x), (int) (delta_y));
+    }
+    public Move stochasticallyRounded()
     {
         double dx=delta_x, dy=delta_y;
         if (delta_x<0)
@@ -49,12 +54,13 @@ public class Move {
         else
             dy += rand.nextFloat();
             
-        return new Move ((int) (dx), (int) (dy));
     
+        return new Move ((int) (dx), (int) (dy));
     }
     @Override
     public String toString() {
   
-        return "M("+String.format("%.3g",delta_x)+","+String.format("%.3g",delta_y)+")";
+        return "M("+String.format("%.3g",delta_x)+","+String.format("%.3g",delta_y)+"="+String.format("%.3g",length())+")";
+        
     }
 }

@@ -47,6 +47,7 @@ public class GameBoard {
     // make a move
     boolean movePlayer(Player player, Move m) {
 
+        LOG(player + " moves " + m);
         if (player == null) {
             throw new RuntimeException("movePlayer: trying to move an empty cell.");
         }
@@ -60,6 +61,9 @@ public class GameBoard {
             System.err.println("The board has, at " + player.getLocation() + ":" + board.get(getIndex(player.getLocation())));
         }
 
+        if (m.length() > allowedMoveDistance(player) + 0.000005) {
+            return false;
+        }
 
         GameLocation loc = player.getLocation();
         int x = loc.x;
@@ -109,6 +113,10 @@ public class GameBoard {
             return true;
         } else if (playerCellPiece == GamePiece.WOLF && targetCellPiece == GamePiece.PASTURE) {
             // wolf can't movePlayer onto pasture
+        } else if (targetCellPiece == GamePiece.OBSTACLE) {
+
+            LOG("hit obstacle");
+
         }
         // else: still can't movePlayer.
 
@@ -353,7 +361,7 @@ public class GameBoard {
         board.set(i1, null);
         setPlayerAt(i1, board.get(i2));
         setPlayerAt(i2, tmp);
-        
+
     }
     static Random rand = new Random();
 
@@ -369,22 +377,19 @@ public class GameBoard {
         return new GameLocation(getX(pos), getY(pos));
     }
 
-    void setPlayerAt(int i, Player p)
-        {
-            Player ep = board.get(i);
-            if (ep != null)
-            {
-                throw new RuntimeException("setPlayerAt - trying to override existing player.");
-            }
-                
-            board.set(i, p);
-            if (p != null)
-            {
-                p.setLoc(getX(i), getY(i));
-            }
-
+    void setPlayerAt(int i, Player p) {
+        Player ep = board.get(i);
+        if (ep != null) {
+            throw new RuntimeException("setPlayerAt - trying to override existing player.");
         }
-        
+
+        board.set(i, p);
+        if (p != null) {
+            p.setLoc(getX(i), getY(i));
+        }
+
+    }
+
     void addPlayer(Player p, GameLocation loc) {
 
         p.setGameBoard(this);
@@ -460,7 +465,7 @@ public class GameBoard {
 //               
     // callback from game backend
     synchronized boolean noteMove(Player p, Move move) {
-        test(1);
+
         return movePlayer(p, move);
     }
 
