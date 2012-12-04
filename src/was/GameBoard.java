@@ -275,12 +275,21 @@ public class GameBoard {
         return sp;
     }
 
+    void printPlayerOverview() {
+        
+        String str = "";
+        for (Player p : players) {
+            str = p.getID()+p.getLocation()+" "+str; // reverse order
+        }
+        System.out.println("Players: "+str);
+    }
+
     /**
      * Structure containing information about a player at a given point in time
      * This information is available to all other players.
      */
-    public class PublicPlayerInfo
-    {
+    public class PublicPlayerInfo {
+
         /**
          * The type of the player (GamePiece)
          */
@@ -301,18 +310,17 @@ public class GameBoard {
          * The point in time for which the location and other info is valid.
          */
         public int timeValid;
-        
     }
-    
+
     /**
-     * Get a snapshot of all players and their positions
-     * This contains player representations of the obstacles and pastures
-     * along with all living sheep and the wolf.
+     * Get a snapshot of all players and their positions This contains player
+     * representations of the obstacles and pastures along with all living sheep
+     * and the wolf.
+     *
      * @return a map from player ID (key) to a PublicPlayerInfo structure.
      */
-    public Map<String,GameBoard.PublicPlayerInfo> findAllPlayers()
-    {
-        Map<String,PublicPlayerInfo> sp = new HashMap();
+    public Map<String, GameBoard.PublicPlayerInfo> findAllPlayers() {
+        Map<String, PublicPlayerInfo> sp = new HashMap();
         for (Player p : players) {
             if (p != null && !p.isGone()) {
                 GameBoard.PublicPlayerInfo pi = new GameBoard.PublicPlayerInfo();
@@ -322,13 +330,13 @@ public class GameBoard {
                 pi.className = p.getClass().getName();
                 pi.loc = p.getLocation();
                 pi.timeValid = getTime();
-                
-                sp.put(pi.id,pi);
+
+                sp.put(pi.id, pi);
             }
         }
         return sp;
     }
-    
+
     /**
      * $Returns true if cell is empty
      *
@@ -419,21 +427,26 @@ public class GameBoard {
     }
     static Random rand = new Random();
 
-    GameLocation randomEmptyLocation() {
+    GameLocation randomEmptyLocation(List<GameLocation> e1, List<GameLocation> e2) {
         int pos = -1;
-
-        while (pos < 0 || !isEmptyCell(pos)) {
+        GameLocation posl = null;
+        
+        while (pos < 0 || !isEmptyCell(pos) || (e1!= null && e1.contains(posl)) || (e2!=null && e2.contains(posl))) {
             // not efficient
             // choose random position
             pos = rand.nextInt(board.size());
-
+            posl = new GameLocation(getX(pos), getY(pos));
+            
         }
-        return new GameLocation(getX(pos), getY(pos));
+        return posl;
     }
 
     void setPlayerAt(int i, Player p) {
         Player ep = board.get(i);
         if (ep != null) {
+            System.err.println("Trying to set player p="+p.getID());
+            System.err.println("Existing player at loc"+i+" is "+ep.getID());
+            
             throw new RuntimeException("setPlayerAt - trying to step on existing player.");
         }
 
@@ -460,7 +473,7 @@ public class GameBoard {
         // choose a cell
 
         if (loc == null) {
-            loc = randomEmptyLocation();
+            loc = randomEmptyLocation(null,null);
         }
         int locI = getIndex(loc.x, loc.y);
 
@@ -523,6 +536,10 @@ public class GameBoard {
         return movePlayer(p, move);
     }
 
+    synchronized void logPlayerCrash(Class pl, Exception ex) {
+        Tournament.logPlayerCrash(pl,ex);
+    }
+    
     // callback from game backend
     void gameNextTimeStep() {
         test(7);
@@ -542,32 +559,42 @@ public class GameBoard {
             p.initialize();
         }
 
-        if (wasgamegrid != null) {
+        try {
 
 
-            wasgamegrid.show();
+            if (wasgamegrid != null) {
 
-            // we're not calling make movePlayer
 
-            wasgamegrid.doRun();
+                wasgamegrid.show();
 
-            // the JGameGrid version will spawn a separate thread,
-            // so we'll wait for it to finish:
+                // we're not calling make movePlayer
 
-            while (!isFinished()) {
-                synchronized (this) {
-                    try {
-                        this.wait();
-                    } catch (InterruptedException ex) {
-                        Logger.getLogger(GameBoard.class.getName()).log(Level.SEVERE, null, ex);
+                wasgamegrid.doRun();
+
+                // the JGameGrid version will spawn a separate thread,
+                // so we'll wait for it to finish:
+
+                while (!isFinished()) {
+                    synchronized (this) {
+                        try {
+                            this.wait();
+                        } catch (InterruptedException ex) {
+                            Logger.getLogger(GameBoard.class.getName()).log(Level.SEVERE, null, ex);
+                        }
                     }
                 }
-            }
-            wasgamegrid.doPause();
-            wasgamegrid.hide();
-            wasgamegrid = null; // go away!
-            //print();
+                wasgamegrid.doPause();
+                wasgamegrid.hide();
+                wasgamegrid = null; // go away!
+                //print();
 
+            }
+        } finally {
+            // de-construct the players
+            // right now this just releases some streams if needed.
+            for (Player p : players) {
+                p.finished();
+            }
         }
         return scores;
     }

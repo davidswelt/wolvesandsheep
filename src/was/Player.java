@@ -1,7 +1,9 @@
 package was;
 
 import ch.aplu.jgamegrid.Actor;
-import java.util.Random;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -24,6 +26,38 @@ public abstract class Player {
     GameBoard gb = null;
     private int x = 0, y = 0;
     String team;
+    
+    static boolean catchExceptions = false;
+
+    static boolean logToFile = false;
+    PrintStream logstream = null;
+
+    public Player() {
+        String filename = getClass().getName() + ".log";
+        
+        try {
+            logstream = new PrintStream(new FileOutputStream(filename, true));
+        } 
+        catch (FileNotFoundException ex) {
+            System.err.println("can't output to " + filename);
+
+        }
+
+
+    }
+    
+    /**
+     * Called when the game is over.
+     * The player may do any cleanup here.
+     */
+    void finished ()
+    {
+        if (logstream != null)
+        {
+            logstream.close();
+            logstream = null;
+        }
+    }
 
     /**
      * The track color for this player Override this method to return your own
@@ -130,7 +164,6 @@ public abstract class Player {
     final boolean isBusy() {
         return (gb == null || gb.currentTimeStep < isBusyUntilTime);
     }
-    protected static boolean catchExceptions = false;
     // called by PlayerProxy
 
     final Move calcMove() {
@@ -142,16 +175,37 @@ public abstract class Player {
 
         Move m;
 
+        // redirect output if needed
+
+
+        PrintStream prevErrStream = System.err;
+        PrintStream prevOutStream = System.out;
+
+
         try {
+
+            if (logstream != null) {
+                System.setOut(logstream);
+                System.setErr(logstream);
+            }
+
             m = move(); // move is defined by extending class
         } catch (RuntimeException ex) {
             if (catchExceptions) {
                 LOG("Player " + this.getClass().getName() + " runtime exception " + ex);
                 Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex);
+                Tournament.logPlayerCrash(this.getClass(), ex);
+                  
                 m = null;
             } else {
                 throw ex;
             }
+        } finally {
+            if (logstream != null) {
+                System.setOut(prevOutStream);
+                System.setErr(prevErrStream);
+            }
+
         }
         if (m == null) {
 
