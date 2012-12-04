@@ -79,6 +79,11 @@ public abstract class Player {
     public void initialize() {
     }
 
+    final public String getID ()
+    {
+        return getClass().getName()+"."+count;
+    }
+    
     /**
      * Get the Gameboard for this player.
      *

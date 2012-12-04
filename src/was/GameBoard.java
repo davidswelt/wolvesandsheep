@@ -276,6 +276,60 @@ public class GameBoard {
     }
 
     /**
+     * Structure containing information about a player at a given point in time
+     * This information is available to all other players.
+     */
+    public class PublicPlayerInfo
+    {
+        /**
+         * The type of the player (GamePiece)
+         */
+        public GamePiece type;
+        /**
+         * A unique ID string.
+         */
+        public String id;
+        /**
+         * The name of the class implementing the player.
+         */
+        public String className;
+        /*
+         * The current location of player.
+         */
+        public GameLocation loc;
+        /*
+         * The point in time for which the location and other info is valid.
+         */
+        public int timeValid;
+        
+    }
+    
+    /**
+     * Get a snapshot of all players and their positions
+     * This contains player representations of the obstacles and pastures
+     * along with all living sheep and the wolf.
+     * @return a map from player ID (key) to a PublicPlayerInfo structure.
+     */
+    public Map<String,GameBoard.PublicPlayerInfo> findAllPlayers()
+    {
+        Map<String,PublicPlayerInfo> sp = new HashMap();
+        for (Player p : players) {
+            if (p != null && !p.isGone()) {
+                GameBoard.PublicPlayerInfo pi = new GameBoard.PublicPlayerInfo();
+                // none of this info is mutable, so we're not creating a reference leak.
+                pi.type = p.getPiece();
+                pi.id = p.getID();
+                pi.className = p.getClass().getName();
+                pi.loc = p.getLocation();
+                pi.timeValid = getTime();
+                
+                sp.put(pi.id,pi);
+            }
+        }
+        return sp;
+    }
+    
+    /**
      * $Returns true if cell is empty
      *
      * @param x column
