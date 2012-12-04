@@ -34,16 +34,34 @@ public class Tournament {
     int numWolves = 1;
     protected static Map<String, String> teams = new HashMap();
 
-    
-    static Class name2class(String name) {
-        try {
-            return Class.forName(name);
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(Tournament.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SecurityException ex) {
-            Logger.getLogger(Tournament.class.getName()).log(Level.SEVERE, null, ex);
+    static Class name2class(String name, String postfix) {
+        // we'll try different variants
+
+        String[] n = new String[4];
+        n[0] = name;
+        n[1] = name.toLowerCase();
+        n[2] = name.substring(0, 1).toUpperCase() + name.substring(1);
+        n[3] = name.toUpperCase();
+
+        Class c = null;
+        for (String s : n) {
+            try {
+                System.err.println(s);
+                c = Class.forName(s+postfix);
+            } catch (ClassNotFoundException ex) {
+            } catch (SecurityException ex) {
+                Logger.getLogger(Tournament.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            if (c != null) {
+                break;
+            }
         }
-        return null;
+
+        if (c == null) {
+            System.err.println("No such class: " + name);
+        }
+
+        return c;
     }
 
     Player playerFactory(Class cl, String symbol) {
@@ -209,7 +227,7 @@ public class Tournament {
     AverageScore timing = new AverageScore();
     HighScore highscore = new HighScore();
 
-    static ArrayList<Class> string2classlist(String listofPlayerClassNames) {
+    static ArrayList<Class> string2classlist(String listofPlayerClassNames, String postfix) {
 
         StringTokenizer st = new StringTokenizer(listofPlayerClassNames, ":");
         if (st.hasMoreElements()) {
@@ -224,7 +242,10 @@ public class Tournament {
         st = new StringTokenizer(listofPlayerClassNames, ", ");
 
         while (st.hasMoreElements()) {
-            players.add(name2class(st.nextToken()));
+            Class cs = name2class(st.nextToken(), postfix);
+            if (cs != null) {
+                players.add(cs);
+            }
         }
         return players;
     }
@@ -250,7 +271,7 @@ public class Tournament {
     static public void run(String listofPlayerClassNames, int repeats) {
 
 
-        run(string2classlist(listofPlayerClassNames), repeats);
+        run(string2classlist(listofPlayerClassNames, ""), repeats);
 
     }
 
@@ -359,13 +380,13 @@ public class Tournament {
 
                 Stack<GameLocation> wolfQueue = new Stack();
                 Stack<GameLocation> sheepQueue = new Stack();
-                
+
                 addScenario(scenario, board, wolfQueue, sheepQueue); // add scenario first to occupy these spaces
 
                 for (Integer i : selectedPlayers) {
                     Stack<GameLocation> queue = isWolf(players.get(i)) ? wolfQueue : sheepQueue;
                     GameLocation initialLocation = queue.empty() ? board.randomEmptyLocation() : queue.pop();
-                        
+
                     board.addPlayer(playerFactory(players.get(i), (isWolf(players.get(i)) ? "w" : "s")), initialLocation);
 
                     highscore.noteUse(players.get(i).getName());
@@ -445,11 +466,22 @@ public class Tournament {
 
     final void addScenario(int scenario, GameBoard board, Stack<GameLocation> wolfP, Stack<GameLocation> sheepP) {
 
+        int rows = board.getRows()-1;
+        int cols = board.getCols()-1;
+        
         // scnario 0 is randomly chosen from several
 
         if (scenario == 0) {
-            scenario = 4; // random.nextInt(4)+1;
+            int maxS = 5;
+            
+            if (rows<29 || cols<29)
+            {
+                maxS = 4;
+            }
+            
+            scenario = random.nextInt(maxS-1)+1;
         }
+        
 
         switch (scenario) {
             case 1:
@@ -465,9 +497,9 @@ public class Tournament {
                 board.addPlayer(new Pasture(), new GameLocation(28, 1));
                 board.addPlayer(new Pasture(), new GameLocation(27, 1));
                 board.addPlayer(new Pasture(), new GameLocation(29, 1));
-                board.addPlayer(new Obstacle(), new GameLocation(15, 20));
-                board.addPlayer(new Obstacle(), new GameLocation(16, 20));
-                board.addPlayer(new Obstacle(), new GameLocation(14, 20));
+                board.addPlayer(new Obstacle(), new GameLocation(15, rows));
+                board.addPlayer(new Obstacle(), new GameLocation(16, rows));
+                board.addPlayer(new Obstacle(), new GameLocation(14, rows));
                 break;
             case 3:
 
@@ -478,9 +510,9 @@ public class Tournament {
                 board.addPlayer(new Pasture(), new GameLocation(27, 2));
                 board.addPlayer(new Pasture(), new GameLocation(28, 2));
 
-                board.addPlayer(new Obstacle(), new GameLocation(15, 20));
-                board.addPlayer(new Obstacle(), new GameLocation(16, 20));
-                board.addPlayer(new Obstacle(), new GameLocation(14, 20));
+                board.addPlayer(new Obstacle(), new GameLocation(15, rows));
+                board.addPlayer(new Obstacle(), new GameLocation(16, rows));
+                board.addPlayer(new Obstacle(), new GameLocation(14, rows));
                 break;
             case 4: // this challenges the sheep
                 board.addPlayer(new Pasture(), new GameLocation(1, 1));
@@ -497,11 +529,11 @@ public class Tournament {
                 board.addPlayer(new Obstacle(), new GameLocation(4, 4));
                 board.addPlayer(new Obstacle(), new GameLocation(5, 2));
                 board.addPlayer(new Obstacle(), new GameLocation(5, 3));
-                sheepP.add(new GameLocation(5,29));
-                sheepP.add(new GameLocation(10,29));
-                sheepP.add(new GameLocation(20,29));
-                sheepP.add(new GameLocation(25,29));
-                
+                sheepP.add(new GameLocation(5, 29));
+                sheepP.add(new GameLocation(10, 29));
+                sheepP.add(new GameLocation(20, 29));
+                sheepP.add(new GameLocation(25, 29));
+
                 break;
             case 5: // this challenges the wolf
                 board.addPlayer(new Pasture(), new GameLocation(1, 1));
@@ -529,7 +561,7 @@ public class Tournament {
                 board.addPlayer(new Obstacle(), new GameLocation(24, 7));
                 board.addPlayer(new Obstacle(), new GameLocation(25, 8));
 
-                wolfP.add(new GameLocation(28,3));
+                wolfP.add(new GameLocation(28, 3));
                 break;
         }
     }
@@ -555,14 +587,14 @@ public class Tournament {
 
             for (String w : wolves) { // each wolf team
 
-                ArrayList<Class> wolves2 = string2classlist(w);
+                ArrayList<Class> wolves2 = string2classlist(w, ".Wolf");
                 String wolfteam = prefix(w);
 
                 for (Class w2 : wolves2) // for each wolf within a group
                 {
                     teams.put(w2.getName(), wolfteam);
 
-                    ArrayList<Class> p = string2classlist(s); // all sheep
+                    ArrayList<Class> p = string2classlist(s, ".Sheep"); // all sheep
 
                     for (Class sh : p) {
                         teams.put(sh.getName(), sheepteam);
@@ -589,6 +621,7 @@ public class Tournament {
         int r = 100;
         int sc = 0; // random scenario
         boolean ui = true;
+        boolean run240 = false;
 
         // parse the command line
         int i = 0;
@@ -606,34 +639,44 @@ public class Tournament {
             } else if (s.equals("-c")) {
                 ui = false;
             } else if (s.equals("-e")) {
-                Player.catchExceptions  = true;
+                Player.catchExceptions = true;
             } else if (s.equals("-r")) {
 
                 r = Integer.parseInt(args[i++]);
+
+            } else if (s.equals("-ist240")) {
+
+                run240 = true;
 
             } else if (s.equals("-s")) {
 
                 sc = Integer.parseInt(args[i++]);
 
             } else {
-                players.add(name2class(s));
+                players.add(name2class(s,""));
             }
         }
 
 
-        if (players.size() > 0) {
-            was.Tournament.run(players, m, n, r, ui, sc); // m, n, k,
+        if (run240) {
+            ist240();
         } else {
-            System.err.println("Usage: java -jar WolvesAndSheep.jar -t M,N,K -r R CLASS1 CLASS2 CLASS3 CLASS4 CLASS5 (...)");
-            System.err.println("       -t M,N,K  ==> play a M*N board with K sheep.");
-            System.err.println("       -r R      ==> play R repeats of each game.");
-            System.err.println("       -S S      ==> set up scenario no. S (0 for random)");
-            System.err.println("       -e        ==> ignore player's exceptions");
-            System.err.println("       -c        ==> do not show the graphical user interface ");
-            System.err.println("Example: java -jar WolvesAndSheep.jar -t 20,20,4 -r 400 players.BasicSheep players.BasicWolf players.BasicSheep players.BasicSheep players.BasicSheep");
-            System.err.println("Example for NetBeans (Run Configuration, Program arguments): -t 20,20,4 -r 400 players.BasicSheep players.BasicWolf players.BasicSheep players.BasicSheep players.BasicSheep");
-            // do not run a default case to make sure it doesn't cause confusion.
-            //            was.Tournament.run("reitter.SheepPlayer,reitter.WolfPlayer,reitter.SheepPlayer,reitter.SheepPlayer, reitter.SheepPlayer", 100);
+            if (players.size() > 0) {
+
+                was.Tournament.run(players, m, n, r, ui, sc); // m, n, k,
+
+            } else {
+                System.err.println("Usage: java -jar WolvesAndSheep.jar -t M,N,K -r R CLASS1 CLASS2 CLASS3 CLASS4 CLASS5 (...)");
+                System.err.println("       -t M,N,K  ==> play a M*N board with K sheep.");
+                System.err.println("       -r R      ==> play R repeats of each game.");
+                System.err.println("       -S S      ==> set up scenario no. S (0 for random)");
+                System.err.println("       -e        ==> ignore player's exceptions");
+                System.err.println("       -c        ==> do not show the graphical user interface ");
+                System.err.println("Example: java -jar WolvesAndSheep.jar -t 20,20,4 -r 400 players.BasicSheep players.BasicWolf players.BasicSheep players.BasicSheep players.BasicSheep");
+                System.err.println("Example for NetBeans (Run Configuration, Program arguments): -t 20,20,4 -r 400 players.BasicSheep players.BasicWolf players.BasicSheep players.BasicSheep players.BasicSheep");
+                // do not run a default case to make sure it doesn't cause confusion.
+                //            was.Tournament.run("reitter.SheepPlayer,reitter.WolfPlayer,reitter.SheepPlayer,reitter.SheepPlayer, reitter.SheepPlayer", 100);
+            }
         }
     }
 }
