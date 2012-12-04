@@ -79,11 +79,10 @@ public abstract class Player {
     public void initialize() {
     }
 
-    final public String getID ()
-    {
-        return getClass().getName()+"."+count;
+    final public String getID() {
+        return getClass().getName() + "." + count;
     }
-    
+
     /**
      * Get the Gameboard for this player.
      *
@@ -131,8 +130,9 @@ public abstract class Player {
     final boolean isBusy() {
         return (gb == null || gb.currentTimeStep < isBusyUntilTime);
     }
-
+    protected static boolean catchExceptions = false;
     // called by PlayerProxy
+
     final Move calcMove() {
 
         if (isBusy()) {
@@ -141,12 +141,17 @@ public abstract class Player {
         }
 
         Move m;
+
         try {
             m = move(); // move is defined by extending class
         } catch (RuntimeException ex) {
-            LOG("Player " + this.getClass().getName() + " runtime exception " + ex);
-            Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex);
-            m = null;
+            if (catchExceptions) {
+                LOG("Player " + this.getClass().getName() + " runtime exception " + ex);
+                Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex);
+                m = null;
+            } else {
+                throw ex;
+            }
         }
         if (m == null) {
 

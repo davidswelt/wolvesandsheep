@@ -34,6 +34,7 @@ public class Tournament {
     int numWolves = 1;
     protected static Map<String, String> teams = new HashMap();
 
+    
     static Class name2class(String name) {
         try {
             return Class.forName(name);
@@ -604,6 +605,8 @@ public class Tournament {
                 ui = true;
             } else if (s.equals("-c")) {
                 ui = false;
+            } else if (s.equals("-e")) {
+                Player.catchExceptions  = true;
             } else if (s.equals("-r")) {
 
                 r = Integer.parseInt(args[i++]);
@@ -625,6 +628,7 @@ public class Tournament {
             System.err.println("       -t M,N,K  ==> play a M*N board with K sheep.");
             System.err.println("       -r R      ==> play R repeats of each game.");
             System.err.println("       -S S      ==> set up scenario no. S (0 for random)");
+            System.err.println("       -e        ==> ignore player's exceptions");
             System.err.println("       -c        ==> do not show the graphical user interface ");
             System.err.println("Example: java -jar WolvesAndSheep.jar -t 20,20,4 -r 400 players.BasicSheep players.BasicWolf players.BasicSheep players.BasicSheep players.BasicSheep");
             System.err.println("Example for NetBeans (Run Configuration, Program arguments): -t 20,20,4 -r 400 players.BasicSheep players.BasicWolf players.BasicSheep players.BasicSheep players.BasicSheep");
