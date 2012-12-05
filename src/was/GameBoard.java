@@ -354,13 +354,20 @@ public class GameBoard {
 
     /**
      * Returns game piece currently present in an x,y position
-     *
+     * If x,y position is not on the board, returns GamePiece.OBSTACLE.
      * @param x column
      * @param y row
      * @return a GameBoard.GamePiece. You may check, e.g. for an obstacle at
      * position 4,5: mygameboard.getPiece(4.5)==GameBoard.GamePiece.OBSTACLE
+     * 
      */
     public GamePiece getPiece(int x, int y) {
+        
+        if (x<0 || x>=cols || y<0 || y>=rows)
+        {
+            return GamePiece.OBSTACLE;  // out of bounds - instead of throwing an Exception
+        }
+        
         return getPiece(getIndex(x, y));
     }
 
