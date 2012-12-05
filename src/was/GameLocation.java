@@ -4,7 +4,7 @@ package was;
 /**
  * The type describing the state of a single cell in the game grid.
  */
-final public class GameLocation {
+final public class GameLocation  {
     /**
      * The horizontal position (column)
      */
@@ -29,4 +29,32 @@ final public class GameLocation {
   
         return "L("+x+","+y+")";
     }
+    
+    @Override
+    public boolean equals (Object o) {
+        if (this==o)
+        {
+            return true;
+        }
+        if (o==null)
+        {
+            return false;
+        }
+        if (! (o instanceof GameLocation))
+        {
+            return false;
+        }
+        return (x==((GameLocation) o).x && y==((GameLocation) o).y);
+        
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 79 * hash + this.x;
+        hash = 79 * hash + this.y;
+        return hash;
+    }
+    
+    
 }
