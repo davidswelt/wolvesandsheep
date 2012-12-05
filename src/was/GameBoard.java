@@ -35,7 +35,7 @@ public class GameBoard {
     /**
      * number of steps it takes the wolf to eat a sheep
      */
-    public final int wolfEatingTime = 6;
+    public final int wolfEatingTime = 7;
     /**
      * maximal number of steps before game ends
      */
