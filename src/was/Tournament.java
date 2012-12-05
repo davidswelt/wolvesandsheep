@@ -404,13 +404,12 @@ public class Tournament {
         numSheep = Math.min(numSheep, sheep);
         numWolves = Math.min(numWolves, wolves);
 
-        
+
         List<Integer> sp = new ArrayList<Integer>();
-        if (!combinations)
-        { // just add all given players to the selection
-            int i=0;
-            for (Class p : players){
-            sp.add(i++);
+        if (!combinations) { // just add all given players to the selection
+            int i = 0;
+            for (Class p : players) {
+                sp.add(i++);
             }
         }
 
@@ -456,7 +455,7 @@ public class Tournament {
 
                     for (Integer i : selectedPlayers) {
                         Stack<GameLocation> queue = isWolf(players.get(i)) ? wolfQueue : sheepQueue;
-                        GameLocation initialLocation = queue.empty() ? board.randomEmptyLocation(wolfQueue,sheepQueue) : queue.pop();
+                        GameLocation initialLocation = queue.empty() ? board.randomEmptyLocation(wolfQueue, sheepQueue) : queue.pop();
 
                         Player player = playerFactory(players.get(i), (isWolf(players.get(i)) ? "w" : "s"));
                         if (player != null) {
@@ -673,7 +672,7 @@ public class Tournament {
     public static void ist240(int repeats) {
         String[] sheepteams = new String[]{
             "Black Sheep:CHHITH,GEISER,HAFAIRI,HOFBAUER",
-            "Creepy Sheepies:TAILOR,GARRITY,HOFFMAN,TAILOR", // SCONTINO
+            "Creepy Sheepies:CONTINO,GARRITY,HOFFMAN,TAILOR", // SCONTINO
             "Dolly's Den:DERHAMMER,DERHAMMER,CHAN,CHAN", //TUBERGEN  // BROADWATER
             "White Sheep:BONCHONSKY,HE,SUON,USCAMAYTA",
             "Nervous Wreck:REITTER,REITTER,REITTER,REITTER"
@@ -689,6 +688,7 @@ public class Tournament {
         };
 
         HighScore totalHighscore = new HighScore();
+        HighScore[] scenarioHighScore = new HighScore[NUMSCENARIOS];
 
         minNumSheepRequiredToRun = 1;
         minNumWolvesRequiredToRun = 1;
@@ -725,7 +725,14 @@ public class Tournament {
                     for (int sc = 1; sc < NUMSCENARIOS; sc++) {
                         Tournament t = run(p, 30, 30, repeats, false, sc, false);
                         totalHighscore.addHighScore(t.highscore);
+                        if (scenarioHighScore[sc] == null)
+                        {
+                            scenarioHighScore[sc] = new HighScore();
+                        }
+                        scenarioHighScore[sc].addHighScore(t.highscore);
                     }
+                    totalHighscore.printByCategory();
+
                 }
             }
         }
@@ -735,6 +742,17 @@ public class Tournament {
 
         System.out.println("Player Crashes:");
         crashLog.printByCategory();
+
+
+        System.out.println("Highscore by scenario:");
+
+        for (int sc = 1; sc < NUMSCENARIOS; sc++) {
+            if (scenarioHighScore[sc] != null)
+            {
+            System.out.println("Scenario " + sc);
+            scenarioHighScore[sc].printByCategory();
+            }
+            }
 
     }
 
