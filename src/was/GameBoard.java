@@ -39,7 +39,7 @@ public class GameBoard {
     /**
      * maximal number of steps before game ends
      */
-    public final int MAXTIMESTEP = 80;
+    int MAXTIMESTEP;
     final int NUMWOLVES = 1;
     int currentTimeStep = 0;
     WasGameBackend wasgamegrid = null;
@@ -160,13 +160,14 @@ public class GameBoard {
     }
 
     GameBoard() {
-        this(30, 30, false);
+        this(30, 30, false, 80);
     }
 
-    GameBoard(int width, int height, boolean ui) {
+    GameBoard(int width, int height, boolean ui, int maxTimeStep) {
         cols = width;
         rows = height;
-
+        this.MAXTIMESTEP = maxTimeStep;
+        
         for (int i = 0; i < cols * rows; i++) {
             board.add(null); // null is empty
         }
@@ -179,6 +180,11 @@ public class GameBoard {
         }
     }
 
+    public int getMaxTimeStep ()
+    {
+        return this.MAXTIMESTEP;
+    }
+    
     public int getTime() {
         return currentTimeStep;
     }

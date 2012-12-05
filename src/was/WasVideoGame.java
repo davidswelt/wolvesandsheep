@@ -13,11 +13,11 @@ class WasVideoGame extends ch.aplu.jgamegrid.GameGrid implements WasGameBackend 
     final GameBoard board;
 
     public WasVideoGame(GameBoard board) {
-        super(board.getCols(), board.getRows(), PlayerProxy.cellSize);
+        super(board.getCols(), board.getRows(), PlayerProxy.getCellSize(board));
         this.board = board;
         setBgColor(java.awt.Color.WHITE);
 
-        setSimulationPeriod(150);
+        setSimulationPeriod(50);
     }
 
      @Override

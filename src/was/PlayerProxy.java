@@ -5,10 +5,12 @@
 package was;
 
 import ch.aplu.jgamegrid.*;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Point;
+import java.awt.Toolkit;
 import java.awt.geom.GeneralPath;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -22,7 +24,7 @@ import java.util.logging.Logger;
 class PlayerProxy extends Actor {
 
     Player player;
-    static final int cellSize = 12;
+    static int cellSize = 12;
 
     PlayerProxy(Player player) {
         //                super("sprites/nemo.gif");
@@ -31,10 +33,10 @@ class PlayerProxy extends Actor {
 //javax.imageio.ImageIO.write(bim, "jpg", fos);
 //fos.close();
 
-        super(true, scaledImage(player.imageFile()));
+        super(true, scaledImage(player));
         this.player = player;
 
-
+        
 
     }
 
@@ -46,9 +48,21 @@ class PlayerProxy extends Actor {
         return bi;
     }
 
-    static BufferedImage scaledImage(String file) {
+    static int getCellSize (GameBoard board)
+    {
+        
+     Toolkit toolkit = Toolkit.getDefaultToolkit();
+        Dimension dim = toolkit.getScreenSize();
+
+        int csize = (int) ((dim.height-120) / board.getRows());
+
+        cellSize = Math.min(12, csize-1);
+        return cellSize;
+    }
+    
+    static BufferedImage scaledImage(Player player) {
         try {
-            return imageToBufferedImage(javax.imageio.ImageIO.read(new File(file)).getScaledInstance(cellSize, cellSize, Image.SCALE_SMOOTH));
+            return imageToBufferedImage(javax.imageio.ImageIO.read(new File(player.imageFile())).getScaledInstance(getCellSize(player.getGameBoard()), getCellSize(player.getGameBoard()), Image.SCALE_SMOOTH));
         } catch (IOException ex) {
             Logger.getLogger(PlayerProxy.class.getName()).log(Level.SEVERE, null, ex);
         }

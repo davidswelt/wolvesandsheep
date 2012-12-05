@@ -360,7 +360,7 @@ public class Tournament {
         if (scenario == 0) {
           scenario = random.nextInt(NUMSCENARIOS - 1) + 1;
         }
-        t = new Tournament(playerClasses, scenarioBoardSize(scenario), scenarioBoardSize(scenario), r, ui);
+        t = new Tournament(playerClasses, r, ui);
 
         int totalgames = r * playerClasses.size() * Math.max(1, playerClasses.size() - 1) * Math.max(1, playerClasses.size() - 2) * Math.max(1, playerClasses.size() - 3);
 
@@ -448,7 +448,7 @@ public class Tournament {
 
 
                 for (int r = 0; r < repeats; r++) {
-                    GameBoard board = new GameBoard(boardWidth, boardHeight, boardUI);
+                    GameBoard board = new GameBoard(scenarioBoardSize(scenario), scenarioBoardSize(scenario), boardUI, 80);
 
 
                     Stack<GameLocation> wolfQueue = new Stack();
@@ -540,15 +540,11 @@ public class Tournament {
                     .getName()).log(Level.SEVERE, null, ex);
         }
     }
-    int boardWidth = 30;
-    int boardHeight = 30;
     boolean boardUI = false;
 
-    Tournament(List<Class> playerClasses, int m, int n, int r, boolean ui) {
+    Tournament(List<Class> playerClasses, int r, boolean ui) {
         //(Class[] playerClasses, int m, int n, int r) {
-
-        boardWidth = m;
-        boardHeight = n;
+;
         boardUI = ui;
 
         // Security Policy
@@ -580,6 +576,9 @@ public class Tournament {
     static final int NUMSCENARIOS = 6;
 
     final static int scenarioBoardSize(int scenario) {
+         switch (scenario) {
+            case 10: return 150;
+         }
         return 30;
     }
 
@@ -690,6 +689,32 @@ public class Tournament {
                 board.addPlayer(new Obstacle(), new GameLocation(28, 15));
                 board.addPlayer(new Obstacle(), new GameLocation(2, 15));
                 break;
+            case 10: // big one
+                // works with 15 sheep and 15 wolvs
+                // on a 100x100 board
+                // sheep go in top right corner
+                // wolves go in bottom left corner
+                for (int y = 0; y<10; y+=2)
+                    for (int x = 0; x<8; x+=2)
+                        sheepP.add(new GameLocation(x, y));
+                
+                // wolves: bottom left
+                for (int y = board.getRows()-1; y>board.getRows()-10; y-=2)
+                    for (int x = 0; x<8; x+=2)
+                        sheepP.add(new GameLocation(x, y));  
+                Collections.shuffle(sheepP);
+                
+                board.addPlayer(new Pasture(), new GameLocation(board.getCols()-2, 0));
+                board.addPlayer(new Pasture(), new GameLocation(board.getCols()-1, 0));
+                board.addPlayer(new Pasture(), new GameLocation(board.getCols()-1, 1));
+                board.addPlayer(new Pasture(), new GameLocation(board.getCols()-1, board.getCols()/2));
+                board.addPlayer(new Obstacle(), new GameLocation(board.getCols()-1, board.getCols()/2-1));
+                board.addPlayer(new Obstacle(), new GameLocation(board.getCols()-1, board.getCols()/2+1));
+                board.addPlayer(new Obstacle(), new GameLocation(board.getCols()-2, board.getCols()/2-2));
+                board.addPlayer(new Obstacle(), new GameLocation(board.getCols()-2, board.getCols()/2+2));
+              
+                board.MAXTIMESTEP = Math.max(board.MAXTIMESTEP, 500);
+                
         }
     }
 
@@ -784,7 +809,7 @@ public class Tournament {
 //        int m = -1;
 //        int n = -;
 //        int k = 4;
-        int r = 100;
+        int r = 1;
         int sc = 0; // random scenario
         boolean ui = true;
         boolean run240 = false;
