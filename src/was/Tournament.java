@@ -881,5 +881,6 @@ public class Tournament {
                 //            was.Tournament.run("reitter.SheepPlayer,reitter.WolfPlayer,reitter.SheepPlayer,reitter.SheepPlayer, reitter.SheepPlayer", 100);
             }
         }
+        System.exit(0); 
     }
 }
