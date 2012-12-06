@@ -1,5 +1,6 @@
 package was;
 
+import ch.aplu.jgamegrid.GGExitListener;
 import java.util.ArrayList;
 import java.util.ArrayDeque;
 import java.util.HashMap;
@@ -553,6 +554,12 @@ public class GameBoard {
         Tournament.logPlayerCrash(pl,ex);
     }
     
+    
+    synchronized void exitRequested() {
+        // set marker so that repetitive processes know to terminate
+        Tournament.exitRequested = true;
+    }
+  
     // callback from game backend
     void gameNextTimeStep() {
         test(7);
@@ -587,7 +594,7 @@ public class GameBoard {
                 // the JGameGrid version will spawn a separate thread,
                 // so we'll wait for it to finish:
 
-                while (!isFinished()) {
+                if (!isFinished()) {
                     synchronized (this) {
                         try {
                             this.wait();

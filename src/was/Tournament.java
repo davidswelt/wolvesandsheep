@@ -35,6 +35,7 @@ public class Tournament {
     protected static Map<Class, String> teams = new HashMap();
     static int minNumSheepRequiredToRun = 0;  // run won't start a game otherwise
     static int minNumWolvesRequiredToRun = 0;
+    static boolean exitRequested = false;
 
     static Class name2class(String name, String postfix) {
         // we'll try different variants
@@ -341,8 +342,6 @@ public class Tournament {
         run(playerClasses, r, false, 0, true);
     }
 
-    
-    
     /**
      * creates and runs a tournament, printing the results.
      *
@@ -351,15 +350,16 @@ public class Tournament {
      * @param r number of repetitions to run
      * @param ui true if UI is to be shown
      * @param scenario number of the scenario to be used
-     * @param comb true if the tournament should test all combinations of the players.
-     *     Otherwise, all given players will be added to the game board at once.
+     * @param comb true if the tournament should test all combinations of the
+     * players. Otherwise, all given players will be added to the game board at
+     * once.
      */
     static public Tournament run(List<Class> playerClasses, int r, boolean ui, int scenario, boolean comb) {
 
         Tournament t;
 
         if (scenario == 0) {
-          scenario = random.nextInt(NUMSCENARIOS - 1) + 1;
+            scenario = random.nextInt(NUMSCENARIOS - 1) + 1;
         }
         t = new Tournament(playerClasses, r, ui);
 
@@ -367,11 +367,12 @@ public class Tournament {
 
         System.err.println("Total trials: " + totalgames);
 
-        t.start(totalgames > 100000, scenario, r, comb);
-
-        t.highscore.printByCategory();
+        try {
+            t.start(totalgames > 100000, scenario, r, comb);
+        } finally {
+            t.highscore.printByCategory();
 //        t.timing.print();
-
+        }
         System.out.println("____________________________________\n");
         return t;
     }
@@ -448,7 +449,7 @@ public class Tournament {
             {
 
 
-                for (int r = 0; r < repeats; r++) {
+                for (int r = 0; r < repeats && exitRequested==false; r++) {
                     GameBoard board = new GameBoard(scenarioBoardSize(scenario), scenarioBoardSize(scenario), boardUI, 80);
 
 
@@ -493,28 +494,32 @@ public class Tournament {
                         if (r == 0) {
                             board.printPlayerOverview();
                         }
-                        Map<Player, int[]> s = board.playGame();
 
-                        for (Map.Entry<Player, int[]> score : s.entrySet()) {
-                            Class cl = score.getKey().getClass();
-                            highscore.inc(cl.getName(), score.getValue()[0]);
+                        try {
+                            Map<Player, int[]> s = board.playGame();
 
-                            if (teams.get(cl) != null) { // Pastures etc don't have a team
+                            for (Map.Entry<Player, int[]> score : s.entrySet()) {
+                                Class cl = score.getKey().getClass();
+                                highscore.inc(cl.getName(), score.getValue()[0]);
 
-                                highscore.inc(teams.get(cl) + (score.getKey() instanceof WolfPlayer ? ".WolfTeam" : ".SheepTeam"), score.getValue()[0]);
+                                if (teams.get(cl) != null) { // Pastures etc don't have a team
+
+                                    highscore.inc(teams.get(cl) + (score.getKey() instanceof WolfPlayer ? ".WolfTeam" : ".SheepTeam"), score.getValue()[0]);
+                                }
                             }
-                        }
-                        if (printHighscores) {
-                            //final String ESC = "\033[";
-                            //System.out.println(ESC + "2J"); 
-                            highscore.printByCategory();
+                        } finally {
+                            if (printHighscores) {
+                                //final String ESC = "\033[";
+                                //System.out.println(ESC + "2J"); 
+                                highscore.printByCategory();
+                            }
                         }
                     }
                 }
 
 
             } else {
-                for (int i = 0; i < players.size(); i++) {
+                for (int i = 0; i < players.size() && exitRequested==false; i++) {
                     Class p1 = players.get(i);
 
                     // do not add a player twice
@@ -545,7 +550,7 @@ public class Tournament {
 
     Tournament(List<Class> playerClasses, int r, boolean ui) {
         //(Class[] playerClasses, int m, int n, int r) {
-;
+        ;
         boardUI = ui;
 
         // Security Policy
@@ -577,9 +582,10 @@ public class Tournament {
     static final int NUMSCENARIOS = 6;
 
     final static int scenarioBoardSize(int scenario) {
-         switch (scenario) {
-            case 10: return 150;
-         }
+        switch (scenario) {
+            case 10:
+                return 150;
+        }
         return 30;
     }
 
@@ -695,27 +701,31 @@ public class Tournament {
                 // on a 100x100 board
                 // sheep go in top right corner
                 // wolves go in bottom left corner
-                for (int y = 0; y<10; y+=2)
-                    for (int x = 0; x<8; x+=2)
+                for (int y = 0; y < 10; y += 2) {
+                    for (int x = 0; x < 8; x += 2) {
                         sheepP.add(new GameLocation(x, y));
-                
+                    }
+                }
+
                 // wolves: bottom left
-                for (int y = board.getRows()-1; y>board.getRows()-10; y-=2)
-                    for (int x = 0; x<8; x+=2)
-                        sheepP.add(new GameLocation(x, y));  
+                for (int y = board.getRows() - 1; y > board.getRows() - 10; y -= 2) {
+                    for (int x = 0; x < 8; x += 2) {
+                        sheepP.add(new GameLocation(x, y));
+                    }
+                }
                 Collections.shuffle(sheepP);
-                
-                board.addPlayer(new Pasture(), new GameLocation(board.getCols()-2, 0));
-                board.addPlayer(new Pasture(), new GameLocation(board.getCols()-1, 0));
-                board.addPlayer(new Pasture(), new GameLocation(board.getCols()-1, 1));
-                board.addPlayer(new Pasture(), new GameLocation(board.getCols()-1, board.getCols()/2));
-                board.addPlayer(new Obstacle(), new GameLocation(board.getCols()-1, board.getCols()/2-1));
-                board.addPlayer(new Obstacle(), new GameLocation(board.getCols()-1, board.getCols()/2+1));
-                board.addPlayer(new Obstacle(), new GameLocation(board.getCols()-2, board.getCols()/2-2));
-                board.addPlayer(new Obstacle(), new GameLocation(board.getCols()-2, board.getCols()/2+2));
-              
+
+                board.addPlayer(new Pasture(), new GameLocation(board.getCols() - 2, 0));
+                board.addPlayer(new Pasture(), new GameLocation(board.getCols() - 1, 0));
+                board.addPlayer(new Pasture(), new GameLocation(board.getCols() - 1, 1));
+                board.addPlayer(new Pasture(), new GameLocation(board.getCols() - 1, board.getCols() / 2));
+                board.addPlayer(new Obstacle(), new GameLocation(board.getCols() - 1, board.getCols() / 2 - 1));
+                board.addPlayer(new Obstacle(), new GameLocation(board.getCols() - 1, board.getCols() / 2 + 1));
+                board.addPlayer(new Obstacle(), new GameLocation(board.getCols() - 2, board.getCols() / 2 - 2));
+                board.addPlayer(new Obstacle(), new GameLocation(board.getCols() - 2, board.getCols() / 2 + 2));
+
                 board.MAXTIMESTEP = Math.max(board.MAXTIMESTEP, 500);
-                
+
         }
     }
 
@@ -772,7 +782,7 @@ public class Tournament {
 
 
                     // all scenarios
-                    for (int sc = 1; sc < NUMSCENARIOS; sc++) {
+                    for (int sc = 1; sc < NUMSCENARIOS && exitRequested==false; sc++) {
                         Tournament t = run(p, repeats, false, sc, false);
                         totalHighscore.addHighScore(t.highscore);
                         if (scenarioHighScore[sc] == null) {
@@ -856,8 +866,8 @@ public class Tournament {
         } else {
             if (players.size() > 0) {
 
-                    was.Tournament.run(players, r, ui, sc, true); // m, n, k,
-                
+                was.Tournament.run(players, r, ui, sc, true); // m, n, k,
+
             } else {
                 System.err.println("Usage: java -jar WolvesAndSheep.jar -t M,N,K -r R CLASS1 CLASS2 CLASS3 CLASS4 CLASS5 (...)");
                 //System.err.println("       -t M,N,K  ==> play a M*N board with K sheep.");
