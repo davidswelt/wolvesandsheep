@@ -504,7 +504,7 @@ public class GameBoard {
     /**
      * Calculates distance that a certain game piece is allowed to movePlayer
      *
-     * @param g: GameBoard.GamePiece, e.g., GameBoard.GamePiece.SHEEP
+     * @param g GameBoard.GamePiece, e.g., GameBoard.GamePiece.SHEEP
      * @return distance in steps
      */
     public double allowedMoveDistance(GamePiece g) {
@@ -520,7 +520,7 @@ public class GameBoard {
     /**
      * Gets distance that a certain player is allowed to movePlayer
      *
-     * @param p: player
+     * @param p player
      * @return distance in steps
      */
     public double allowedMoveDistance(Player p) {

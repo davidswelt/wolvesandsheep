@@ -315,12 +315,12 @@ public class Tournament {
     /**
      * Create a new tournament and run it.
      *
-     * @param listofPlayerClassNames: String of comma-separated, fully qualified
+     * @param listofPlayerClassNames String of comma-separated, fully qualified
      * classnames of players, e.g. "smith.Sheep,smith.Sheep,smith.Sheep,
      * reitter.SheepPlayer,reitter.WolfPlayer". Needs a minimum number of
      * players. Repeat player class names if necessary.
      *
-     * @param repeats: number of repetitions
+     * @param repeats number of repetitions
      */
     static public void run(String listofPlayerClassNames, int repeats) {
 
@@ -332,7 +332,7 @@ public class Tournament {
     /**
      * creates and runs a tournament, printing the results.
      *
-     * @param playerClasses: Array of classes of players. Each player has to
+     * @param playerClasses Array of classes of players. Each player has to
      * implement the was.Player interface.
      * @param r number of repetitions to run
      */
@@ -346,12 +346,13 @@ public class Tournament {
     /**
      * creates and runs a tournament, printing the results.
      *
-     * @param playerClasses: Array of classes of players. Each player has to
+     * @param playerClasses Array of classes of players. Each player has to
      * implement the was.Player interface.
-     * @param k number of pieces in a row required to win
      * @param r number of repetitions to run
      * @param ui true if UI is to be shown
      * @param scenario number of the scenario to be used
+     * @param comb true if the tournament should test all combinations of the players.
+     *     Otherwise, all given players will be added to the game board at once.
      */
     static public Tournament run(List<Class> playerClasses, int r, boolean ui, int scenario, boolean comb) {
 

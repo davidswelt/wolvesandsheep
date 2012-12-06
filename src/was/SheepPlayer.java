@@ -36,7 +36,7 @@ public abstract class SheepPlayer extends Player {
     }
     /**
      * Get specific other sheep in the game.
-     * @param className: name of the class defining the sheep to be 
+     * @param className name of the class defining the sheep to be 
      *                   obtained, e.g. "smith.Sheep"
      * @return a list of player objects (all sheep of this class)
      */
@@ -59,7 +59,7 @@ public abstract class SheepPlayer extends Player {
      * Gets a shared property (any object) associated with a key.
      * The property is shared among all sheep in a team.
      * Properties are empty at the beginning of each game.
-     * @param key: string giving the key for lookup
+     * @param key string giving the key for lookup
      * @return the value, if any, of null if the property is not set.
      */
     protected Object getWhiteboardProperty(String key)
@@ -69,8 +69,8 @@ public abstract class SheepPlayer extends Player {
     /**
      * Sets a shared property (any object) associated with a key.
      * The property is shared among all sheep in a team.
-     * @param key: string giving the key for lookup (case-sensitive)
-     * @param value: any object to be associated with the key.
+     * @param key string giving the key for lookup (case-sensitive)
+     * @param value any object to be associated with the key.
      * @return the value, if any, of null if the property is not set.
      */
     protected Object setWhiteboardProperty(String key, Object value)
