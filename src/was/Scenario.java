@@ -182,7 +182,7 @@ public class Scenario {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final SecretScenario other = (SecretScenario) obj;
+        final Scenario other = (Scenario) obj;
         if (this.requested != other.requested) {
             return false;
         }
@@ -233,9 +233,9 @@ public class Scenario {
 
                 }
             } catch (InstantiationException ex) {
-                Logger.getLogger(SecretScenario.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(Scenario.class.getName()).log(Level.SEVERE, null, ex);
             } catch (IllegalAccessException ex) {
-                Logger.getLogger(SecretScenario.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(Scenario.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
