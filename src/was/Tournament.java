@@ -220,7 +220,7 @@ public class Tournament {
      */
     static public void run(List<Class> playerClasses, int r) {
 
-        run(playerClasses, r, false, new ExamScenario(0), true);
+        run(playerClasses, r, false, Scenario.makeScenario(0), true);
     }
 
     /**
@@ -235,7 +235,7 @@ public class Tournament {
      * players. Otherwise, all given players will be added to the game board at
      * once.
      */
-    static public Tournament run(List<Class> playerClasses, int r, boolean ui, ExamScenario scenario, boolean comb) {
+    static public Tournament run(List<Class> playerClasses, int r, boolean ui, Scenario scenario, boolean comb) {
 
         Tournament t;
 
@@ -262,7 +262,7 @@ public class Tournament {
      * starts the tournament.
      *
      */
-    TreeMap<String, Double> start(boolean printHighscores, ExamScenario scenario, int repeats, boolean combinations) {
+    TreeMap<String, Double> start(boolean printHighscores, Scenario scenario, int repeats, boolean combinations) {
 
 // check players
 
@@ -322,7 +322,7 @@ public class Tournament {
         return count;
     }
 
-    void startT(boolean printHighscores, List<Integer> selectedPlayers, ExamScenario scenario, int repeats) {
+    void startT(boolean printHighscores, List<Integer> selectedPlayers, Scenario scenario, int repeats) {
 // 
         try {
             // reached number of sheep (plus wolf), or have selected all available players
@@ -483,7 +483,7 @@ public class Tournament {
 
         HighScore totalHighscore = new HighScore().setTitle("total");
        
-        Map<ExamScenario, HighScore> scenarioHighScore = new HashMap();
+        Map<Scenario, HighScore> scenarioHighScore = new HashMap();
 
         minNumSheepRequiredToRun = 1;
         minNumWolvesRequiredToRun = 1;
@@ -517,10 +517,10 @@ public class Tournament {
 
 
                     // all scenarios
-                    for (int sp : ExamScenario.scenarioParameterValues)
+                    for (int sp : Scenario.scenarioParameterValues)
                     {
-                        ExamScenario sc = new ExamScenario(sp);
-                    //for (int sc = 1; sc < ExamScenario.NUMSCENARIOS && exitRequested==false; sc++) {
+                        Scenario sc = Scenario.makeScenario(sp);
+                    //for (int sc = 1; sc < Scenario.NUMSCENARIOS && exitRequested==false; sc++) {
                         Tournament t = run(p, repeats, false, sc, false);
                         totalHighscore.addHighScore(t.highscore);
                         if (scenarioHighScore.get(sc) == null) {
@@ -555,7 +555,7 @@ public class Tournament {
 //
 //        for (int sc = 1; sc < NUMSCENARIOS; sc++) {
 //            if (scenarioHighScore[sc] != null) {
-//                System.out.println("ExamScenario " + sc);
+//                System.out.println("Scenario " + sc);
 //                scenarioHighScore[sc].printByCategory();
 //            }
 //        }
@@ -623,7 +623,7 @@ public class Tournament {
         } else {
             if (players.size() > 0) {
 
-                was.Tournament.run(players, r, ui, new ExamScenario(sc), tourn); // m, n, k,
+                was.Tournament.run(players, r, ui, Scenario.makeScenario(sc), tourn); // m, n, k,
 
             } else {
                 System.err.println("Usage: java -jar WolvesAndSheep.jar -t M,N,K -r R CLASS1 CLASS2 CLASS3 CLASS4 CLASS5 (...)");

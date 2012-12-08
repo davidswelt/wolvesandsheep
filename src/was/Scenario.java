@@ -19,16 +19,28 @@ import java.util.logging.Logger;
  * @author dr
  */
 public class Scenario {
-    static List<Integer> scenarioParameterValues;
-    Random rand = new Random();
-    int requested = 0;
 
+    static List<Integer> scenarioParameterValues;
+    static Random rand = new Random();
+    int requested = 0;
     GameBoard tmpGb = null;
 
     {
-      scenarioParameterValues =  new ArrayList(Arrays.asList(1, 2, 3, 4, 5, 6, 7));
+        scenarioParameterValues = new ArrayList(Arrays.asList(1, 2, 3, 4, 5, 6, 7));
     }
-    public Scenario() {
+
+    protected Scenario() {
+    }
+
+    static Scenario makeScenario(int requestedScenario) {
+        //Scenario sc = new SecretScenario();
+        Scenario sc = new Scenario();
+        sc.requested = requestedScenario;
+        // any parametrization should happen here
+        if (sc.requested == 0) {
+            sc.requested = scenarioParameterValues.get(rand.nextInt(scenarioParameterValues.size()));
+        }
+        return sc;
     }
 
     void addToBoard(GameBoard board, Stack<GameLocation> wolfP, Stack<GameLocation> sheepP) {
@@ -150,7 +162,7 @@ public class Scenario {
                 grey(-2, rows / 2 + 2);
                 board.MAXTIMESTEP = Math.max(board.MAXTIMESTEP, 500);
                 break;
-            
+
         }
     }
 
@@ -170,7 +182,7 @@ public class Scenario {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final ExamScenario other = (ExamScenario) obj;
+        final SecretScenario other = (SecretScenario) obj;
         if (this.requested != other.requested) {
             return false;
         }
@@ -188,9 +200,9 @@ public class Scenario {
     GameLocation loc(double x, double y) {
         int xx = (int) x; // Math.max(0, Math.min(tmpGb.getCols()-1, (int) (x*(scale/inputscale))));
         int yy = (int) y; // Math.max(0, Math.min(tmpGb.getRows()-1, (int) (y*(scale/inputscale))));
-        
+
         xx = normX(xx);
-        yy = normY(yy); 
+        yy = normY(yy);
         if (tmpGb.isEmptyCell(xx, yy)) {
             return new GameLocation(xx, yy);
         } else {
@@ -218,12 +230,12 @@ public class Scenario {
             try {
                 if (tmpGb.isEmptyCell(l.x, l.y)) {
                     tmpGb.addPlayer((Player) p.newInstance(), l);
-                  
+
                 }
             } catch (InstantiationException ex) {
-                Logger.getLogger(ExamScenario.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(SecretScenario.class.getName()).log(Level.SEVERE, null, ex);
             } catch (IllegalAccessException ex) {
-                Logger.getLogger(ExamScenario.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(SecretScenario.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
@@ -232,5 +244,4 @@ public class Scenario {
     public String toString() {
         return "Sc." + requested;
     }
-    
 }
