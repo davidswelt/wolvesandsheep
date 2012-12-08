@@ -2,16 +2,12 @@ package was;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.text.CollationKey;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.Set;
 import java.util.Stack;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
@@ -36,7 +32,8 @@ public class Tournament {
     static int minNumSheepRequiredToRun = 0;  // run won't start a game otherwise
     static int minNumWolvesRequiredToRun = 0;
     static boolean exitRequested = false;
-
+    static boolean pauseInitially = false;
+    
     static Class name2class(String name, String postfix) {
         // we'll try different variants
 
@@ -69,7 +66,7 @@ public class Tournament {
 
         return c;
     }
-    static HighScore crashLog = new HighScore();
+    static HighScore crashLog = new HighScore().setTitle("crashes");
 
     static void logPlayerCrash(Class pl, Exception ex) {
         crashLog.inc(pl.getName() + ".Crash");
@@ -163,122 +160,6 @@ public class Tournament {
             }
         }
     }
-
-    public static class HighScore extends TreeMap<String, Double> {
-
-        TreeMap<String, Integer> uses = new TreeMap();
-
-        void addHighScore(HighScore other) {
-            for (Map.Entry<String, Integer> e : other.uses.entrySet()) {
-                noteUse(e.getKey(), e.getValue());
-            }
-            for (Map.Entry<String, Double> e : other.entrySet()) {
-                inc(e.getKey(), e.getValue());
-            }
-        }
-
-        void inc(String s) {
-//            System.out.println("increase " + s);
-            inc(s, 1.0);
-        }
-
-        void inc(String s, double by) {
-//            System.out.println("increase " + s + " by " + by);
-            put(s, new Double(get(s) + by));
-        }
-
-        void noteUse(String s) {
-            noteUse(s, 1);
-        }
-
-        void noteUse(String s, int by) {
-            Integer prev = uses.get(s);
-
-            uses.put(s, new Integer(prev == null ? by : prev + by));
-
-        }
-
-        public double get(String s) {
-            Double f = super.get(s);
-            if (f == null) {
-                return 0.0;
-            } else {
-                return f.floatValue();
-            }
-        }
-
-        public double getNormalized(String s) {
-            Double f = super.get(s);
-            if (f == null) {
-                return 0.0;
-            } else {
-                Integer n = uses.get(s);
-                if (n == null || n.equals(0)) {
-                    return f.floatValue();
-                }
-                return f.floatValue() / n;
-            }
-        }
-
-        public void print() {
-            System.out.println("Highscore:");
-            printKeys(new ArrayList(keySet()), false);
-
-        }
-
-        public class TreeValueComparator implements Comparator<String> {
-
-            @Override
-            public int compare(String a, String b) {
-                return ((Double) HighScore.this.getNormalized(a)).compareTo(HighScore.this.getNormalized(b));
-            }
-        };
-
-        public void printKeys(List<String> keys, boolean sorted) {
-
-
-            // sort it
-            Collections.sort(keys, new TreeValueComparator());
-
-            for (String k : keys) {
-                System.out.println(k + ":\t" + String.format("%.3f", getNormalized(k)));
-            }
-        }
-
-        public void printByCategory() {
-            System.out.println("Highscore:");
-
-            Set<String> keys = keySet();
-            Map<String, List<String>> cats = new TreeMap(); // categories
-
-
-            for (String k : keys) {
-                //categories marked with \ or .
-
-                StringTokenizer t = new StringTokenizer(k, (k.contains("\\") ? "\\" : "."));
-
-                String classname;
-                classname = t.nextToken();
-                if (t.hasMoreTokens()) {
-                    classname = t.nextToken();
-                }
-
-                if (cats.get(classname) == null) {
-                    cats.put(classname, new ArrayList());
-                }
-                cats.get(classname).add(k); // add whole key
-            }
-
-            // for each category, print it, sorted
-
-            for (String k : cats.keySet()) {
-                System.out.println();
-                printKeys(cats.get(k), true);
-            }
-
-
-        }
-    }
     AverageScore timing = new AverageScore();
     HighScore highscore = new HighScore();
 
@@ -339,7 +220,7 @@ public class Tournament {
      */
     static public void run(List<Class> playerClasses, int r) {
 
-        run(playerClasses, r, false, 0, true);
+        run(playerClasses, r, false, new ExamScenario(0), true);
     }
 
     /**
@@ -354,26 +235,26 @@ public class Tournament {
      * players. Otherwise, all given players will be added to the game board at
      * once.
      */
-    static public Tournament run(List<Class> playerClasses, int r, boolean ui, int scenario, boolean comb) {
+    static public Tournament run(List<Class> playerClasses, int r, boolean ui, ExamScenario scenario, boolean comb) {
 
         Tournament t;
 
-        if (scenario == 0) {
-            scenario = random.nextInt(NUMSCENARIOS - 1) + 1;
-        }
         t = new Tournament(playerClasses, r, ui);
 
         int totalgames = r * playerClasses.size() * Math.max(1, playerClasses.size() - 1) * Math.max(1, playerClasses.size() - 2) * Math.max(1, playerClasses.size() - 3);
 
         System.err.println("Total trials: " + totalgames);
 
+        
+        
         try {
             t.start(totalgames > 100000, scenario, r, comb);
         } finally {
-            t.highscore.printByCategory();
+            t.highscore.printByCategory(null);
 //        t.timing.print();
         }
-        System.out.println("____________________________________\n");
+        
+        System.out.print(dividerLine);
         return t;
     }
 
@@ -381,7 +262,7 @@ public class Tournament {
      * starts the tournament.
      *
      */
-    TreeMap<String, Double> start(boolean printHighscores, int scenario, int repeats, boolean combinations) {
+    TreeMap<String, Double> start(boolean printHighscores, ExamScenario scenario, int repeats, boolean combinations) {
 
 // check players
 
@@ -441,7 +322,7 @@ public class Tournament {
         return count;
     }
 
-    void startT(boolean printHighscores, List<Integer> selectedPlayers, int scenario, int repeats) {
+    void startT(boolean printHighscores, List<Integer> selectedPlayers, ExamScenario scenario, int repeats) {
 // 
         try {
             // reached number of sheep (plus wolf), or have selected all available players
@@ -450,13 +331,13 @@ public class Tournament {
 
 
                 for (int r = 0; r < repeats && exitRequested==false; r++) {
-                    GameBoard board = new GameBoard(scenarioBoardSize(scenario), scenarioBoardSize(scenario), boardUI, 80);
+                    GameBoard board = new GameBoard(scenario.boardSize(), scenario.boardSize(), boardUI, 80);
 
 
                     Stack<GameLocation> wolfQueue = new Stack();
                     Stack<GameLocation> sheepQueue = new Stack();
 
-                    addScenario(scenario, board, wolfQueue, sheepQueue); // add scenario first to occupy these spaces
+                    scenario.addToBoard(board, wolfQueue, sheepQueue); // add scenario first to occupy these spaces
 
                     for (Integer i : selectedPlayers) {
                         Stack<GameLocation> queue = isWolf(players.get(i)) ? wolfQueue : sheepQueue;
@@ -496,7 +377,7 @@ public class Tournament {
                         }
 
                         try {
-                            Map<Player, int[]> s = board.playGame();
+                            Map<Player, int[]> s = board.playGame(pauseInitially);
 
                             for (Map.Entry<Player, int[]> score : s.entrySet()) {
                                 Class cl = score.getKey().getClass();
@@ -511,7 +392,7 @@ public class Tournament {
                             if (printHighscores) {
                                 //final String ESC = "\033[";
                                 //System.out.println(ESC + "2J"); 
-                                highscore.printByCategory();
+                                highscore.printByCategory(null);
                             }
                         }
                     }
@@ -579,156 +460,9 @@ public class Tournament {
         // adjust timeout
         //TIMEOUT = (long) ((float) TIMEOUT * (float) Benchmark.runBenchmark());
     }
-    static final int NUMSCENARIOS = 6;
 
-    final static int scenarioBoardSize(int scenario) {
-        switch (scenario) {
-            case 10:
-                return 150;
-        }
-        return 30;
-    }
-
-    final void addScenario(int scenario, GameBoard board, Stack<GameLocation> wolfP, Stack<GameLocation> sheepP) {
-
-        int rows = board.getRows() - 1;
-        int cols = board.getCols() - 1;
-
-
-
-        switch (scenario) {
-            case 1:
-
-                board.addPlayer(new Pasture(), new GameLocation(1, 1));
-                board.addPlayer(new Pasture(), new GameLocation(1, 2));
-                board.addPlayer(new Pasture(), new GameLocation(2, 2));
-                board.addPlayer(new Obstacle(), new GameLocation(15, 15));
-                board.addPlayer(new Obstacle(), new GameLocation(16, 15));
-                break;
-            case 2:
-
-                board.addPlayer(new Pasture(), new GameLocation(28, 1));
-                board.addPlayer(new Pasture(), new GameLocation(27, 1));
-                board.addPlayer(new Pasture(), new GameLocation(29, 1));
-                board.addPlayer(new Obstacle(), new GameLocation(15, rows));
-                board.addPlayer(new Obstacle(), new GameLocation(16, rows));
-                board.addPlayer(new Obstacle(), new GameLocation(14, rows));
-                break;
-            case 3:
-
-                board.addPlayer(new Pasture(), new GameLocation(2, 2));
-                board.addPlayer(new Pasture(), new GameLocation(3, 2));
-                board.addPlayer(new Pasture(), new GameLocation(28, 1));
-                board.addPlayer(new Pasture(), new GameLocation(27, 1));
-                board.addPlayer(new Pasture(), new GameLocation(27, 2));
-                board.addPlayer(new Pasture(), new GameLocation(28, 2));
-
-                board.addPlayer(new Obstacle(), new GameLocation(15, rows));
-                board.addPlayer(new Obstacle(), new GameLocation(16, rows));
-                board.addPlayer(new Obstacle(), new GameLocation(14, rows));
-                break;
-            case 4: // this challenges the sheep
-                board.addPlayer(new Pasture(), new GameLocation(1, 1));
-                board.addPlayer(new Pasture(), new GameLocation(1, 2));
-                board.addPlayer(new Pasture(), new GameLocation(2, 1));
-                board.addPlayer(new Pasture(), new GameLocation(2, 2));
-
-
-                board.addPlayer(new Obstacle(), new GameLocation(0, 4));
-                board.addPlayer(new Obstacle(), new GameLocation(1, 4));
-                board.addPlayer(new Obstacle(), new GameLocation(2, 4));
-                board.addPlayer(new Obstacle(), new GameLocation(3, 4));
-                board.addPlayer(new Obstacle(), new GameLocation(4, 3));
-                board.addPlayer(new Obstacle(), new GameLocation(4, 4));
-                board.addPlayer(new Obstacle(), new GameLocation(5, 2));
-                board.addPlayer(new Obstacle(), new GameLocation(5, 3));
-                sheepP.add(new GameLocation(5, 29));
-                sheepP.add(new GameLocation(10, 29));
-                sheepP.add(new GameLocation(20, 29));
-                sheepP.add(new GameLocation(25, 29));
-
-                break;
-            case 5: // this challenges the wolf
-                board.addPlayer(new Pasture(), new GameLocation(1, 1));
-                board.addPlayer(new Pasture(), new GameLocation(1, 2));
-                board.addPlayer(new Pasture(), new GameLocation(2, 1));
-                board.addPlayer(new Pasture(), new GameLocation(2, 2));
-
-
-                board.addPlayer(new Obstacle(), new GameLocation(20, 1));
-                board.addPlayer(new Obstacle(), new GameLocation(20, 2));
-                board.addPlayer(new Obstacle(), new GameLocation(20, 3));
-                board.addPlayer(new Obstacle(), new GameLocation(20, 4));
-                board.addPlayer(new Obstacle(), new GameLocation(20, 5));
-                board.addPlayer(new Obstacle(), new GameLocation(21, 5));
-                board.addPlayer(new Obstacle(), new GameLocation(22, 6));
-                board.addPlayer(new Obstacle(), new GameLocation(23, 7));
-                board.addPlayer(new Obstacle(), new GameLocation(24, 8));
-                board.addPlayer(new Obstacle(), new GameLocation(21, 1));
-                board.addPlayer(new Obstacle(), new GameLocation(21, 2));
-                board.addPlayer(new Obstacle(), new GameLocation(21, 3));
-                board.addPlayer(new Obstacle(), new GameLocation(21, 4));
-                board.addPlayer(new Obstacle(), new GameLocation(21, 6));
-                board.addPlayer(new Obstacle(), new GameLocation(22, 5));
-                board.addPlayer(new Obstacle(), new GameLocation(23, 6));
-                board.addPlayer(new Obstacle(), new GameLocation(24, 7));
-                board.addPlayer(new Obstacle(), new GameLocation(25, 8));
-
-                wolfP.add(new GameLocation(28, 3));
-                break;
-
-            case 6: // sheep starting all with equal distance to the wolf
-
-                wolfP.add(new GameLocation(15, 15));
-                sheepP.add(new GameLocation(10, 15));
-                sheepP.add(new GameLocation(15, 10));
-                sheepP.add(new GameLocation(20, 15));
-                sheepP.add(new GameLocation(15, 20));
-
-                // Pastures are left and right
-
-                board.addPlayer(new Pasture(), new GameLocation(0, 13));
-                board.addPlayer(new Pasture(), new GameLocation(0, 14));
-                board.addPlayer(new Pasture(), new GameLocation(0, 15));
-                board.addPlayer(new Pasture(), new GameLocation(29, 15));
-                board.addPlayer(new Pasture(), new GameLocation(29, 16));
-                board.addPlayer(new Pasture(), new GameLocation(29, 17));
-                board.addPlayer(new Obstacle(), new GameLocation(28, 15));
-                board.addPlayer(new Obstacle(), new GameLocation(2, 15));
-                break;
-            case 10: // big one
-                // works with 15 sheep and 15 wolvs
-                // on a 100x100 board
-                // sheep go in top right corner
-                // wolves go in bottom left corner
-                for (int y = 0; y < 10; y += 2) {
-                    for (int x = 0; x < 8; x += 2) {
-                        sheepP.add(new GameLocation(x, y));
-                    }
-                }
-
-                // wolves: bottom left
-                for (int y = board.getRows() - 1; y > board.getRows() - 10; y -= 2) {
-                    for (int x = 0; x < 8; x += 2) {
-                        sheepP.add(new GameLocation(x, y));
-                    }
-                }
-                Collections.shuffle(sheepP);
-
-                board.addPlayer(new Pasture(), new GameLocation(board.getCols() - 2, 0));
-                board.addPlayer(new Pasture(), new GameLocation(board.getCols() - 1, 0));
-                board.addPlayer(new Pasture(), new GameLocation(board.getCols() - 1, 1));
-                board.addPlayer(new Pasture(), new GameLocation(board.getCols() - 1, board.getCols() / 2));
-                board.addPlayer(new Obstacle(), new GameLocation(board.getCols() - 1, board.getCols() / 2 - 1));
-                board.addPlayer(new Obstacle(), new GameLocation(board.getCols() - 1, board.getCols() / 2 + 1));
-                board.addPlayer(new Obstacle(), new GameLocation(board.getCols() - 2, board.getCols() / 2 - 2));
-                board.addPlayer(new Obstacle(), new GameLocation(board.getCols() - 2, board.getCols() / 2 + 2));
-
-                board.MAXTIMESTEP = Math.max(board.MAXTIMESTEP, 500);
-
-        }
-    }
-
+    static String dividerLine = "__________________________________________________________________________________________\n\n";
+    
     public static void ist240(int repeats) {
         String[] sheepteams = new String[]{
             "Black Sheep:CHHITH,GEISER,HAFAIRI,HOFBAUER",
@@ -747,8 +481,9 @@ public class Tournament {
             "Meat Eater:REITTER,REITTER,REITTER"
         };
 
-        HighScore totalHighscore = new HighScore();
-        HighScore[] scenarioHighScore = new HighScore[NUMSCENARIOS];
+        HighScore totalHighscore = new HighScore().setTitle("total");
+       
+        Map<ExamScenario, HighScore> scenarioHighScore = new HashMap();
 
         minNumSheepRequiredToRun = 1;
         minNumWolvesRequiredToRun = 1;
@@ -782,35 +517,48 @@ public class Tournament {
 
 
                     // all scenarios
-                    for (int sc = 1; sc < NUMSCENARIOS && exitRequested==false; sc++) {
+                    for (int sp : ExamScenario.scenarioParameterValues)
+                    {
+                        ExamScenario sc = new ExamScenario(sp);
+                    //for (int sc = 1; sc < ExamScenario.NUMSCENARIOS && exitRequested==false; sc++) {
                         Tournament t = run(p, repeats, false, sc, false);
                         totalHighscore.addHighScore(t.highscore);
-                        if (scenarioHighScore[sc] == null) {
-                            scenarioHighScore[sc] = new HighScore();
+                        if (scenarioHighScore.get(sc) == null) {
+                            scenarioHighScore.put(sc, new HighScore().setTitle(sc.toString()));
                         }
-                        scenarioHighScore[sc].addHighScore(t.highscore);
+                        scenarioHighScore.get(sc).addHighScore(t.highscore);
+                        if (exitRequested)
+                        {
+                            break;
+                        }
                     }
-                    totalHighscore.printByCategory();
+                    totalHighscore.printByCategory(null);
 
                 }
             }
         }
 
+        System.out.print(dividerLine);
         System.out.println("IST240 Tournament results:");
-        totalHighscore.printByCategory();
+        for (String s: sheepteams) System.out.println(s);
+        for (String s: wolves) System.out.println(s);
+        System.out.println("\n");
+                
+        totalHighscore.printByCategory(scenarioHighScore.values());
 
+        System.out.print(dividerLine);
         System.out.println("Player Crashes:");
-        crashLog.printByCategory();
+        crashLog.printByCategory(null);
 
-
-        System.out.println("Highscore by scenario:");
-
-        for (int sc = 1; sc < NUMSCENARIOS; sc++) {
-            if (scenarioHighScore[sc] != null) {
-                System.out.println("Scenario " + sc);
-                scenarioHighScore[sc].printByCategory();
-            }
-        }
+        System.out.println(dividerLine);
+//        System.out.println("Highscore by scenario:");
+//
+//        for (int sc = 1; sc < NUMSCENARIOS; sc++) {
+//            if (scenarioHighScore[sc] != null) {
+//                System.out.println("ExamScenario " + sc);
+//                scenarioHighScore[sc].printByCategory();
+//            }
+//        }
 
     }
 
@@ -824,7 +572,8 @@ public class Tournament {
         int sc = 0; // random scenario
         boolean ui = true;
         boolean run240 = false;
-
+        boolean tourn = false;
+        
         // parse the command line
         int i = 0;
         while (i < args.length) {
@@ -855,7 +604,15 @@ public class Tournament {
 
                 sc = Integer.parseInt(args[i++]);
 
-            } else {
+            } else if (s.equals("-t")) {
+
+                tourn = true;
+
+            }else if (s.equals("-p")) {
+
+                pauseInitially = true;
+
+            }else {
                 players.add(name2class(s, ""));
             }
         }
@@ -866,14 +623,16 @@ public class Tournament {
         } else {
             if (players.size() > 0) {
 
-                was.Tournament.run(players, r, ui, sc, true); // m, n, k,
+                was.Tournament.run(players, r, ui, new ExamScenario(sc), tourn); // m, n, k,
 
             } else {
                 System.err.println("Usage: java -jar WolvesAndSheep.jar -t M,N,K -r R CLASS1 CLASS2 CLASS3 CLASS4 CLASS5 (...)");
                 //System.err.println("       -t M,N,K  ==> play a M*N board with K sheep.");
                 System.err.println("       -r R      ==> play R repeats of each game.");
-                System.err.println("       -S S      ==> set up scenario no. S (0 for random)");
+                System.err.println("       -s S      ==> set up scenario no. S (0 for random)");
+                System.err.println("       -t        ==> play a tournament of all combinations of players (4 sheep, one wolf)");
                 System.err.println("       -e        ==> ignore player's exceptions");
+                System.err.println("       -p        ==> pause initially if using graphical UI");
                 System.err.println("       -c        ==> do not show the graphical user interface ");
                 System.err.println("Example: java -jar WolvesAndSheep.jar -r 10 players.BasicSheep players.BasicWolf players.BasicSheep players.BasicSheep players.BasicSheep");
                 System.err.println("Example for NetBeans (Run Configuration, Program arguments): -r 10 players.BasicSheep players.BasicWolf players.BasicSheep players.BasicSheep players.BasicSheep");
