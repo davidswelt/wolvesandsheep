@@ -85,7 +85,8 @@ public abstract class Player {
         if (this.gb == null) {
             this.gb = gb;
         } else {
-            throw new RuntimeException("Player's gameboard is already set.  Player added twice?");
+            // this may happen when gameboard is scaled
+            //  throw new RuntimeException("Player's gameboard is already set.  Player added twice?");
         }
     }
 

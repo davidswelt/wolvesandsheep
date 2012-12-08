@@ -571,7 +571,7 @@ public class GameBoard {
         return !(getSheepPositions().size() > 0 && currentTimeStep < MAXTIMESTEP);
     }
 
-    Map<Player, int[]> playGame() {
+    Map<Player, int[]> playGame(boolean pauseInitially) {
 
 
         // initialize the players
@@ -590,7 +590,11 @@ public class GameBoard {
                 // we're not calling make movePlayer
 
                 wasgamegrid.doRun();
-
+                if (pauseInitially)
+                {
+                wasgamegrid.doPause();
+                }
+                
                 // the JGameGrid version will spawn a separate thread,
                 // so we'll wait for it to finish:
 

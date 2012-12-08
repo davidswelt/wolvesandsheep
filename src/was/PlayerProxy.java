@@ -128,7 +128,11 @@ class PlayerProxy extends Actor {
 
         setX(target_x);
         setY(target_y);
-
+        
+        if (player instanceof WolfPlayer || player instanceof SheepPlayer)
+        {
+            
+        
         // update the polygon
 
         ch.aplu.jgamegrid.GGBackground bg = getBackground();
@@ -147,6 +151,7 @@ class PlayerProxy extends Actor {
                 bg.setFont(new Font("TimesRoman", Font.PLAIN, 12));
                 bg.drawText(player.shortName(), new Point(pt.x + 5, pt.y));
             }
+        }
         }
 //    if (!isMoveValid())
 //      turn(180);
