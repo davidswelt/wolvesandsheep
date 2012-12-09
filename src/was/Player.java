@@ -26,34 +26,29 @@ public abstract class Player {
     GameBoard gb = null;
     private int x = 0, y = 0;
     String team;
-    
     static boolean catchExceptions = false;
-
     static boolean logToFile = false;
     PrintStream logstream = null;
 
     public Player() {
-        String filename = getClass().getName() + ".log";
-        
-        try {
-            logstream = new PrintStream(new FileOutputStream(filename, true));
-        } 
-        catch (FileNotFoundException ex) {
-            System.err.println("can't output to " + filename);
+        if (logToFile) {
+            String filename = getClass().getName() + ".log";
 
+            try {
+                logstream = new PrintStream(new FileOutputStream(filename, true));
+            } catch (FileNotFoundException ex) {
+                System.err.println("can't output to " + filename);
+
+            }
         }
 
-
     }
-    
+
     /**
-     * Called when the game is over.
-     * The player may do any cleanup here.
+     * Called when the game is over. The player may do any cleanup here.
      */
-    void finished ()
-    {
-        if (logstream != null)
-        {
+    void finished() {
+        if (logstream != null) {
             logstream.close();
             logstream = null;
         }
@@ -196,7 +191,7 @@ public abstract class Player {
                 LOG("Player " + this.getClass().getName() + " runtime exception " + ex);
                 Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex);
                 Tournament.logPlayerCrash(this.getClass(), ex);
-                  
+
                 m = null;
             } else {
                 throw ex;
