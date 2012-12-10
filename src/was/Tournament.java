@@ -3,11 +3,13 @@ package was;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.SortedMap;
 import java.util.Stack;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
@@ -466,8 +468,8 @@ public class Tournament {
     public static void ist240(int repeats) {
         String[] sheepteams = new String[]{
             "Black Sheep:CHHITH,GEISER,HAFAIRI,HOFBAUER",
-            "Creepy Sheepies:CONTINO,GARRITY,HOFFMAN,TAILOR", // SCONTINO
-            "Dolly's Den:DERHAMMER,DERHAMMER,CHAN,CHAN", //TUBERGEN  // BROADWATER
+            "Creepy Sheepies:CONTINO,GARRITY,HOFFMAN,TAILOR", // 
+            "Dolly's Den:DERHAMMER,DERHAMMER,CHAN,CHAN", //TUBERGEN  // BROADWATER   MUST REPEAT MISSING STUDENTS (4 sheep guaranteed)
             "White Sheep:BONCHONSKY,HE,SUON,USCAMAYTA",
             "Nervous Wreck:REITTER,REITTER,REITTER,REITTER"
         };
@@ -478,12 +480,12 @@ public class Tournament {
             "Furry Fury:REIZNER,SICINSKI,ZIELENSKI",
             "The Gray:NORANTE,RAUGH,ULIANA",
             "Wolf in Sheep's Clothing:GREENE,WILKINSON,YOSUA",
-            "Meat Eater:REITTER,REITTER,REITTER"
+            "Meat Eater:REITTER"
         };
 
         HighScore totalHighscore = new HighScore().setTitle("total");
        
-        Map<Scenario, HighScore> scenarioHighScore = new HashMap();
+        Map<String, HighScore> scenarioHighScore = new TreeMap();
 
         minNumSheepRequiredToRun = 1;
         minNumWolvesRequiredToRun = 1;
@@ -517,16 +519,16 @@ public class Tournament {
 
 
                     // all scenarios
-                    for (int sp : Scenario.scenarioParameterValues)
+                    for (int sp : Scenario.getParameterValues())
                     {
                         Scenario sc = Scenario.makeScenario(sp);
                     //for (int sc = 1; sc < Scenario.NUMSCENARIOS && exitRequested==false; sc++) {
                         Tournament t = run(p, repeats, false, sc, false);
                         totalHighscore.addHighScore(t.highscore);
-                        if (scenarioHighScore.get(sc) == null) {
-                            scenarioHighScore.put(sc, new HighScore().setTitle(sc.toString()));
+                        if (scenarioHighScore.get(sc.toString()) == null) {
+                            scenarioHighScore.put(sc.toString(), new HighScore().setTitle(sc.toString()));
                         }
-                        scenarioHighScore.get(sc).addHighScore(t.highscore);
+                        scenarioHighScore.get(sc.toString()).addHighScore(t.highscore);
                         if (exitRequested)
                         {
                             break;
@@ -543,7 +545,7 @@ public class Tournament {
         for (String s: sheepteams) System.out.println(s);
         for (String s: wolves) System.out.println(s);
         System.out.println("\n");
-                
+           
         totalHighscore.printByCategory(scenarioHighScore.values());
 
         System.out.print(dividerLine);
