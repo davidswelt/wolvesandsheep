@@ -20,25 +20,40 @@ import java.util.logging.Logger;
  */
 public class Scenario {
 
-    static List<Integer> scenarioParameterValues;
+    //protected static List<Integer> scenarioParameterValues;
     static Random rand = new Random();
     int requested = 0;
     GameBoard tmpGb = null;
 
-    {
-        scenarioParameterValues = new ArrayList(Arrays.asList(1, 2, 3, 4, 5, 6, 7));
-    }
-
+    static List<Integer> parmValues = new ArrayList(Arrays.asList(1, 2, 3, 4, 5, 6, 7));
     protected Scenario() {
+    }
+    static List<Integer> getParameterValues() {
+        // to do: should maybe aggregate the parm values here
+       
+//            return SecretScenario.getParameterValues();
+          
+        return parmValues;
     }
 
     static Scenario makeScenario(int requestedScenario) {
-        //Scenario sc = new SecretScenario();
-        Scenario sc = new Scenario();
+        Scenario sc = null;
+        try {
+
+            sc = (Scenario) Class.forName("SecretScenario").newInstance();
+        } catch (InstantiationException ex) {
+        } catch (IllegalAccessException ex) {
+        } catch (ClassNotFoundException ex) {
+        }
+
+        // backup
+        if (sc == null) {
+            sc = new Scenario();
+        }
         sc.requested = requestedScenario;
         // any parametrization should happen here
         if (sc.requested == 0) {
-            sc.requested = scenarioParameterValues.get(rand.nextInt(scenarioParameterValues.size()));
+            sc.requested = getParameterValues().get(rand.nextInt(getParameterValues().size()));
         }
         return sc;
     }
@@ -188,6 +203,16 @@ public class Scenario {
         }
         return true;
     }
+
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 97 * hash + this.requested;
+        hash = 97 * hash + this.getClass().hashCode();
+        return hash;
+    }
+
+    
 
     void green(int x, int y) {
         setFigure(Pasture.class, x, y);
