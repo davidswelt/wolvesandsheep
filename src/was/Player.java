@@ -180,7 +180,7 @@ public abstract class Player {
 
         try {
 
-            if (logstream != null) {
+            if (logstream != null && logToFile) {
                 System.setOut(logstream);
                 System.setErr(logstream);
             }
@@ -197,7 +197,7 @@ public abstract class Player {
                 throw ex;
             }
         } finally {
-            if (logstream != null) {
+            if (logstream != null && logToFile) {
                 System.setOut(prevOutStream);
                 System.setErr(prevErrStream);
             }
@@ -211,7 +211,7 @@ public abstract class Player {
             if (m.length() > 0.1) {
 //            System.err.println("Len: "+m.length()+" maxallowed: "+ maxAllowedDistance);
                 if (m.length() > maxAllowedDistance + 0.000005) {
-                    System.err.println(this.getClass() + " - illegal move: too long! " + m.length() + " > " + maxAllowedDistance);
+                    System.err.println(this.getClass() + " - illegal move: too long! " +m+": " + m.length() + " > " + maxAllowedDistance);
                     // trim move
                     m = m.scaledToLength(maxAllowedDistance);
                 }
