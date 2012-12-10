@@ -97,7 +97,9 @@ public class HighScore extends TreeMap<String, Double> {
     String title = "";
 
     String leftAlign(String s, int a) {
-        return String.format("%" + a + "s%s", "", s);
+        return
+        (a-s.length()>0 ? String.format("%" + (a-s.length()) + "s", "") : "")
+                + String.format("%s", s);
     }
 
     String rightAlign(String s, int a) {
