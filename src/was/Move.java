@@ -37,7 +37,7 @@ public class Move {
             double ratio = length() / length;
             return new Move((delta_x / ratio ), (delta_y / ratio ));
     }
-    static int roundUp (double a)
+    static protected int roundUp (double a)
     {
         if ((int) a == a)
             return (int) a;
@@ -48,10 +48,11 @@ public class Move {
         return (int) (a+(a>0?1.0:-1.0));
         
     }
-    static int roundDown (double a)
+    static protected int roundDown (double a)
     {
         return (int) a;
     }
+    
     /**
      * Converts move to integer
      * Attempts to round up/down so that length is as close as possible to maxLen
