@@ -1,8 +1,5 @@
 package was;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 /**
  * Test of the player
  *
@@ -10,22 +7,29 @@ import java.util.logging.Logger;
  */
 public class PlayerTest {
 
-    public static boolean runTest(Class playerClass) {
+    public static boolean runTest(Class playerClass, HighScore log) {
         try {
+            String str;
             boolean isWolf;
             if (Class.forName("was.SheepPlayer").isAssignableFrom(playerClass)) {
                 isWolf = false;
             } else if (Class.forName("was.WolfPlayer").isAssignableFrom(playerClass)) {
                 isWolf = true;
             } else {
-                System.err.println("Class is neither derived from was.WolfPlayer nor from was.SheepPlayer.");
+                str = String.format("Class %s is neither derived from was.WolfPlayer nor from was.SheepPlayer.\n", playerClass.getName());
+                log.inc(str);
+                System.err.println(str);
                 return false;
             }
             if (Class.forName("reitter.Wolf").isAssignableFrom(playerClass) && Class.forName("reitter.Wolf") != playerClass) {
-                System.err.println("Class inherits from reitter.Wolf.");
+                str = String.format("Class %s inherits from reitter.Wolf.\n", playerClass.getName());
+                log.inc(str);
+                System.err.println(str);
                 return false;
             } else if (Class.forName("reitter.Sheep").isAssignableFrom(playerClass)&& Class.forName("reitter.Sheep") != playerClass) {
-                System.err.println("Class inherits from reitter.Wolf.");
+                str = String.format("Class %s inherits from reitter.Sheep.\n", playerClass.getName());
+                log.inc(str);
+                System.err.println(str);
                 return false;
             }
             return true;
@@ -35,7 +39,7 @@ public class PlayerTest {
         }
     }
 
-    public static boolean runTest(String playerClassStr) {
+    public static boolean runTest(String playerClassStr, HighScore log) {
 
         // wolf or sheep?
         boolean isWolf;
@@ -54,13 +58,14 @@ public class PlayerTest {
         }
 
         if (playerClass == null) {
-            System.err.println("Class coud not be found in supplied jar file: " + playerClassStr);
+            log.inc("Class coud not be found in supplied jar files: " + playerClassStr);
+            System.err.println("Class coud not be found in supplied jar files: " + playerClassStr);
             System.err.println("Did you give it in the form of packagename.classname?");
             System.err.println("Did you put your class in the right package?");
             System.err.println("Did you make sure the package is included?");
             return false;
         }
-        return runTest(playerClass);
+        return runTest(playerClass, log);
 
     }
 
@@ -72,7 +77,7 @@ public class PlayerTest {
             String s = args[i++];
 
             System.err.println("Testing " + s);
-            if (runTest(s)) {
+            if (runTest(s, new HighScore())) {
                 System.err.println("Class passed the test.");
             } else {
                 System.err.println("Class failed the test.");
