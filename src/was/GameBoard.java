@@ -147,8 +147,8 @@ public class GameBoard {
             System.err.println("Wolf is now at " + wl);
         }
 
-        wolf.isEating();
-        sheep.isBeingEaten();
+        wolf.callIsEating();
+        sheep.callIsBeingEaten();
 
         wolf.keepBusyFor(wolfEatingTime);
 

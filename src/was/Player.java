@@ -32,7 +32,7 @@ public abstract class Player {
 
     public Player() {
         if (logToFile) {
-            String filename = "log/"+getClass().getName() + ".log";
+            String filename = "log/" + getClass().getName() + ".log";
 
             try {
                 logstream = new PrintStream(new FileOutputStream(filename, true));
@@ -162,17 +162,8 @@ public abstract class Player {
     }
     // called by PlayerProxy
 
-    final Move calcMove() {
-
-        if (isBusy()) {
-
-            return null; // can't make a move
-        }
-
-        Move m;
-
-        // redirect output if needed
-
+    final Object callPlayerFunction(int fn) {
+        Object m = null; // return var
 
         PrintStream prevErrStream = System.err;
         PrintStream prevOutStream = System.out;
@@ -184,8 +175,24 @@ public abstract class Player {
                 System.setOut(logstream);
                 System.setErr(logstream);
             }
+            switch (fn) {
+                case 0:
+                    m = move(); // move is defined by extending class
+                    break;
+                case 2:
+                    m = null;
+                    if (this instanceof SheepPlayer) {
+                        ((SheepPlayer) this).isBeingEaten();
+                    }
+                    break;
+                case 3:
+                    m = null;
+                    if (this instanceof WolfPlayer) {
+                        ((WolfPlayer) this).isEating();
+                    }
+                    break;
+            }
 
-            m = move(); // move is defined by extending class
         } catch (RuntimeException ex) {
             if (catchExceptions) {
                 LOG("Player " + this.getClass().getName() + " runtime exception " + ex);
@@ -203,6 +210,31 @@ public abstract class Player {
             }
 
         }
+        return m;
+
+    }
+
+    final void callIsBeingEaten() {
+        callPlayerFunction(2);
+    }
+
+    final void callIsEating() {
+        callPlayerFunction(3);
+    }
+
+    final Move calcMove() {
+
+        if (isBusy()) {
+
+            return null; // can't make a move
+        }
+
+        Move m;
+
+        // redirect output if needed
+
+        m = (Move) callPlayerFunction(0); // call "move"
+
         if (m == null) {
 
             LOG("move() returned null.");
@@ -211,7 +243,12 @@ public abstract class Player {
             if (m.length() > 0.1) {
 //            System.err.println("Len: "+m.length()+" maxallowed: "+ maxAllowedDistance);
                 if (m.length() > maxAllowedDistance + 0.000005) {
-                    System.err.println(this.getClass() + " - illegal move: too long! " +m+": " + m.length() + " > " + maxAllowedDistance);
+                    String str = "illegal move: too long! " + m + ": " + m.length() + " > " + maxAllowedDistance;
+                    System.err.println(this.getClass() + str);
+
+                    Tournament.logPlayerCrash(this.getClass(), new RuntimeException(str));
+
+
                     // trim move
                     m = m.scaledToLength(maxAllowedDistance);
                 }
