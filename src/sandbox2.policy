@@ -1,0 +1,6 @@
+
+grant {
+    permission java.io.FilePermission "log/-", "read,write";
+    permission java.io.FilePermission "pics/*", "read";
+    permission java.lang.RuntimePermission "setIO", "";
+};
