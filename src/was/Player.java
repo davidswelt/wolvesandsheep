@@ -32,7 +32,7 @@ public abstract class Player {
 
     public Player() {
         if (logToFile) {
-            String filename = getClass().getName() + ".log";
+            String filename = "log/"+getClass().getName() + ".log";
 
             try {
                 logstream = new PrintStream(new FileOutputStream(filename, true));
