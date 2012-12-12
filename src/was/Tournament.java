@@ -2,15 +2,12 @@ package was;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.security.Policy;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.SortedMap;
 import java.util.Stack;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
@@ -223,7 +220,7 @@ public class Tournament {
      */
     static public void run(List<Class> playerClasses, int r) {
 
-        run(playerClasses, r, false, Scenario.makeScenario(0), true);
+        run(playerClasses, r, false, Scenario.makeScenario(0), true, true);
     }
 
     /**
@@ -238,7 +235,7 @@ public class Tournament {
      * players. Otherwise, all given players will be added to the game board at
      * once.
      */
-    static public Tournament run(List<Class> playerClasses, int r, boolean ui, Scenario scenario, boolean comb) {
+    static public Tournament run(List<Class> playerClasses, int r, boolean ui, Scenario scenario, boolean comb, boolean printHighScore) {
 
         Tournament t;
 
@@ -246,18 +243,22 @@ public class Tournament {
 
         int totalgames = r * playerClasses.size() * Math.max(1, playerClasses.size() - 1) * Math.max(1, playerClasses.size() - 2) * Math.max(1, playerClasses.size() - 3);
 
-        System.err.println("Total trials: " + totalgames);
+//        System.err.println("Total trials: " + totalgames);
 
 
 
         try {
             t.start(totalgames > 100000, scenario, r, comb);
         } finally {
-            t.highscore.printByCategory(null);
+            if (printHighScore)
+            {
+                t.highscore.printByCategory(null);
+                System.out.print(dividerLine);
+            }
 //        t.timing.print();
         }
 
-        System.out.print(dividerLine);
+        
         return t;
     }
 
@@ -434,7 +435,7 @@ public class Tournament {
 
     Tournament(List<Class> playerClasses, int r, boolean ui) {
         //(Class[] playerClasses, int m, int n, int r) {
-        ;
+        
         boardUI = ui;
 
         // Security Policy
@@ -523,7 +524,7 @@ public class Tournament {
                     for (int sp : Scenario.getParameterValues()) {
                         Scenario sc = Scenario.makeScenario(sp);
                         //for (int sc = 1; sc < Scenario.NUMSCENARIOS && exitRequested==false; sc++) {
-                        Tournament t = run(p, repeats, false, sc, false);
+                        Tournament t = run(p, repeats, false, sc, false, false);
                         totalHighscore.addHighScore(t.highscore);
                         if (scenarioHighScore.get(sc.toString()) == null) {
                             scenarioHighScore.put(sc.toString(), new HighScore().setTitle(sc.toString()));
@@ -645,7 +646,7 @@ public class Tournament {
         } else {
             if (players.size() > 0) {
 
-                was.Tournament.run(players, r, ui, Scenario.makeScenario(sc), tourn); // m, n, k,
+                was.Tournament.run(players, r, ui, Scenario.makeScenario(sc), tourn, true); // m, n, k,
 
             } else {
                 System.err.println("Usage: java -jar WolvesAndSheep.jar -t M,N,K -r R CLASS1 CLASS2 CLASS3 CLASS4 CLASS5 (...)");
