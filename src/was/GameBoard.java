@@ -286,7 +286,10 @@ public class GameBoard {
         
         String str = "";
         for (Player p : players) {
-            str = p.getID()+p.getLocation()+" "+str; // reverse order
+            if (p instanceof WolfPlayer || p instanceof SheepPlayer)
+            {
+                str = p.getID()+p.getLocation()+" "+str; // reverse order
+            }
         }
         System.out.println("Players: "+str);
     }

@@ -492,6 +492,9 @@ public class Tournament {
         minNumSheepRequiredToRun = 1;
         minNumWolvesRequiredToRun = 1;
 
+        int totalRuns = sheepteams.length * wolves.length;
+        int runcount = 1;
+        
         for (String s : sheepteams) { // each sheep team
             String sheepteam = prefix(s);
 
@@ -517,7 +520,7 @@ public class Tournament {
 
                     // randomize order of sheep
                     Collections.shuffle(p);
-                    System.out.println("running");
+                    System.out.printf("running (%s out of %s)\n", runcount++, totalRuns);
 
 
                     // all scenarios
