@@ -1,9 +1,18 @@
 package was;
 
 import ch.aplu.jgamegrid.Actor;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadMXBean;
+import java.util.ArrayList;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -29,6 +38,9 @@ public abstract class Player {
     static boolean catchExceptions = false;
     static boolean logToFile = false;
     PrintStream logstream = null;
+    long totalRunTime = 0;
+    long totalRuns = 0;
+    boolean disqualified = false;
 
     public Player() {
         if (logToFile) {
@@ -42,6 +54,15 @@ public abstract class Player {
             }
         }
 
+    }
+
+    /**
+     * Override this function to keep track of your player's version number
+     *
+     * @return
+     */
+    public double versionNumber() {
+        return 1.0;
     }
 
     /**
@@ -110,7 +131,7 @@ public abstract class Player {
     }
 
     final public String getID() {
-        return getClass().getName() + "." + count;
+        return getClass().getName() + "." + versionNumber() + count;
     }
 
     /**
@@ -162,12 +183,68 @@ public abstract class Player {
     }
     // called by PlayerProxy
 
+    /**
+     * Return the average runtime of this player (all functions)
+     *
+     * @return avg. runtime in milliseconds or 0.0 if no measurements
+     */
+    final public double meanRunTime() {
+        if (totalRuns > 0) {
+            return totalRunTime / totalRuns;
+        } else {
+            return 0.0;
+        }
+    }
+    // we discard a player's move if it takes longer than 2*180 ms.
+    // currently, players are not disqualified.
+    int individualRunFactor = 3;
+    long TIMEOUT = 180;
+
     final Object callPlayerFunction(int fn) {
         Object m = null; // return var
+
+        if (disqualified) {
+            return null;
+        }
 
         PrintStream prevErrStream = System.err;
         PrintStream prevOutStream = System.out;
 
+        final Player thePlayer = this;
+        final int func = fn;
+
+        FutureTask ft = new FutureTask<Object[]>(new Callable<Object[]>() {
+            @Override
+            public Object[] call() {
+                ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
+                long startTime = threadMXBean.getCurrentThreadCpuTime();
+
+                Object m = null;
+                switch (func) {
+                    case 0:
+                        m = move(); // move is defined by extending class
+                        break;
+                    case 2:
+                        m = null;
+                        if (thePlayer instanceof SheepPlayer) {
+                            ((SheepPlayer) thePlayer).isBeingEaten();
+                        }
+                        break;
+                    case 3:
+                        m = null;
+                        if (thePlayer instanceof WolfPlayer) {
+                            ((WolfPlayer) thePlayer).isEating();
+                        }
+                        break;
+                }
+
+
+                Object[] ret2 = new Object[4];
+                ret2[0] = m;
+                ret2[1] = (long) ((threadMXBean.getCurrentThreadCpuTime() - startTime) / 1000); // nanosec to 1000*millisec
+                return ret2;
+            }
+        });
 
         try {
 
@@ -175,23 +252,55 @@ public abstract class Player {
                 System.setOut(logstream);
                 System.setErr(logstream);
             }
-            switch (fn) {
-                case 0:
-                    m = move(); // move is defined by extending class
-                    break;
-                case 2:
-                    m = null;
-                    if (this instanceof SheepPlayer) {
-                        ((SheepPlayer) this).isBeingEaten();
-                    }
-                    break;
-                case 3:
-                    m = null;
-                    if (this instanceof WolfPlayer) {
-                        ((WolfPlayer) this).isEating();
-                    }
-                    break;
+
+
+
+            ft.run();
+
+            /* I think the timeout in FutureTask refers to clock time, not CPU time.
+             * Thus, we need to allow for a much longer timeout.  This will only catch
+             * cases where a player hangs.  Because we disqualify it in that situation,
+             * we can afford to wait a whole second.
+             */
+            Object[] result = (Object[]) ft.get(1, TimeUnit.SECONDS); // timeout
+
+            /* dur will contain the actual, measured CPU time for the thread. 
+             This is going to be much more accurate. */
+            long dur = (long) result[1];
+            m = (Object) result[0];
+            //timing.add(p.getClass().getName(), (double) dur / 1000.0);
+            // we allow for 5 times the nominal average run time in certain cases
+
+            totalRunTime += dur / 1000;
+            if (func == 0) // only count function 0 runs (others add up)
+            {
+                totalRuns++;
             }
+
+            if (dur > individualRunFactor * TIMEOUT * 1000) {  // convert to 1000*millisec
+                System.err.println("!! Runtime: " + dur / 1000 + "ms."); // convert to millisec.
+                disqualified = true;
+                throw new TimeoutException();
+            }
+            if (dur > TIMEOUT * 1000) {  // convert to 1000*millisec
+                System.err.println("Runtime: " + dur / 1000 + "ms."); // convert to millisec.
+                throw new TimeoutException();
+            }
+        } catch (InterruptedException ex) {
+            Logger.getLogger(Tournament.class.getName()).log(Level.SEVERE, null, ex);
+            Tournament.logPlayerCrash(this.getClass(), ex);
+            //throw new IllegalGameMoveException("makeMove was interrupted.", p, null);
+        } catch (ExecutionException ex) {
+            Logger.getLogger(Tournament.class.getName()).log(Level.SEVERE, null, ex);
+            Tournament.logPlayerCrash(this.getClass(), ex);
+//            throw new IllegalGameMoveException("exception in makeMove.", p, null);
+        } catch (TimeoutException ex) {
+            System.err.println("Player " + thePlayer.getClass().getName() + " timed out " + TIMEOUT + "ms max.");
+            Tournament.logPlayerCrash(this.getClass(), ex);
+            //            int[][] availableMoves = (int[][]) board.getFreeCells();
+            //            int chosen = random.nextInt(availableMoves.length);
+            //            move = availableMoves[chosen];
+//                        disqualifiedPlayers.add(p.getClass());
 
         } catch (RuntimeException ex) {
             if (catchExceptions) {
@@ -243,10 +352,10 @@ public abstract class Player {
             if (m.length() > 0.1) {
 //            System.err.println("Len: "+m.length()+" maxallowed: "+ maxAllowedDistance);
                 if (m.length() > maxAllowedDistance + 0.000005) {
-                    String str = "illegal move: too long! " + m + ": " + m.length() + " > " + maxAllowedDistance;
-                    System.err.println(this.getClass() + str);
+                    // String str = "illegal move: too long! " + m + ": " + m.length() + " > " + maxAllowedDistance;
+                    //System.err.println(this.getClass() + str);
 
-                    Tournament.logPlayerCrash(this.getClass(), new RuntimeException(str));
+                    Tournament.logPlayerCrash(this.getClass(), new RuntimeException("illegal move: too long"));
 
 
                     // trim move
@@ -359,4 +468,18 @@ public abstract class Player {
     final public int hashCode() {
         return count;
     }
+
+    // helper
+    // hack
+//    public long getBuildTime() {
+//        try {
+//            Class cl = getClass();
+//            String rn = cl.getName().replace('.', '/') + ".class";
+//            File path = new File(cl.getResource(rn).getPath());
+//
+//            return path.lastModified();
+//        } catch (Exception e) {
+//            return -1;
+//        }
+//    }
 }

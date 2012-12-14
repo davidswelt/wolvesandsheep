@@ -160,7 +160,7 @@ public class Tournament {
             }
         }
     }
-    AverageScore timing = new AverageScore();
+    HighScore timing = new HighScore();
     HighScore highscore = new HighScore();
 
     static ArrayList<Class> string2classlist(String listofPlayerClassNames, String postfix) {
@@ -250,15 +250,14 @@ public class Tournament {
         try {
             t.start(totalgames > 100000, scenario, r, comb);
         } finally {
-            if (printHighScore)
-            {
+            if (printHighScore) {
                 t.highscore.printByCategory(null);
                 System.out.print(dividerLine);
             }
 //        t.timing.print();
         }
 
-        
+
         return t;
     }
 
@@ -391,6 +390,8 @@ public class Tournament {
 
                                     highscore.inc(teams.get(cl) + (score.getKey() instanceof WolfPlayer ? ".WolfTeam" : ".SheepTeam"), score.getValue()[0]);
                                 }
+                                timing.inc(cl.getName(), score.getKey().meanRunTime());
+                                timing.noteUse(cl.getName());
                             }
                         } finally {
                             if (printHighscores) {
@@ -435,7 +436,7 @@ public class Tournament {
 
     Tournament(List<Class> playerClasses, int r, boolean ui) {
         //(Class[] playerClasses, int m, int n, int r) {
-        
+
         boardUI = ui;
 
         // Security Policy
@@ -447,7 +448,7 @@ public class Tournament {
 
 
         for (Class p : playerClasses) {
-            
+
 
             if (PlayerTest.runTest(p, crashLog)) {
 
@@ -471,30 +472,37 @@ public class Tournament {
         String[] sheepteams = new String[]{
             "Black Sheep:CHHITH,GEISER,HAFAIRI,HOFBAUER",
             "Creepy Sheepies:CONTINO,GARRITY,HOFFMAN,TAILOR", // 
-            "Dolly's Den:DERHAMMER,DERHAMMER,CHAN,CHAN", //TUBERGEN  // BROADWATER   MUST REPEAT MISSING STUDENTS (4 sheep guaranteed)
-            "White Sheep:BONCHONSKY,HE,SUON,USCAMAYTA",
-            "Nervous Wreck:REITTER,REITTER,REITTER,REITTER"
+//            "Dolly's Den:DERHAMMER,DERHAMMER,CHAN,CHAN", //TUBERGEN  // BROADWATER   MUST REPEAT MISSING STUDENTS (4 sheep guaranteed)
+//            "White Sheep:BONCHONSKY,HE,SUON,USCAMAYTA",
+//            "Nervous Wreck:REITTER,REITTER,REITTER,REITTER"
         };
 
         String[] wolves = new String[]{
             "Hungry Beast:MONDELL,MULLEN,MUNOZ",
-            "Lone Hunters:CHEETHAM,KIDNEY,LAFFERTY",
-            "Furry Fury:REIZNER,SICINSKI,ZIELENSKI",
-            "The Gray:NORANTE,RAUGH,ULIANA",
-            "Wolf in Sheep's Clothing:GREENE,WILKINSON,YOSUA",
-            "Meat Eater:REITTER"
+//            "Lone Hunters:CHEETHAM,KIDNEY,LAFFERTY",
+//            "Furry Fury:REIZNER,SICINSKI,ZIELENSKI",
+//            "The Gray:NORANTE,RAUGH,ULIANA",
+//            "Wolf in Sheep's Clothing:GREENE,WILKINSON,YOSUA",
+//            "Meat Eater:REITTER"
         };
 
         HighScore totalHighscore = new HighScore().setTitle("total");
+        HighScore totalTiming = new HighScore().setTitle("timing");
 
         Map<String, HighScore> scenarioHighScore = new TreeMap();
 
         minNumSheepRequiredToRun = 1;
         minNumWolvesRequiredToRun = 1;
 
-        int totalRuns = sheepteams.length * wolves.length;
+        int totalRuns = 0;
+        for (String wteam : wolves) {
+
+            totalRuns += string2classlist(wteam, ".Wolf").size();
+        }
+        totalRuns = totalRuns * sheepteams.length * wolves.length * Scenario.getParameterValues().size();
         int runcount = 1;
-        
+        long startTime = System.currentTimeMillis();
+
         for (String s : sheepteams) { // each sheep team
             String sheepteam = prefix(s);
 
@@ -520,11 +528,21 @@ public class Tournament {
 
                     // randomize order of sheep
                     Collections.shuffle(p);
-                    System.out.printf("running (%s out of %s)\n", runcount++, totalRuns);
 
-
+                    double avgtimeperrun = 0;
+                    if (runcount > Scenario.getParameterValues().size())
+                    {
+                        avgtimeperrun = (System.currentTimeMillis() - startTime) / runcount;
+                    }
                     // all scenarios
                     for (int sp : Scenario.getParameterValues()) {
+
+                        if (avgtimeperrun > 0) {
+                            System.out.printf("running (%s out of %s).  %s mins. left\n", runcount, totalRuns,
+                                    (int) (((totalRuns - runcount) * avgtimeperrun) / 1000 / 60));
+                        }
+                        runcount++;
+                        
                         Scenario sc = Scenario.makeScenario(sp);
                         //for (int sc = 1; sc < Scenario.NUMSCENARIOS && exitRequested==false; sc++) {
                         Tournament t = run(p, repeats, false, sc, false, false);
@@ -533,12 +551,14 @@ public class Tournament {
                             scenarioHighScore.put(sc.toString(), new HighScore().setTitle(sc.toString()));
                         }
                         scenarioHighScore.get(sc.toString()).addHighScore(t.highscore);
+                        totalTiming.addHighScore(t.timing);
+
                         if (exitRequested) {
                             break;
                         }
                     }
                     totalHighscore.printByCategory(null);
-
+                    
                 }
             }
         }
@@ -560,14 +580,10 @@ public class Tournament {
         crashLog.printByCategory(null);
 
         System.out.println(dividerLine);
-//        System.out.println("Highscore by scenario:");
-//
-//        for (int sc = 1; sc < NUMSCENARIOS; sc++) {
-//            if (scenarioHighScore[sc] != null) {
-//                System.out.println("Scenario " + sc);
-//                scenarioHighScore[sc].printByCategory();
-//            }
-//        }
+        totalTiming.printByCategory(null);
+        
+        System.out.println(dividerLine);
+
 
     }
     // static init
