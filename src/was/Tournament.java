@@ -117,49 +117,7 @@ public class Tournament {
         return null;
     }
 
-    class AverageScore extends TreeMap<String, ArrayList<Double>> {
-
-        void add(String s, double by) {
-            ArrayList<Double> f = super.get(s);
-            if (f == null) {
-                f = new ArrayList<Double>();
-                put(s, f);
-            }
-            f.add((Double) by);
-            put(s, f);
-        }
-
-        public double get(String s) {
-            ArrayList<Double> f = super.get(s);
-            if (f == null) {
-                return 0.0;
-            } else {
-                double sum = 0.0;
-                for (Double d : f) {
-                    sum += d.floatValue();
-                }
-                return sum / f.size();
-            }
-        }
-
-        public ArrayList<String> getEntriesGreaterThan(double limit) {
-            ArrayList<String> ret = new ArrayList<String>();
-            for (Map.Entry<String, ?> k : this.entrySet()) {
-                if (get(k.getKey()) > limit) {
-                    ret.add(k.getKey());
-                }
-            }
-
-            return ret;
-        }
-
-        public void print() {
-            System.out.println("Average runtimes:");
-            for (Map.Entry<String, ?> k : this.entrySet()) {
-                System.out.println(k.getKey() + ":\t" + String.format("%2.4f", (double) get(k.getKey())) + "ms");
-            }
-        }
-    }
+    
     HighScore timing = new HighScore();
     HighScore highscore = new HighScore();
 
