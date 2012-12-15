@@ -198,7 +198,7 @@ public abstract class Player {
     // we discard a player's move if it takes longer than 2*180 ms.
     // currently, players are not disqualified.
     int individualRunFactor = 3;
-    long TIMEOUT = 180;
+    long TIMEOUT = 70;
 
     final Object callPlayerFunction(int fn) {
         Object m = null; // return var
@@ -241,7 +241,7 @@ public abstract class Player {
 
                 Object[] ret2 = new Object[4];
                 ret2[0] = m;
-                ret2[1] = (long) ((threadMXBean.getCurrentThreadCpuTime() - startTime) / 1000); // nanosec to 1000*millisec
+                ret2[1] = (Long) ((threadMXBean.getCurrentThreadCpuTime() - startTime) / 1000); // nanosec to 1000*millisec
                 return ret2;
             }
         });
@@ -266,7 +266,7 @@ public abstract class Player {
 
             /* dur will contain the actual, measured CPU time for the thread. 
              This is going to be much more accurate. */
-            long dur = (long) result[1];
+            long dur = (Long) result[1];
             m = (Object) result[0];
             //timing.add(p.getClass().getName(), (double) dur / 1000.0);
             // we allow for 5 times the nominal average run time in certain cases
