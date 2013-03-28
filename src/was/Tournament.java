@@ -430,18 +430,18 @@ public class Tournament {
         String[] sheepteams = new String[]{
             "Black Sheep:CHHITH,GEISER,HAFAIRI,HOFBAUER",
             "Creepy Sheepies:CONTINO,GARRITY,HOFFMAN,TAILOR", // 
-//            "Dolly's Den:DERHAMMER,DERHAMMER,CHAN,CHAN", //TUBERGEN  // BROADWATER   MUST REPEAT MISSING STUDENTS (4 sheep guaranteed)
-//            "White Sheep:BONCHONSKY,HE,SUON,USCAMAYTA",
-//            "Nervous Wreck:REITTER,REITTER,REITTER,REITTER"
+            "Dolly's Den:DERHAMMER,DERHAMMER,CHAN,CHAN", //TUBERGEN  // BROADWATER   MUST REPEAT MISSING STUDENTS (4 sheep guaranteed)
+            "White Sheep:BONCHONSKY,HE,SUON,USCAMAYTA",
+            "Nervous Wreck:REITTER,REITTER,REITTER,REITTER"
         };
 
         String[] wolves = new String[]{
             "Hungry Beast:MONDELL,MULLEN,MUNOZ",
-//            "Lone Hunters:CHEETHAM,KIDNEY,LAFFERTY",
-//            "Furry Fury:REIZNER,SICINSKI,ZIELENSKI",
-//            "The Gray:NORANTE,RAUGH,ULIANA",
-//            "Wolf in Sheep's Clothing:GREENE,WILKINSON,YOSUA",
-//            "Meat Eater:REITTER"
+            "Lone Hunters:CHEETHAM,KIDNEY,LAFFERTY",
+            "Furry Fury:REIZNER,SICINSKI,ZIELENSKI",
+            "The Gray:NORANTE,RAUGH,ULIANA",
+            "Wolf in Sheep's Clothing:GREENE,WILKINSON,YOSUA",
+            "Meat Eater:REITTER"
         };
 
         HighScore totalHighscore = new HighScore().setTitle("total");
@@ -457,7 +457,7 @@ public class Tournament {
 
             totalRuns += string2classlist(wteam, ".Wolf").size();
         }
-        totalRuns = totalRuns * sheepteams.length * wolves.length * Scenario.getParameterValues().size();
+        totalRuns = totalRuns * sheepteams.length * Scenario.getParameterValues().size();
         int runcount = 1;
         long startTime = System.currentTimeMillis();
 
@@ -626,16 +626,16 @@ public class Tournament {
                 was.Tournament.run(players, r, ui, Scenario.makeScenario(sc), tourn, true); // m, n, k,
 
             } else {
-                System.err.println("Usage: java -jar WolvesAndSheep.jar -t M,N,K -r R CLASS1 CLASS2 CLASS3 CLASS4 CLASS5 (...)");
+                System.err.println("Usage: java -jar WolvesAndSheep.jar -r R -s S -t -e -p -c CLASS1 CLASS2 CLASS3 CLASS4 CLASS5 (...)");
                 //System.err.println("       -t M,N,K  ==> play a M*N board with K sheep.");
                 System.err.println("       -r R      ==> play R repeats of each game.");
-                System.err.println("       -s S      ==> set up scenario no. S (0 for random)");
+                System.err.println("       -s S      ==> set up scenario no. S (0 or default for random)");
                 System.err.println("       -t        ==> play a tournament of all combinations of players (4 sheep, one wolf)");
                 System.err.println("       -e        ==> ignore player's exceptions");
                 System.err.println("       -p        ==> pause initially if using graphical UI");
                 System.err.println("       -c        ==> do not show the graphical user interface ");
-                System.err.println("Example: java -jar WolvesAndSheep.jar -r 10 players.BasicSheep players.BasicWolf players.BasicSheep players.BasicSheep players.BasicSheep");
-                System.err.println("Example for NetBeans (Run Configuration, Program arguments): -r 10 players.BasicSheep players.BasicWolf players.BasicSheep players.BasicSheep players.BasicSheep");
+                System.err.println("Example: java -jar WolvesAndSheep.jar -r 10 basic.Wolf basic.Sheep basic.Sheep basic.Sheep basic.Sheep");
+                System.err.println("Example for NetBeans (Run Configuration, Program arguments): -r 10 basic.Wolf basic.Sheep basic.Sheep basic.Sheep basic.Sheep");
                 // do not run a default case to make sure it doesn't cause confusion.
                 //            was.Tournament.run("reitter.SheepPlayer,reitter.WolfPlayer,reitter.SheepPlayer,reitter.SheepPlayer, reitter.SheepPlayer", 100);
             }
