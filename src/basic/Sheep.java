@@ -1,6 +1,7 @@
 package basic;
 
 import java.util.Random;
+import was.GameBoard;
 import was.Move;
 
 /**
@@ -10,9 +11,15 @@ import was.Move;
 public class Sheep  extends was.SheepPlayer{
     
     private static Random rand = new Random();
-        
+    GameBoard board = null;
 
-    
+    @Override
+    public void initialize() {
+        // you cannot call "getGameBoard" in the constructor, as the
+        // game board is created after all the players.
+        board = getGameBoard();
+    }
+
     @Override
     public Move move() {
 

@@ -128,6 +128,9 @@ public abstract class Player {
      * board has been set up.
      */
     public void initialize() {
+        
+        
+        
     }
 
     final public String getID() {
@@ -140,6 +143,10 @@ public abstract class Player {
      * @return a gameboard object
      */
     final public GameBoard getGameBoard() {
+        if (gb == null)
+        {
+            throw new RuntimeException("getGameBoard may not be called from a player constructor.  Use the Player class's 'initialize' method.");
+        }
         return gb;
     }
 
