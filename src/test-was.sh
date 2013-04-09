@@ -20,6 +20,8 @@ zip -d $file javafx/*
 zip -d $file was/*
 zip -d $file players/*
 zip -d $file basic/*
+zip -d $file sandbox2.policy test-was.sh reitter.jar
+
 if [ "$file" != "players/reitter.jar" ]; then
    zip -d $file reitter/*
 fi

@@ -623,7 +623,8 @@ public class Tournament {
         } else {
             if (players.size() > 0) {
 
-                was.Tournament.run(players, r, ui, Scenario.makeScenario(sc), tourn, true); // m, n, k,
+                was.Tournament.run(players, r, ui, 
+                        Scenario.makeScenario(sc), tourn, true); // m, n, k,
 
             } else {
                 System.err.println("Usage: java -jar WolvesAndSheep.jar -r R -s S -t -e -p -c CLASS1 CLASS2 CLASS3 CLASS4 CLASS5 (...)");
@@ -638,6 +639,9 @@ public class Tournament {
                 System.err.println("Example for NetBeans (Run Configuration, Program arguments): -r 10 basic.Wolf basic.Sheep basic.Sheep basic.Sheep basic.Sheep");
                 // do not run a default case to make sure it doesn't cause confusion.
                 //            was.Tournament.run("reitter.SheepPlayer,reitter.WolfPlayer,reitter.SheepPlayer,reitter.SheepPlayer, reitter.SheepPlayer", 100);
+            
+                // for testing purposes: reitter.Wolf reitter.Sheep greene.Wolf zielenski.Wolf Wilkinson.Wolf derhammer.Sheep chan.Sheep derhammer.Sheep tailor.Sheep
+                // (greene is one of the stronger wolves.)
             }
         }
         System.exit(0);
