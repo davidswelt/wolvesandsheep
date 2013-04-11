@@ -55,6 +55,15 @@ public abstract class Player {
         }
 
     }
+    
+    /**
+     * Override this function to run your own unit test.
+     *
+     * @return true if the the test was passed, false otherwise.
+     */
+    public static boolean test () {
+        return true;
+    }
 
     /**
      * Override this function to keep track of your player's version number

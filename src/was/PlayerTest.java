@@ -1,5 +1,12 @@
 package was;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import static was.Tournament.logPlayerCrash;
+
 /**
  * Test of the player
  *
@@ -69,6 +76,40 @@ public class PlayerTest {
 
     }
 
+    static boolean runUnitTest( Class cl, HighScore log)
+    {
+        
+            try {
+                Method method = cl.getMethod("test", (Class[]) null);
+                try {
+                    boolean result = (Boolean) method.invoke(null);
+                    
+                    if (result)
+                    {
+                        return true;
+                    }
+                    logPlayerCrash(cl, new RuntimeException("Player failed unit test."));
+                     
+                
+                } catch (IllegalAccessException ex) {
+                    Logger.getLogger(Tournament.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (IllegalArgumentException ex) {
+                    Logger.getLogger(Tournament.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (InvocationTargetException ex) {
+                    Logger.getLogger(Tournament.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                
+            } catch (NoSuchMethodException ex) {
+                logPlayerCrash(cl, new RuntimeException("Player has no unit test.  Proceeding."));
+                return true; // no unit test
+            } catch (SecurityException ex) {
+                Logger.getLogger(Tournament.class.getName()).log(Level.SEVERE, null, ex);
+                logPlayerCrash(cl, new RuntimeException("Player violated security rule.  Proceeding."));
+            }
+            
+        return false;
+        
+    }
     public static void main(String args[]) {
 
         // parse the command line

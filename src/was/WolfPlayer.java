@@ -6,7 +6,8 @@ package was;  // players may not use this package name
  * @author dr
  */
 abstract public class WolfPlayer extends Player {
-  
+   
+    @Override
     public GamePiece getPiece() 
     {
         return GamePiece.WOLF;
@@ -14,6 +15,7 @@ abstract public class WolfPlayer extends Player {
     
     // you may override if you like
     
+    @Override
     public String imageFile () {
         return "pics/wolf_head_small.gif";
     }

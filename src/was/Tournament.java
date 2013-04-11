@@ -2,9 +2,11 @@ package was;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -116,8 +118,6 @@ public class Tournament {
 
         return null;
     }
-
-    
     HighScore timing = new HighScore();
     HighScore highscore = new HighScore();
 
@@ -141,6 +141,8 @@ public class Tournament {
                 players.add(cs);
             }
         }
+
+
         return players;
     }
 
@@ -197,6 +199,7 @@ public class Tournament {
 
         Tournament t;
 
+
         t = new Tournament(playerClasses, r, ui);
 
         int totalgames = r * playerClasses.size() * Math.max(1, playerClasses.size() - 1) * Math.max(1, playerClasses.size() - 2) * Math.max(1, playerClasses.size() - 3);
@@ -211,6 +214,8 @@ public class Tournament {
             if (printHighScore) {
                 t.highscore.printByCategory(null);
                 System.out.print(dividerLine);
+                System.out.println("Player Crashes:");
+                crashLog.printByCategory(null);
             }
 //        t.timing.print();
         }
@@ -416,11 +421,14 @@ public class Tournament {
                     System.err.println(
                             "Error: " + p.getName() + " is not a subtype of was.SheepPlayer or was.WolfPlayer.");
                 } else {
-                    highscore.inc(p.getName(), 0.0);
-                    players.add(p);
+                    if (PlayerTest.runUnitTest(p, crashLog)) {
+                        highscore.inc(p.getName(), 0.0);
+                        players.add(p);
+                    }
                 }
             }
         }
+
         // adjust timeout
         //TIMEOUT = (long) ((float) TIMEOUT * (float) Benchmark.runBenchmark());
     }
@@ -488,8 +496,7 @@ public class Tournament {
                     Collections.shuffle(p);
 
                     double avgtimeperrun = 0;
-                    if (runcount > Scenario.getParameterValues().size())
-                    {
+                    if (runcount > Scenario.getParameterValues().size()) {
                         avgtimeperrun = (System.currentTimeMillis() - startTime) / runcount;
                     }
                     // all scenarios
@@ -500,7 +507,7 @@ public class Tournament {
                                     (int) (((totalRuns - runcount) * avgtimeperrun) / 1000 / 60));
                         }
                         runcount++;
-                        
+
                         Scenario sc = Scenario.makeScenario(sp);
                         //for (int sc = 1; sc < Scenario.NUMSCENARIOS && exitRequested==false; sc++) {
                         Tournament t = run(p, repeats, false, sc, false, false);
@@ -516,7 +523,7 @@ public class Tournament {
                         }
                     }
                     totalHighscore.printByCategory(null);
-                    
+
                 }
             }
         }
@@ -539,7 +546,7 @@ public class Tournament {
 
         System.out.println(dividerLine);
         totalTiming.printByCategory(null);
-        
+
         System.out.println(dividerLine);
 
 
@@ -623,7 +630,7 @@ public class Tournament {
         } else {
             if (players.size() > 0) {
 
-                was.Tournament.run(players, r, ui, 
+                was.Tournament.run(players, r, ui,
                         Scenario.makeScenario(sc), tourn, true); // m, n, k,
 
             } else {
@@ -639,8 +646,8 @@ public class Tournament {
                 System.err.println("Example for NetBeans (Run Configuration, Program arguments): -r 10 basic.Wolf basic.Sheep basic.Sheep basic.Sheep basic.Sheep");
                 // do not run a default case to make sure it doesn't cause confusion.
                 //            was.Tournament.run("reitter.SheepPlayer,reitter.WolfPlayer,reitter.SheepPlayer,reitter.SheepPlayer, reitter.SheepPlayer", 100);
-            
-                // for testing purposes: reitter.Wolf reitter.Sheep greene.Wolf zielenski.Wolf Wilkinson.Wolf derhammer.Sheep chan.Sheep derhammer.Sheep tailor.Sheep
+
+                // for testing purposes:  greene.Wolf zielenski.Wolf Wilkinson.Wolf derhammer.Sheep chan.Sheep derhammer.Sheep tailor.Sheep
                 // (greene is one of the stronger wolves.)
             }
         }
