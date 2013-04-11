@@ -23,6 +23,7 @@ import was.Player.GamePiece;
  */
 public class GameBoard {
 
+    boolean ui = false;
     private final int cols;
     private final int rows;
     private List<Player> board = new ArrayList<Player>();
@@ -172,7 +173,7 @@ public class GameBoard {
         for (int i = 0; i < cols * rows; i++) {
             board.add(null); // null is empty
         }
-
+        this.ui = ui;
         if (ui) {
             // if UI, then this game board is backed by a wasvideogame (GameGrid)
             wasgamegrid = new WasVideoGame(this);
@@ -499,10 +500,12 @@ public class GameBoard {
 
         scores.put(p, new int[1]);
 
+        if (this.ui)
+        {
         PlayerProxy pprox = new PlayerProxy(p);
         wasgamegrid.addActor(pprox, loc);
         p.setPlayerProxy(pprox);
-
+        }
     }
 
     /**
