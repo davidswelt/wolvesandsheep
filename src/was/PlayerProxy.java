@@ -15,11 +15,13 @@ import java.awt.geom.GeneralPath;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.annotation.Resource;
 
 class PlayerProxy extends Actor {
 
@@ -61,8 +63,15 @@ class PlayerProxy extends Actor {
     }
     
     static BufferedImage scaledImage(Player player) {
-        try {
-            return imageToBufferedImage(javax.imageio.ImageIO.read(new File(player.imageFile())).getScaledInstance(getCellSize(player.getGameBoard()), getCellSize(player.getGameBoard()), Image.SCALE_SMOOTH));
+        try {            
+            String s = player.imageFile();
+            URL r = player.getClass().getResource(s);
+            if (r==null)
+            {
+                r = PlayerProxy.class.getResource(s);
+            }
+            Image img = javax.imageio.ImageIO.read(r);
+            return imageToBufferedImage(img.getScaledInstance(getCellSize(player.getGameBoard()), getCellSize(player.getGameBoard()), Image.SCALE_SMOOTH));
         } catch (IOException ex) {
             Logger.getLogger(PlayerProxy.class.getName()).log(Level.SEVERE, null, ex);
         }
