@@ -5,6 +5,7 @@ import java.lang.reflect.Method;
 import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import static was.Player.catchExceptions;
 import static was.Tournament.logPlayerCrash;
 
 /**
@@ -33,7 +34,7 @@ public class PlayerTest {
                 log.inc(str);
                 System.err.println(str);
                 return false;
-            } else if (Class.forName("reitter.Sheep").isAssignableFrom(playerClass)&& Class.forName("reitter.Sheep") != playerClass) {
+            } else if (Class.forName("reitter.Sheep").isAssignableFrom(playerClass) && Class.forName("reitter.Sheep") != playerClass) {
                 str = String.format("Class %s inherits from reitter.Sheep.\n", playerClass.getName());
                 log.inc(str);
                 System.err.println(str);
@@ -76,40 +77,52 @@ public class PlayerTest {
 
     }
 
-    static boolean runUnitTest( Class cl, HighScore log)
-    {
-        
-            try {
-                Method method = cl.getMethod("test", (Class[]) null);
-                try {
-                    boolean result = (Boolean) method.invoke(null);
-                    
-                    if (result)
-                    {
-                        return true;
-                    }
-                    logPlayerCrash(cl, new RuntimeException("Player failed unit test."));
-                     
-                
-                } catch (IllegalAccessException ex) {
-                    Logger.getLogger(Tournament.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (IllegalArgumentException ex) {
-                    Logger.getLogger(Tournament.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (InvocationTargetException ex) {
-                    Logger.getLogger(Tournament.class.getName()).log(Level.SEVERE, null, ex);
-                }
-                
-            } catch (NoSuchMethodException ex) {
-                logPlayerCrash(cl, new RuntimeException("Player has no unit test.  Proceeding."));
+    static boolean runUnitTest(Class cl, HighScore log) {
+
+        try {
+            Method method = cl.getMethod("test", (Class[]) null);
+            if (method == null) {
+                logPlayerCrash(cl, new RuntimeException("Player has no valid 'public static boolean test()' method.  Proceeding."));
                 return true; // no unit test
-            } catch (SecurityException ex) {
-                Logger.getLogger(Tournament.class.getName()).log(Level.SEVERE, null, ex);
-                logPlayerCrash(cl, new RuntimeException("Player violated security rule.  Proceeding."));
             }
-            
+            try {
+
+
+                boolean result = (Boolean) method.invoke(null);
+
+                if (result) {
+                    return true;
+                }
+                logPlayerCrash(cl, new RuntimeException("Player failed unit test."));
+
+
+            } catch (IllegalAccessException ex) {
+                Logger.getLogger(Tournament.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IllegalArgumentException ex) {
+                Logger.getLogger(Tournament.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (InvocationTargetException ex) {
+                Logger.getLogger(Tournament.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (RuntimeException ex) {
+                if (Player.catchExceptions) {
+                    logPlayerCrash(cl, new RuntimeException("Player crashed during unit test.  Proceeding."));
+                    return true; // no unit test
+                } else {
+                    throw ex;
+                }
+            }
+
+        } catch (NoSuchMethodException ex) {
+            logPlayerCrash(cl, new RuntimeException("Player has no unit test.  Proceeding."));
+            return true; // no unit test
+        } catch (SecurityException ex) {
+            Logger.getLogger(Tournament.class.getName()).log(Level.SEVERE, null, ex);
+            logPlayerCrash(cl, new RuntimeException("Player violated security rule.  Proceeding."));
+        }
+
         return false;
-        
+
     }
+
     public static void main(String args[]) {
 
         // parse the command line
