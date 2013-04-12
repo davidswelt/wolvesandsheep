@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 /**
  *
@@ -91,7 +92,7 @@ public class HighScore extends TreeMap<String, Double> {
     void setAlignment() {
         printAlignment = 10;
         for (String k : keySet()) {
-            printAlignment = Math.max(printAlignment, k.length());
+            printAlignment = Math.max(printAlignment, removePrefix(k).length());
         }
     }
     String title = "";
@@ -123,13 +124,13 @@ public class HighScore extends TreeMap<String, Double> {
         Collections.sort(keys, new TreeValueComparator());
         for (String k : keys) {
 
-            System.out.print(rightAlign(k, printAlignment) + ": ");
-            System.out.print(rightAlign(String.format("%.3f", getNormalized(k)), 7));
+            System.out.print(rightAlign(removePrefix(k), printAlignment) + ": ");
+            System.out.print(rightAlign(String.format("%.3f", getNormalized(k)), 8));
             if (extraColumns != null) {
                 for (HighScore h : extraColumns) {
 
                     if (h != null) {
-                        System.out.print(rightAlign(String.format("%.3f", h.getNormalized(k)), 7));
+                        System.out.print(rightAlign(String.format("%.3f", h.getNormalized(k)), 8));
                     }
                 }
 
@@ -138,6 +139,16 @@ public class HighScore extends TreeMap<String, Double> {
         }
     }
 
+    String removePrefix(String k) {
+        StringTokenizer t = new StringTokenizer(k, k.contains("\\") ? "\\" : "");
+        String result;
+        result = t.nextToken();
+        if (t.hasMoreTokens()) {
+            result = t.nextToken();
+        }
+        return result;
+    }
+    
     public void printByCategory(Collection<HighScore> extraColumns) {
 
         setAlignment();
@@ -147,12 +158,12 @@ public class HighScore extends TreeMap<String, Double> {
         // categories
         for (String k : keys) {
             //categories marked with \ or .
-            StringTokenizer t = new StringTokenizer(k, k.contains("\\") ? "\\" : ".");
+            StringTokenizer t = new StringTokenizer(k, k.contains("\\") ? "\\" : "");
             String classname;
             classname = t.nextToken();
-            if (t.hasMoreTokens()) {
-                classname = t.nextToken();
-            }
+//            if (t.hasMoreTokens()) {
+//                classname = t.nextToken();
+//            }
             if (cats.get(classname) == null) {
                 cats.put(classname, new ArrayList());
             }
@@ -160,8 +171,9 @@ public class HighScore extends TreeMap<String, Double> {
             // add whole key
         }
         // for each category, print it, sorted
-        for (String k : cats.keySet()) {
+        for (String k : new TreeSet<String>(cats.keySet())) {
             System.out.println();
+            System.out.println(k+":");
             printKeys(cats.get(k), true, extraColumns);
         }
     }
