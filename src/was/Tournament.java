@@ -128,6 +128,7 @@ public class Tournament {
     }
     HighScore timing = new HighScore();
     HighScore highscore = new HighScore();
+    HighScore scenarioScore = new HighScore();
 
     static ArrayList<Class> string2classlist(String listofPlayerClassNames, String postfix) {
 
@@ -225,6 +226,8 @@ public class Tournament {
             if (printHighScore) {
                 t.highscore.print();
                 System.out.print(dividerLine);
+                t.scenarioScore.printByCategory(null);
+                System.out.print(dividerLine);
                 System.out.println("Player Crashes:");
                 crashLog.printByCategory(null);
             }
@@ -305,9 +308,10 @@ public class Tournament {
             // reached number of sheep (plus wolf), or have selected all available players
             if (selectedPlayers.size() >= numSheep + numWolves) // termination condition
             {
-                scenario = Scenario.makeScenario(scenarioNum);
 
                 for (int r = 0; r < repeats && exitRequested == false; r++) {
+                    scenario = Scenario.makeScenario(scenarioNum);
+
                     GameBoard board = new GameBoard(scenario.boardSize(), scenario.boardSize(), boardUI, 80);
 
 
@@ -317,22 +321,24 @@ public class Tournament {
                     scenario.addToBoard(board, wolfQueue, sheepQueue); // add scenario first to occupy these spaces
 
                     for (Integer i : selectedPlayers) {
-                        Stack<GameLocation> queue = isWolf(players.get(i)) ? wolfQueue : sheepQueue;
+                        Class plClass = players.get(i);
+                        Stack<GameLocation> queue = isWolf(plClass) ? wolfQueue : sheepQueue;
                         GameLocation initialLocation = queue.empty() ? board.randomEmptyLocation(wolfQueue, sheepQueue) : queue.pop();
 
-                        Player player = playerFactory(players.get(i), (isWolf(players.get(i)) ? "w" : "s"));
+                        Player player = playerFactory(plClass, (isWolf(plClass) ? "w" : "s"));
                         if (player != null) {
                             board.addPlayer(player, initialLocation);
                         }
                         // note use even if player wasn't added (due to crash!)
-                        highscore.noteUse(players.get(i).getName());
+                        highscore.noteUse(plClass.getName());
+                        scenarioScore.noteUse("Scenario" + scenario.toString() + "\\" + plClass.getName());
 
-                        if (teams.get(players.get(i)) == null) {
+                        if (teams.get(plClass) == null) {
                             //System.err.println(i);
                             //System.err.println("WARNING: can't get team for " + players.get(i));
                         } else {
                             // note use of player so that team score can be normalized later
-                            highscore.noteUse(teams.get(players.get(i)) + (isWolf(players.get(i)) ? ".WolfTeam" : ".SheepTeam"));
+                            highscore.noteUse(teams.get(plClass) + (isWolf(plClass) ? ".WolfTeam" : ".SheepTeam"));
                         }
                     }
 
@@ -365,6 +371,10 @@ public class Tournament {
                                     highscore.inc(teams.get(cl) + (score.getKey() instanceof WolfPlayer ? ".WolfTeam" : ".SheepTeam"), score.getValue()[0]);
                                 }
                                 timing.inc(cl.getName(), score.getKey().meanRunTime());
+
+
+                                scenarioScore.inc("Scenario" + scenario.toString() + "\\" + cl.getName(), score.getValue()[0]);
+
                                 timing.noteUse(cl.getName());
                             }
                         } finally {
@@ -372,6 +382,7 @@ public class Tournament {
                                 //final String ESC = "\033[";
                                 //System.out.println(ESC + "2J"); 
                                 highscore.printByCategory(null);
+
                             }
                         }
                     }
@@ -607,7 +618,7 @@ public class Tournament {
                 ui = true;
             } else if (s.equals("-c")) {
                 ui = false;
-            }  else if (s.equals("-q")) {
+            } else if (s.equals("-q")) {
 
                 quiet = true;
 
