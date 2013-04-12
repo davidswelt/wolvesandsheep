@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 targetfile = "/home/dreitter/submission/media/results/latest.html"
-tourn_args = "-c -t -e -q -r 10000"
+tourn_args = "-c -t -e -q -r 5000"
 
 import os
 
@@ -35,4 +35,4 @@ os.system(cmd)
 with open(tmpfile, "a") as text_file:
     text_file.write("</pre>{% endblock content %}")
 
-os.system("mv \"%s\" \"%s\""(tmpfile,targetfile))
+os.system("mv \"%s\" \"%s\""%(tmpfile,targetfile))
