@@ -22,6 +22,11 @@ import java.util.logging.Logger;
  * @author reitter
  */
 public abstract class Player {
+    
+    private static final int MOVE = 0;
+    private static final int INITIALIZE = 1;
+    private static final int IS_BEING_EATEN = 2;
+    private static final int IS_EATING = 3;
 
     public static enum GamePiece {
 
@@ -138,8 +143,6 @@ public abstract class Player {
      */
     public void initialize() {
         
-        
-        
     }
 
     final public String getID() {
@@ -230,6 +233,7 @@ public abstract class Player {
         final int func = fn;
 
         FutureTask ft = new FutureTask<Object[]>(new Callable<Object[]>() {
+            private static final int MOVE = 0;
             @Override
             public Object[] call() {
                 ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
@@ -237,16 +241,19 @@ public abstract class Player {
 
                 Object m = null;
                 switch (func) {
-                    case 0:
+                    case MOVE:
                         m = move(); // move is defined by extending class
                         break;
-                    case 2:
+                    case INITIALIZE:
+                        initialize(); // move is defined by extending class
+                        break;
+                    case IS_BEING_EATEN:
                         m = null;
                         if (thePlayer instanceof SheepPlayer) {
                             ((SheepPlayer) thePlayer).isBeingEaten();
                         }
                         break;
-                    case 3:
+                    case IS_EATING:
                         m = null;
                         if (thePlayer instanceof WolfPlayer) {
                             ((WolfPlayer) thePlayer).isEating();
@@ -307,9 +314,16 @@ public abstract class Player {
             Tournament.logPlayerCrash(this.getClass(), ex);
             //throw new IllegalGameMoveException("makeMove was interrupted.", p, null);
         } catch (ExecutionException ex) {
-            Logger.getLogger(Tournament.class.getName()).log(Level.SEVERE, null, ex);
-            Tournament.logPlayerCrash(this.getClass(), ex);
-//            throw new IllegalGameMoveException("exception in makeMove.", p, null);
+            
+            if (catchExceptions) {
+                
+                LOG("Player " + this.getClass().getName() + " runtime exception " + ex);
+                Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex);
+                Tournament.logPlayerCrash(this.getClass(), ex);
+                m = null;
+            } else {
+                throw (RuntimeException) ex.getCause();
+            }
         } catch (TimeoutException ex) {
             System.err.println("Player " + thePlayer.getClass().getName() + " timed out " + TIMEOUT + "ms max.");
             Tournament.logPlayerCrash(this.getClass(), ex);
@@ -319,13 +333,16 @@ public abstract class Player {
 //                        disqualifiedPlayers.add(p.getClass());
 
         } catch (RuntimeException ex) {
+            System.err.println("runtime ex.");
             if (catchExceptions) {
+                System.err.println("catching");
                 LOG("Player " + this.getClass().getName() + " runtime exception " + ex);
                 Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex);
                 Tournament.logPlayerCrash(this.getClass(), ex);
 
                 m = null;
             } else {
+                System.err.println("NOT catching");
                 throw ex;
             }
         } finally {
@@ -339,12 +356,16 @@ public abstract class Player {
 
     }
 
+    final void callInitialize() {
+        callPlayerFunction(INITIALIZE);
+    }
+    
     final void callIsBeingEaten() {
-        callPlayerFunction(2);
+        callPlayerFunction(IS_BEING_EATEN);
     }
 
     final void callIsEating() {
-        callPlayerFunction(3);
+        callPlayerFunction(IS_EATING);
     }
 
     final Move calcMove() {
@@ -358,7 +379,7 @@ public abstract class Player {
 
         // redirect output if needed
 
-        m = (Move) callPlayerFunction(0); // call "move"
+        m = (Move) callPlayerFunction(MOVE); // call "move"
 
         if (m == null) {
 

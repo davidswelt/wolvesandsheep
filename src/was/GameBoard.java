@@ -582,7 +582,7 @@ public class GameBoard {
 
         // initialize the players
         for (Player p : players) {
-            p.initialize();
+            p.callInitialize();
         }
 
         try {
