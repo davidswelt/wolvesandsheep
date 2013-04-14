@@ -27,8 +27,9 @@ public class Tournament {
     protected ArrayList<Class> players = new ArrayList<Class>();
     protected static Random random = new Random();
     Scenario scenario = null;
-    int numSheep = 4;
-    int numWolves = 1;
+    int initNumSheep = 4;
+    int initNumWolves = 1;
+    int numSheep, numWolves;
     protected static Map<Class, String> teams = new HashMap();
     static int minNumSheepRequiredToRun = 0;  // run won't start a game otherwise
     static int minNumWolvesRequiredToRun = 0;
@@ -266,10 +267,10 @@ public class Tournament {
 //
 //        }
         // if fewer sheep or wolves are specified, just don't add them.
-
-        numSheep = Math.min(numSheep, sheep);
-        numWolves = Math.min(numWolves, wolves);
-
+        
+        numSheep = Math.min(initNumSheep, sheep);
+        numWolves = Math.min(initNumWolves, wolves);
+        System.out.println("nS= "+numSheep+"  numW="+numWolves);
 
         List<Integer> sp = new ArrayList<Integer>();
         if (!combinations) { // just add all given players to the selection
@@ -320,6 +321,7 @@ public class Tournament {
 
                     scenario.addToBoard(board, wolfQueue, sheepQueue); // add scenario first to occupy these spaces
 
+//                      System.err.println("sel pl len="+selectedPlayers.size());
                     for (Integer i : selectedPlayers) {
                         Class plClass = players.get(i);
                         Stack<GameLocation> queue = isWolf(plClass) ? wolfQueue : sheepQueue;
@@ -331,7 +333,7 @@ public class Tournament {
                         }
                         // note use even if player wasn't added (due to crash!)
                         highscore.noteUse(plClass.getName());
-                        scenarioScore.noteUse("Scenario" + scenario.toString() + "\\" + plClass.getName());
+                        scenarioScore.noteUse("Scenario " + scenario.toString() + "\\" + plClass.getName());
 
                         if (teams.get(plClass) == null) {
                             //System.err.println(i);
@@ -357,6 +359,7 @@ public class Tournament {
 
                         if (r == 0) {
                             board.printPlayerOverview();
+                            board.print();
                         }
 
                         try {
@@ -607,14 +610,7 @@ public class Tournament {
         int i = 0;
         while (i < args.length) {
             String s = args[i++];
-            if (s.equals("-t")) {
-//
-//                StringTokenizer st = new StringTokenizer(args[i++], ",");
-//                m = Integer.parseInt(st.nextToken());
-//                n = Integer.parseInt(st.nextToken());
-//                k = Integer.parseInt(st.nextToken());
-//
-            } else if (s.equals("-u")) {
+            if (s.equals("-u")) {
                 ui = true;
             } else if (s.equals("-c")) {
                 ui = false;
