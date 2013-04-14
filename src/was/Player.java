@@ -396,7 +396,9 @@ public abstract class Player {
 
 
                     // trim move
-                    m = m.scaledToLength(maxAllowedDistance);
+                    // we penalize the player a little by reducing the maxAllowedDistance
+                    // to 1  (i.e., no diagonal moves allowed)
+                    m = m.scaledToLength(1.0);
                 }
                 m = m.quantized(maxAllowedDistance);
             }
@@ -409,7 +411,7 @@ public abstract class Player {
             tx = Math.min(gb.getCols() - 1, tx);
             ty = Math.min(gb.getRows() - 1, ty);
 
-            m = new Move(tx - x, ty - y);
+            m = new Move(tx - x, ty - y);            
         }
 
         if (gb.noteMove(this, m)) {
