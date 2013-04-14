@@ -317,9 +317,9 @@ public abstract class Player {
             
             if (catchExceptions) {
                 
-                LOG("Player " + this.getClass().getName() + " runtime exception " + ex);
-                Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex);
-                Tournament.logPlayerCrash(this.getClass(), ex);
+                LOG("Player " + this.getClass().getName() + " runtime exception " + ex.getCause());
+                Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex.getCause());
+                Tournament.logPlayerCrash(this.getClass(), (RuntimeException) ex.getCause());
                 m = null;
             } else {
                 throw (RuntimeException) ex.getCause();
