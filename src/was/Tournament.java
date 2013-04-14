@@ -270,7 +270,6 @@ public class Tournament {
         
         numSheep = Math.min(initNumSheep, sheep);
         numWolves = Math.min(initNumWolves, wolves);
-        System.out.println("nS= "+numSheep+"  numW="+numWolves);
 
         List<Integer> sp = new ArrayList<Integer>();
         if (!combinations) { // just add all given players to the selection
@@ -311,7 +310,14 @@ public class Tournament {
             {
 
                 for (int r = 0; r < repeats && exitRequested == false; r++) {
-                    scenario = Scenario.makeScenario(scenarioNum);
+
+                    int theSc = scenarioNum;
+                    if (scenarioNum==0 && repeats>=Scenario.getParameterValues().size())
+                    {
+                        theSc = 1 + (repeats % Scenario.getParameterValues().size());
+                    }
+                    
+                    scenario = Scenario.makeScenario(theSc);
 
                     GameBoard board = new GameBoard(scenario.boardSize(), scenario.boardSize(), boardUI, 80);
 
@@ -357,7 +363,7 @@ public class Tournament {
 
                     if (sheep >= minNumSheepRequiredToRun && wolves >= minNumWolvesRequiredToRun) {
 
-                        if (r == 0) {
+                        if (r == 0 && !quiet) {
                             board.printPlayerOverview();
                             board.print();
                         }
