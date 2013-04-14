@@ -46,6 +46,35 @@ public class GameBoard {
     int currentTimeStep = 0;
     WasGameBackend wasgamegrid = null;
 
+    // can move along line between a and b
+    GameLocation clearShot(GameLocation a, GameLocation b)
+    {
+        
+        // diagonal steps are OK
+        Move m = new Move(b.x-a.x, b.y-a.y).scaledToLength(Math.sqrt(2));
+        
+       
+        double x = a.x;
+        double y = a.y;
+        for (int i=0; i<10; i++) // limit search (to be sure we're terminating)
+        {
+            x += m.delta_x;
+            y += m.delta_y;
+            
+            if (getPiece((int) Math.round(x), (int) Math.round(y)) == GamePiece.OBSTACLE)
+            {
+                // return previous (known good) location
+                return new GameLocation((int) Math.round(x-m.delta_x), (int) Math.round(y-m.delta_y));
+            }
+            if (b.x == (int) Math.round(x) && b.y == (int) Math.round(y))
+            {
+                break;
+            } 
+        }
+        return b;
+    }
+    
+    
     // make a move
     boolean movePlayer(Player player, Move m) {
 
@@ -88,9 +117,11 @@ public class GameBoard {
         GamePiece playerCellPiece = player.getPiece();
         GamePiece targetCellPiece = getPiece(idx);
 
-        // check if new x,y is free
-
-        //System.out.println("x:"+x+" y:"+y);
+        GameLocation nloc = clearShot(loc, new GameLocation(x,y));
+        x=nloc.x;
+        y=nloc.y;
+                
+     
         if (isEmptyCell(x, y)) {
             // swap empty cell
 
@@ -119,7 +150,7 @@ public class GameBoard {
 
             LOG("hit obstacle");
 
-        }
+        } 
         // else: still can't movePlayer.
 
         // do not execute the movePlayer.  return false to inform caller.
@@ -381,7 +412,9 @@ public class GameBoard {
         
         return getPiece(getIndex(x, y));
     }
-
+    GamePiece getPiece(GameLocation i) {
+        return getPiece(getIndex(i.x, i.y));
+    }
     GamePiece getPiece(int i) {
         Player p = board.get(i);
         if (p == null) {
