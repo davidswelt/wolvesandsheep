@@ -76,7 +76,6 @@ public class HighScore extends TreeMap<String, Double> {
 
     public void print() {
         setAlignment();
-        System.out.println("Highscore:");
         printKeys(new ArrayList(keySet()), false, null);
     }
 
@@ -148,7 +147,7 @@ public class HighScore extends TreeMap<String, Double> {
         }
         return result;
     }
-    
+  
     public void printByCategory(Collection<HighScore> extraColumns) {
 
         setAlignment();

@@ -167,6 +167,11 @@ public class Tournament {
         return "";
     }
 
+    /** given a list of objects, return combinations of N. */
+    
+    // To Do
+    
+    
     /**
      * Create a new tournament and run it.
      *
@@ -231,6 +236,11 @@ public class Tournament {
                 System.out.print(dividerLine);
                 System.out.println("Player Crashes:");
                 crashLog.printByCategory(null);
+                
+                System.out.println(dividerLine);
+                System.out.println("Timing:");
+                t.timing.print();
+
             }
 //        t.timing.print();
         }
@@ -576,7 +586,7 @@ public class Tournament {
         crashLog.printByCategory(null);
 
         System.out.println(dividerLine);
-        totalTiming.printByCategory(null);
+        totalTiming.print();
 
         System.out.println(dividerLine);
 

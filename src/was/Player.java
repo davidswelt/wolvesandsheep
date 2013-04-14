@@ -43,7 +43,7 @@ public abstract class Player {
     static boolean catchExceptions = false;
     static boolean logToFile = false;
     PrintStream logstream = null;
-    long totalRunTime = 0;
+    double totalRunTime = 0.0;
     long totalRuns = 0;
     boolean disqualified = false;
 
@@ -294,8 +294,8 @@ public abstract class Player {
             //timing.add(p.getClass().getName(), (double) dur / 1000.0);
             // we allow for 5 times the nominal average run time in certain cases
 
-            totalRunTime += dur / 1000;
-            if (func == 0) // only count function 0 runs (others add up)
+            totalRunTime += dur / 1000.0;
+            if (func == MOVE) // only count function 0 runs (others add up)
             {
                 totalRuns++;
             }
