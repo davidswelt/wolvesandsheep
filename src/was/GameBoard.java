@@ -59,8 +59,8 @@ public class GameBoard {
         int lastempty_y = a.y;
         
         
-        double x = a.x;
-        double y = a.y;
+        double x = a.x+0.5; // we'll start in the center of the cell
+        double y = a.y+0.5;
         double distcovered =0;
         double perstep = Math.sqrt(m.delta_x*m.delta_x+m.delta_y*m.delta_y);
         while (true) // limit search (to be sure we're terminating)
@@ -73,8 +73,8 @@ public class GameBoard {
                 break;
             }
             
-            int xx = (int) Math.round(x);
-            int yy = (int) Math.round(y);
+            int xx = (int) x;
+            int yy = (int) y;
             
             if (getPiece(xx, yy) == GamePiece.OBSTACLE)
             {
