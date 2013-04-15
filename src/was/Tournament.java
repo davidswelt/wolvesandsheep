@@ -167,11 +167,10 @@ public class Tournament {
         return "";
     }
 
-    /** given a list of objects, return combinations of N. */
-    
+    /**
+     * given a list of objects, return combinations of N.
+     */
     // To Do
-    
-    
     /**
      * Create a new tournament and run it.
      *
@@ -236,7 +235,7 @@ public class Tournament {
                 System.out.print(dividerLine);
                 System.out.println("Player Crashes:");
                 crashLog.printByCategory(null);
-                
+
                 System.out.println(dividerLine);
                 System.out.println("Timing:");
                 t.timing.print();
@@ -277,7 +276,7 @@ public class Tournament {
 //
 //        }
         // if fewer sheep or wolves are specified, just don't add them.
-        
+
         numSheep = Math.min(initNumSheep, sheep);
         numWolves = Math.min(initNumWolves, wolves);
 
@@ -315,118 +314,146 @@ public class Tournament {
     void startT(boolean printHighscores, List<Integer> selectedPlayers, int scenarioNum, int repeats) {
 // 
         try {
-            // reached number of sheep (plus wolf), or have selected all available players
-            if (selectedPlayers.size() >= numSheep + numWolves) // termination condition
-            {
 
-                for (int r = 0; r < repeats && exitRequested == false; r++) {
+            ArrayList selSheep = new ArrayList();
+            ArrayList selWolves = new ArrayList();
+            ArrayList<ArrayList> sheepComb, wolvesComb;
 
-                    int theSc = scenarioNum;
-                    if (scenarioNum==0 && repeats>=Scenario.getParameterValues().size())
-                    {
-                        theSc = 1 + (repeats % Scenario.getParameterValues().size());
+            if (selectedPlayers.size() > 0) {
+                for (Integer i : selectedPlayers) {
+                    Class plClass = players.get(i);
+                    if (isWolf(plClass)) {
+                        selWolves.add(i);
+                    } else {
+                        selSheep.add(i);
                     }
-                    
-                    scenario = Scenario.makeScenario(theSc);
+                }
+                    sheepComb = new ArrayList();
+                    sheepComb.add(selSheep);
+                    wolvesComb = new ArrayList();
+                    wolvesComb.add(selWolves);
 
-                    GameBoard board = new GameBoard(scenario.boardSize(), scenario.boardSize(), boardUI, 80);
+                
+            } else {
+                for (Integer i=0; i<players.size(); i++) {
+                    Class plClass = players.get(i);
+                    if (isWolf(plClass)) {
+                        selWolves.add(i);
+                    } else {
+                        selSheep.add(i);
+                    }
+                }
+
+                Combinations c;
+
+                c = new Combinations(selWolves);
+                wolvesComb = c.drawNwithoutReplacement(numWolves);
+                c = new Combinations(selSheep);
+                sheepComb = c.drawNwithoutReplacement(Math.min(numSheep, selSheep.size()));
+
+            }
+            
+            if (! quiet)
+            {
+                System.out.println(""+sheepComb.size()+" sheep teams, "+wolvesComb.size()+" wolves, "+repeats+" reps.");
+            }
+            
+            for (int r = 0; r < repeats && exitRequested == false; r++) {
+
+                int theSc = scenarioNum;
+                if (scenarioNum == 0 && repeats >= Scenario.getParameterValues().size()) {
+                    theSc = 1 + (r % Scenario.getParameterValues().size());
+                }
+
+                scenario = Scenario.makeScenario(theSc);
+
+                for (ArrayList selWolfComb : wolvesComb) {
+                    for (ArrayList selSheepComb : sheepComb) {
+                        selectedPlayers = new ArrayList();
+                        selectedPlayers.addAll(selWolfComb);
+                        selectedPlayers.addAll(selSheepComb);
 
 
-                    Stack<GameLocation> wolfQueue = new Stack();
-                    Stack<GameLocation> sheepQueue = new Stack();
+                        GameBoard board = new GameBoard(scenario.boardSize(), scenario.boardSize(), boardUI, 80);
 
-                    scenario.addToBoard(board, wolfQueue, sheepQueue); // add scenario first to occupy these spaces
+
+                        Stack<GameLocation> wolfQueue = new Stack();
+                        Stack<GameLocation> sheepQueue = new Stack();
+
+                        scenario.addToBoard(board, wolfQueue, sheepQueue); // add scenario first to occupy these spaces
 
 //                      System.err.println("sel pl len="+selectedPlayers.size());
-                    for (Integer i : selectedPlayers) {
-                        Class plClass = players.get(i);
-                        Stack<GameLocation> queue = isWolf(plClass) ? wolfQueue : sheepQueue;
-                        GameLocation initialLocation = queue.empty() ? board.randomEmptyLocation(wolfQueue, sheepQueue) : queue.pop();
+                        for (Integer i : selectedPlayers) {
+                            Class plClass = players.get(i);
+                            Stack<GameLocation> queue = isWolf(plClass) ? wolfQueue : sheepQueue;
+                            GameLocation initialLocation = queue.empty() ? board.randomEmptyLocation(wolfQueue, sheepQueue) : queue.pop();
 
-                        Player player = playerFactory(plClass, (isWolf(plClass) ? "w" : "s"));
-                        if (player != null) {
-                            board.addPlayer(player, initialLocation);
-                        }
-                        // note use even if player wasn't added (due to crash!)
-                        highscore.noteUse(plClass.getName());
-                        scenarioScore.noteUse("Scenario " + scenario.toString() + "\\" + plClass.getName());
+                            Player player = playerFactory(plClass, (isWolf(plClass) ? "w" : "s"));
+                            if (player != null) {
+                                board.addPlayer(player, initialLocation);
+                            }
+                            // note use even if player wasn't added (due to crash!)
+                            highscore.noteUse(plClass.getName());
+                            scenarioScore.noteUse("Scenario " + scenario.toString() + "\\" + plClass.getName());
 
-                        if (teams.get(plClass) == null) {
-                            //System.err.println(i);
-                            //System.err.println("WARNING: can't get team for " + players.get(i));
-                        } else {
-                            // note use of player so that team score can be normalized later
-                            highscore.noteUse(teams.get(plClass) + (isWolf(plClass) ? ".WolfTeam" : ".SheepTeam"));
-                        }
-                    }
-
-                    int wolves = 0, sheep = 0;
-
-                    for (Player p : board.players) {
-                        if (p instanceof WolfPlayer) {
-                            wolves++;
-                        }
-                        if (p instanceof SheepPlayer) {
-                            sheep++;
-                        }
-                    }
-
-                    if (sheep >= minNumSheepRequiredToRun && wolves >= minNumWolvesRequiredToRun) {
-
-                        if (r == 0 && !quiet) {
-                            board.printPlayerOverview();
-                            board.print();
+                            if (teams.get(plClass) == null) {
+                                //System.err.println(i);
+                                //System.err.println("WARNING: can't get team for " + players.get(i));
+                            } else {
+                                // note use of player so that team score can be normalized later
+                                highscore.noteUse(teams.get(plClass) + (isWolf(plClass) ? ".WolfTeam" : ".SheepTeam"));
+                            }
                         }
 
-                        try {
-                            Map<Player, int[]> s = board.playGame(pauseInitially);
+                        int wolves = 0, sheep = 0;
 
-                            for (Map.Entry<Player, int[]> score : s.entrySet()) {
-                                Class cl = score.getKey().getClass();
-                                highscore.inc(cl.getName(), score.getValue()[0]);
+                        for (Player p : board.players) {
+                            if (p instanceof WolfPlayer) {
+                                wolves++;
+                            }
+                            if (p instanceof SheepPlayer) {
+                                sheep++;
+                            }
+                        }
 
-                                if (teams.get(cl) != null) { // Pastures etc don't have a team
+                        if (sheep >= minNumSheepRequiredToRun && wolves >= minNumWolvesRequiredToRun) {
 
-                                    highscore.inc(teams.get(cl) + (score.getKey() instanceof WolfPlayer ? ".WolfTeam" : ".SheepTeam"), score.getValue()[0]);
+                            if (r == 0 && !quiet) {
+                                board.printPlayerOverview();
+                                board.print();
+                            }
+
+                            try {
+                                Map<Player, int[]> s = board.playGame(pauseInitially);
+
+                                for (Map.Entry<Player, int[]> score : s.entrySet()) {
+                                    Class cl = score.getKey().getClass();
+                                    highscore.inc(cl.getName(), score.getValue()[0]);
+
+                                    if (teams.get(cl) != null) { // Pastures etc don't have a team
+
+                                        highscore.inc(teams.get(cl) + (score.getKey() instanceof WolfPlayer ? ".WolfTeam" : ".SheepTeam"), score.getValue()[0]);
+                                    }
+                                    timing.inc(cl.getName(), score.getKey().meanRunTime());
+
+
+                                    scenarioScore.inc("Scenario " + scenario.toString() + "\\" + cl.getName(), score.getValue()[0]);
+
+                                    timing.noteUse(cl.getName());
                                 }
-                                timing.inc(cl.getName(), score.getKey().meanRunTime());
+                            } finally {
+                                if (printHighscores) {
+                                    //final String ESC = "\033[";
+                                    //System.out.println(ESC + "2J"); 
+                                    highscore.printByCategory(null);
 
-
-                                scenarioScore.inc("Scenario " + scenario.toString() + "\\" + cl.getName(), score.getValue()[0]);
-
-                                timing.noteUse(cl.getName());
-                            }
-                        } finally {
-                            if (printHighscores) {
-                                //final String ESC = "\033[";
-                                //System.out.println(ESC + "2J"); 
-                                highscore.printByCategory(null);
-
+                                }
                             }
                         }
                     }
+
+
                 }
-
-
-            } else {
-                for (int i = 0; i < players.size() && exitRequested == false; i++) {
-                    Class p1 = players.get(i);
-
-                    // do not add a player twice
-                    if (!selectedPlayers.contains(i)) {
-                        if ((isWolf(p1) && countPl(selectedPlayers, true) < numWolves)
-                                || (!isWolf(p1) && countPl(selectedPlayers, false) < numSheep)) {
-                            selectedPlayers.add(i);
-
-                            startT(printHighscores, selectedPlayers, scenarioNum, repeats);
-                            selectedPlayers.remove(selectedPlayers.size() - 1); // so we don't have to make a copy
-
-
-                        }
-                    }
-                }
-
-
             }
         } catch (IllegalArgumentException ex) {
             Logger.getLogger(Tournament.class
