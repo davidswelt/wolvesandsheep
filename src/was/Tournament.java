@@ -392,7 +392,7 @@ public class Tournament {
                                 timing.inc(cl.getName(), score.getKey().meanRunTime());
 
 
-                                scenarioScore.inc("Scenario" + scenario.toString() + "\\" + cl.getName(), score.getValue()[0]);
+                                scenarioScore.inc("Scenario " + scenario.toString() + "\\" + cl.getName(), score.getValue()[0]);
 
                                 timing.noteUse(cl.getName());
                             }
