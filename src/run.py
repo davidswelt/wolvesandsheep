@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 targetfile = "/home/dreitter/submission/media/results/latest.html"
-tourn_args = "-c -t -e -q -r 5000"
+tourn_args = "-c -t -e -q -r 32"
 
 import os
 
