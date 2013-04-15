@@ -17,7 +17,7 @@ class WasVideoGame extends ch.aplu.jgamegrid.GameGrid implements WasGameBackend,
         super(board.getCols(), board.getRows(), PlayerProxy.getCellSize(board));
         this.board = board;
         setBgColor(java.awt.Color.WHITE);
-        
+        setTitle("Wolves And Sheep");
         setSimulationPeriod(50);
 
         addExitListener(this);
