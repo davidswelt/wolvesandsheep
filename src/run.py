@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 targetfile = "/home/dreitter/submission/media/results/latest.html"
-tourn_args = "-c -t -e -q -r 32"
+tourn_args = "-c -t -e -q -r 48"
 
 import os
 
@@ -22,8 +22,9 @@ import datetime
 
 tmpfile = targetfile+".tmp"
 
-now =datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
-prefix = "{% extends \"base_generic.html\" %}{% block content %}<h1>Tournament results</h1><i>Time: "+now+"</i><p><pre>"
+def now ():
+    return datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+prefix = "{% extends \"base_generic.html\" %}{% block content %}<h1>Tournament results</h1><i>Time: "+now()+"</i><p><pre>"
 
 cmd = "java -cp WolvesAndSheep.jar:lib/\*:players/\*:classic.players/\*:../was/\* was.Tournament %s %s >>%s" % (tourn_args, " ".join(jars), tmpfile)
 
@@ -33,6 +34,6 @@ with open(tmpfile, "w") as text_file:
     text_file.write(prefix)
 os.system(cmd)
 with open(tmpfile, "a") as text_file:
-    text_file.write("</pre>{% endblock content %}")
+    text_file.write("</pre>Finished:"+now()+".{% endblock content %}")
 
 os.system("mv \"%s\" \"%s\""%(tmpfile,targetfile))
