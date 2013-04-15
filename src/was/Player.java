@@ -264,6 +264,7 @@ public abstract class Player {
 
                 Object[] ret2 = new Object[4];
                 ret2[0] = m;
+                // A nanosecond (ns) is one billionth of a second
                 ret2[1] = (Long) ((threadMXBean.getCurrentThreadCpuTime() - startTime) / 1000); // nanosec to 1000*millisec
                 return ret2;
             }
@@ -293,8 +294,8 @@ public abstract class Player {
             m = (Object) result[0];
             //timing.add(p.getClass().getName(), (double) dur / 1000.0);
             // we allow for 5 times the nominal average run time in certain cases
-
-            totalRunTime += dur / 1000.0;
+            // dur is sec/1000000
+            totalRunTime += dur / 1000.0; // millisec
             if (func == MOVE) // only count function 0 runs (others add up)
             {
                 totalRuns++;
