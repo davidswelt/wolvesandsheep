@@ -49,27 +49,47 @@ public class GameBoard {
     // can move along line between a and b
     GameLocation clearShot(GameLocation a, GameLocation b)
     {
-        
         // diagonal steps are OK
-        Move m = new Move(b.x-a.x, b.y-a.y).scaledToLength(Math.sqrt(2));
+        Move m = new Move(b.x-a.x, b.y-a.y);
+
+        double maxlen = m.length();
+        m=m.scaledToLength(Math.sqrt(2));
         
-       
+        int lastempty_x = a.x;
+        int lastempty_y = a.y;
+        
+        
         double x = a.x;
         double y = a.y;
-        for (int i=0; i<10; i++) // limit search (to be sure we're terminating)
+        double distcovered =0;
+        double perstep = Math.sqrt(m.delta_x*m.delta_x+m.delta_y*m.delta_y);
+        while (true) // limit search (to be sure we're terminating)
         {
             x += m.delta_x;
             y += m.delta_y;
+            distcovered += perstep;
+            if (distcovered >maxlen)
+            {
+                break;
+            }
             
-            if (getPiece((int) Math.round(x), (int) Math.round(y)) == GamePiece.OBSTACLE)
+            int xx = (int) Math.round(x);
+            int yy = (int) Math.round(y);
+            
+            if (getPiece(xx, yy) == GamePiece.OBSTACLE)
             {
                 // return previous (known good) location
-                return new GameLocation((int) Math.round(x-m.delta_x), (int) Math.round(y-m.delta_y));
+                return new GameLocation(lastempty_x, lastempty_y);
             }
-            if (b.x == (int) Math.round(x) && b.y == (int) Math.round(y))
+            if (b.x == xx && b.y == yy)
             {
                 break;
             } 
+            if (isEmptyCell(xx,yy))
+            {
+                lastempty_x = xx;
+                lastempty_y = yy;
+            }
         }
         return b;
     }
