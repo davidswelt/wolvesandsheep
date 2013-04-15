@@ -15,7 +15,20 @@ import static was.Tournament.logPlayerCrash;
  */
 public class PlayerTest {
 
+    static HighScore log;
+    static boolean mayNotInheritFrom(Class playerClass, String other)
+            throws ClassNotFoundException
+    {
+        if (Class.forName(other).isAssignableFrom(playerClass) && Class.forName(other) != playerClass) {
+                String str = String.format("Class %s inherits from %s.\n", playerClass.getName(), other);
+                log.inc(str);
+                System.err.println(str);
+                return true;
+            }
+        return false;
+    }
     public static boolean runTest(Class playerClass, HighScore log) {
+        PlayerTest.log = log;
         try {
             String str;
             boolean isWolf;
@@ -28,18 +41,15 @@ public class PlayerTest {
                 log.inc(str);
                 System.err.println(str);
                 return false;
-            }
-            if (Class.forName("reitter.Wolf").isAssignableFrom(playerClass) && Class.forName("reitter.Wolf") != playerClass) {
-                str = String.format("Class %s inherits from reitter.Wolf.\n", playerClass.getName());
-                log.inc(str);
-                System.err.println(str);
-                return false;
-            } else if (Class.forName("reitter.Sheep").isAssignableFrom(playerClass) && Class.forName("reitter.Sheep") != playerClass) {
-                str = String.format("Class %s inherits from reitter.Sheep.\n", playerClass.getName());
-                log.inc(str);
-                System.err.println(str);
+            } 
+            
+            if ( mayNotInheritFrom(playerClass, "reitter.Wolf") ||
+                    mayNotInheritFrom(playerClass, "greene.Wolf") ||
+                    mayNotInheritFrom(playerClass, "reitter.Sheep"))
+            {
                 return false;
             }
+                    
             return true;
         } catch (ClassNotFoundException ex) {
             // reitter.* may not be included
@@ -127,20 +137,23 @@ public class PlayerTest {
 
         // parse the command line
         int i = 0;
+        boolean pass = true;
         while (i < args.length) {
             String s = args[i++];
 
-            System.err.println("Testing " + s);
+            System.out.println("Testing " + s);
             if (runTest(s, new HighScore())) {
-                System.err.println("Class passed the test.");
+                System.out.println(s+" passed.");
             } else {
-                System.err.println("Class failed the test.");
+                System.out.println(s+" failed.");
+                pass = false;
             }
 
         }
-
-        System.err.println("Usage: java -jar W -classpath .:./players/ was.PlayerTest PACKAGENAME.CLASS");
-        System.err.println("Put player .jar files into players/");
-
+        if (args.length == 0) {
+            System.err.println("Usage: java -jar W -classpath .:./players/ was.PlayerTest PACKAGENAME.CLASS");
+            System.err.println("Put player .jar files into players/");
+        }
+        System.exit(pass ? 0 : 1);
     }
 }
