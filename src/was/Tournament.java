@@ -506,18 +506,20 @@ public class Tournament {
         String[] sheepteams = new String[]{
             "Black Sheep:skotleski,cotter,svinte,mancini",
             "Creepy Sheepies:vickery,chin,kim,wei", // 
-            "Dolly's Den:dori,boyd,stramitis", //TUBERGEN  // BROADWATER   MUST REPEAT MISSING STUDENTS (4 sheep guaranteed)
-            "Nervous Wreck:harsham,heath"
+            "Dolly's Den:dori,boyd,stramitis,dori", //   MUST REPEAT MISSING STUDENTS (4 sheep guaranteed)
+            "Nervous Wreck:harsham,heath,harsham,heath", //
+            "Old Mutton (Classic):derhammer,chan,derhammer,chan"
                      
         };
 
+        // team scores are averages, not sums - so team size doesn't matter
         String[] wolves = new String[]{
             "Wolves:scottmurphy,amberson,wenzel",
             "Lone Hunters:bouknight,chong,fannon,fox",
             "Furry Fury:gehr,hatzell,jesukiewicz,lankay",
             "The Gray:miller,rao,scanlon,stoltz",
             "Wolf in Sheep's Clothing:tomechko,toohig,weiler",
-            "Meat Eater:REITTER"
+            "Meat Eater (Classic):reitter,greene,norante"
         };
 
 
