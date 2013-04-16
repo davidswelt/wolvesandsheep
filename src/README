@@ -1,0 +1,18 @@
+Notes to self.
+
+
+The .jar produced by this project needs to be signed before deployment.  "sign" does that. (new keys may have to be generated.)
+
+sync.sh signs and uploads the produced .jar to server.   Clean&build in Netbeans before doing that.
+use a softlink and run it from the project directory.
+
+test-was.sh is needed if .jar files are run from within NetBeans (with graphical output).  This will strip them of the "was" packages, most importantly.
+run it from the project directory.
+
+run.py runs the tournament (either free-form, or as defined by TOurnament.ist240).  This is typically a cron job on the server.
+If set up to run the 240 tournament, it'll keep repeating it for 10 minutes before producing output in a specified HTML file.
+
+
+DR 4/2013
+
+

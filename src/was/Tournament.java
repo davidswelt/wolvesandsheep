@@ -500,25 +500,26 @@ public class Tournament {
         // adjust timeout
         //TIMEOUT = (long) ((float) TIMEOUT * (float) Benchmark.runBenchmark());
     }
-    static String dividerLine = "__________________________________________________________________________________________\n\n";
+    static String dividerLine = "_______________________________________________________________________________________________________________________________\n\n";
 
-    public static void ist240(int repeats) {
+    public static void ist240(int repeats, int minutes) {
         String[] sheepteams = new String[]{
-            "Black Sheep:CHHITH,GEISER,HAFAIRI,HOFBAUER",
-            "Creepy Sheepies:CONTINO,GARRITY,HOFFMAN,TAILOR", // 
-            "Dolly's Den:DERHAMMER,DERHAMMER,CHAN,CHAN", //TUBERGEN  // BROADWATER   MUST REPEAT MISSING STUDENTS (4 sheep guaranteed)
-            "White Sheep:BONCHONSKY,HE,SUON,USCAMAYTA",
-            "Nervous Wreck:REITTER,REITTER,REITTER,REITTER"
+            "Black Sheep:skotleski,cotter,svinte,mancini",
+            "Creepy Sheepies:vickery,chin,kim,wei", // 
+            "Dolly's Den:dori,boyd,stramitis", //TUBERGEN  // BROADWATER   MUST REPEAT MISSING STUDENTS (4 sheep guaranteed)
+            "Nervous Wreck:harsham,heath"
+                     
         };
 
         String[] wolves = new String[]{
-            "Hungry Beast:MONDELL,MULLEN,MUNOZ",
-            "Lone Hunters:CHEETHAM,KIDNEY,LAFFERTY",
-            "Furry Fury:REIZNER,SICINSKI,ZIELENSKI",
-            "The Gray:NORANTE,RAUGH,ULIANA",
-            "Wolf in Sheep's Clothing:GREENE,WILKINSON,YOSUA",
+            "Wolves:scottmurphy,amberson,wenzel",
+            "Lone Hunters:bouknight,chong,fannon,fox",
+            "Furry Fury:gehr,hatzell,jesukiewicz,lankay",
+            "The Gray:miller,rao,scanlon,stoltz",
+            "Wolf in Sheep's Clothing:tomechko,toohig,weiler",
             "Meat Eater:REITTER"
         };
+
 
         HighScore totalHighscore = new HighScore().setTitle("total");
         HighScore totalTiming = new HighScore().setTitle("timing");
@@ -535,8 +536,11 @@ public class Tournament {
         }
         totalRuns = totalRuns * sheepteams.length * Scenario.getParameterValues().size();
         int runcount = 1;
+        long targetTimeSecs = Math.max(1, minutes * 60); // 10 minutes
         long startTime = System.currentTimeMillis();
 
+        while ((System.currentTimeMillis() - startTime)< targetTimeSecs*1000)
+        {
         for (String s : sheepteams) { // each sheep team
             String sheepteam = prefix(s);
 
@@ -555,7 +559,6 @@ public class Tournament {
 
                     for (Class sh : p) {
                         teams.put(sh, sheepteam);
-
                     }
 
                     p.add(w2); // one wolf
@@ -571,8 +574,20 @@ public class Tournament {
                     for (int sp : Scenario.getParameterValues()) {
 
                         if (avgtimeperrun > 0) {
-                            System.out.printf("running (%s out of %s).  %s mins. left\n", runcount, totalRuns,
-                                    (int) (((totalRuns - runcount) * avgtimeperrun) / 1000 / 60));
+                            long mleft = (long) ((targetTimeSecs*1000-(System.currentTimeMillis() - startTime))/1000.0);
+                            if (mleft<1)
+                            {
+                                mleft = (int) (((totalRuns - runcount) * avgtimeperrun) / 1000.0 +0.5);
+                                System.err.printf("running (%s out of %s).  %s secs. left\n", runcount, totalRuns, mleft);
+                                  
+                            }
+                            else
+                            {
+                                System.err.printf("running (%s).  %s secs. left\n", runcount, mleft);
+                                  
+                            }
+                            
+                              
                         }
                         runcount++;
 
@@ -590,12 +605,15 @@ public class Tournament {
                             break;
                         }
                     }
+                    if (! quiet)
+                    {
                     totalHighscore.printByCategory(null);
-
+                    }
                 }
             }
         }
-
+        }
+        System.out.println("###########################"); // marker for processing script
         System.out.print(dividerLine);
         System.out.println("IST240 Tournament results:");
         for (String s : sheepteams) {
@@ -606,13 +624,15 @@ public class Tournament {
         }
         System.out.println("\n");
 
-        totalHighscore.printByCategory(scenarioHighScore.values());
+        totalHighscore.printByClass(scenarioHighScore.values());
 
+        
         System.out.print(dividerLine);
         System.out.println("Player Crashes:");
         crashLog.printByCategory(null);
 
         System.out.println(dividerLine);
+        System.out.println("Timing (ms.):");
         totalTiming.print();
 
         System.out.println(dividerLine);
@@ -648,6 +668,7 @@ public class Tournament {
         boolean ui = true;
         boolean run240 = false;
         boolean tourn = false;
+        int duration = 0;
 
         // parse the command line
         int i = 0;
@@ -658,9 +679,7 @@ public class Tournament {
             } else if (s.equals("-c")) {
                 ui = false;
             } else if (s.equals("-q")) {
-
                 quiet = true;
-
             } else if (s.equals("-e")) {
                 Player.catchExceptions = true;
                 Player.logToFile = true;
@@ -671,6 +690,10 @@ public class Tournament {
             } else if (s.equals("-ist240")) {
 
                 run240 = true;
+
+            } else if (s.equals("-d")) {
+
+                duration = Integer.parseInt(args[i++]);
 
             } else if (s.equals("-s")) {
 
@@ -691,7 +714,7 @@ public class Tournament {
 
 
         if (run240) {
-            ist240(r);
+            ist240(r,duration);
         } else {
             if (players.size() > 0) {
 
@@ -712,7 +735,7 @@ public class Tournament {
                 // do not run a default case to make sure it doesn't cause confusion.
                 //            was.Tournament.run("reitter.SheepPlayer,reitter.WolfPlayer,reitter.SheepPlayer,reitter.SheepPlayer, reitter.SheepPlayer", 100);
 
-                // for testing purposes:  greene.Wolf zielenski.Wolf Wilkinson.Wolf derhammer.Sheep chan.Sheep derhammer.Sheep tailor.Sheep
+                // for testing prposes:  greene.Wolf zielenski.Wolf Wilkinson.Wolf derhammer.Sheep chan.Sheep derhammer.Sheep tailor.Sheep
                 // (greene is one of the stronger wolves.)
             }
         }

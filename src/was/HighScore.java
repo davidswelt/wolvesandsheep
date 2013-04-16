@@ -19,6 +19,8 @@ public class HighScore extends TreeMap<String, Double> {
 
     TreeMap<String, Integer> uses = new TreeMap();
 
+    final int COLUMNWIDTH = 8;
+    
     HighScore setTitle(String t) {
         title = t;
         return this;
@@ -97,8 +99,7 @@ public class HighScore extends TreeMap<String, Double> {
     String title = "";
 
     String leftAlign(String s, int a) {
-        return
-        (a-s.length()>0 ? String.format("%" + (a-s.length()) + "s", "") : "")
+        return (a - s.length() > 0 ? String.format("%" + (a - s.length()) + "s", "") : "")
                 + String.format("%s", s);
     }
 
@@ -107,11 +108,11 @@ public class HighScore extends TreeMap<String, Double> {
     }
 
     void printHeader(Collection<HighScore> extraColumns) {
-        System.out.printf("\n%" + printAlignment + "s  %s", "", leftAlign(title, 7));
+        System.out.printf("\n%" + printAlignment + "s  %s", "", leftAlign(title, COLUMNWIDTH));
         if (extraColumns != null) {
             for (HighScore h : extraColumns) {
                 if (h != null) {
-                    System.out.printf("%s", leftAlign(h.title, 7));
+                    System.out.printf("%s", leftAlign(h.title, COLUMNWIDTH));
                 }
             }
 
@@ -124,12 +125,12 @@ public class HighScore extends TreeMap<String, Double> {
         for (String k : keys) {
 
             System.out.print(rightAlign(removePrefix(k), printAlignment) + ": ");
-            System.out.print(rightAlign(String.format("%.3f", getNormalized(k)), 8));
+            System.out.print(rightAlign(String.format("%.3f", getNormalized(k)), COLUMNWIDTH));
             if (extraColumns != null) {
                 for (HighScore h : extraColumns) {
 
                     if (h != null) {
-                        System.out.print(rightAlign(String.format("%.3f", h.getNormalized(k)), 8));
+                        System.out.print(rightAlign(String.format("%.3f", h.getNormalized(k)), COLUMNWIDTH));
                     }
                 }
 
@@ -147,8 +148,18 @@ public class HighScore extends TreeMap<String, Double> {
         }
         return result;
     }
-  
+
     public void printByCategory(Collection<HighScore> extraColumns) {
+        printInternal(extraColumns, false);
+
+    }
+
+    public void printByClass(Collection<HighScore> extraColumns) {
+        printInternal(extraColumns, true);
+
+    }
+
+    void printInternal(Collection<HighScore> extraColumns, boolean byClass) {
 
         setAlignment();
         printHeader(extraColumns);
@@ -157,12 +168,12 @@ public class HighScore extends TreeMap<String, Double> {
         // categories
         for (String k : keys) {
             //categories marked with \ or .
-            StringTokenizer t = new StringTokenizer(k, k.contains("\\") ? "\\" : "");
+            StringTokenizer t = new StringTokenizer(k, k.contains("\\") ? "\\" : (byClass? "." : ""));
             String classname;
             classname = t.nextToken();
-//            if (t.hasMoreTokens()) {
-//                classname = t.nextToken();
-//            }
+            if (byClass && t.hasMoreTokens()) {
+                classname = t.nextToken();
+            }
             if (cats.get(classname) == null) {
                 cats.put(classname, new ArrayList());
             }
@@ -172,7 +183,7 @@ public class HighScore extends TreeMap<String, Double> {
         // for each category, print it, sorted
         for (String k : new TreeSet<String>(cats.keySet())) {
             System.out.println();
-            System.out.println(k+":");
+            System.out.println(k + ":");
             printKeys(cats.get(k), true, extraColumns);
         }
     }

@@ -1,38 +1,58 @@
 #!/usr/bin/python
 
+import random
+
 targetfile = "/home/dreitter/submission/media/results/latest.html"
-tourn_args = "-c -t -e -q -r 48"
+tmpf = "%s"%random.randint(1, 10)
+ist240 = True # run actual 240 tournament
+tourn_args = "-d 10 -c -e"  # run for 10 minutes
+#tourn_args = "-c -t -e -q -r 8"
 
 import os
 
 os.system("rm -r players >/dev/null; mkdir players; cp ../submission/media/was/*.jar players/");
 
-# list of players
 
-jars = ['basic.Wolf','basic.Sheep']
+if ist240:
+    tourn_args = "-ist240 " + tourn_args
+    jars = []
+else:
 
-for dir in ["players","classic.players"]:
-    for r,d,f in os.walk(dir):
-    	for files in f:
-            if files.endswith(".jar"):
-	        jars += [files[:-4]]
+
+    # list of players
+
+    jars = ['basic.Wolf','basic.Sheep']
+
+    for dir in ["players","classic.players"]:
+        for r,d,f in os.walk(dir):
+            for files in f:
+                if files.endswith(".jar"):
+                    jars += [files[:-4]]
 
 
 import datetime
 
-tmpfile = targetfile+".tmp"
+tmpfile = targetfile+"."+tmpf
 
 def now ():
     return datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
 prefix = "{% extends \"base_generic.html\" %}{% block content %}<h1>Tournament results</h1><i>Time: "+now()+"</i><p><pre>"
 
-cmd = "java -cp WolvesAndSheep.jar:lib/\*:players/\*:classic.players/\*:../was/\* was.Tournament %s %s >>%s" % (tourn_args, " ".join(jars), tmpfile)
+cmdtmpfile = tmpfile+".run"
+cmd = "java -cp WolvesAndSheep.jar:lib/\*:players/\*:classic.players/\*:../was/\* was.Tournament %s %s >>%s" % (tourn_args, " ".join(jars), cmdtmpfile)
 
 print cmd
 
 with open(tmpfile, "w") as text_file:
     text_file.write(prefix)
 os.system(cmd)
+
+if ist240:
+    # insert portion after marker only
+    os.system("grep -A1000 -e '##########' \"%s\" >>\"%s\""%(cmdtmpfile,tmpfile))
+else:
+    os.system("cat \"%s\" >>\"%s\""%(cmdtmpfile,tmpfile))
+
 with open(tmpfile, "a") as text_file:
     text_file.write("</pre>Finished:"+now()+".{% endblock content %}")
 
