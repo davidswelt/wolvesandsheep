@@ -1,0 +1,2 @@
+jarsigner -storepass javakey  -keypass javakey dist/WolvesAndSheep.jar dr2
+jarsigner -storepass javakey  -keypass javakey dist/lib/JGameGrid.jar dr2
