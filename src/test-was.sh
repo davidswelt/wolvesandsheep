@@ -9,17 +9,17 @@ target=dist/WolvesAndSheep.jar
 
 alljars=
 allclasses=
-for file in `ls players/*.jar`; do
+for file in `ls players/*.jar players/*/*.jar`; do
 
 file2=`echo $file | tr [:upper:] [:lower:]` 
 mv $file $file2 
 file=$file2
 
 # delete javafx and was packages if necessary
-zip -d $file javafx/*
-zip -d $file was/*
-zip -d $file players/*
-zip -d $file basic/*
+zip -d $file javafx/\*
+zip -d $file was/\*
+zip -d $file players/\*
+zip -d $file basic/\*
 zip -d $file sandbox2.policy test-was.sh reitter.jar
 
 if [ "$file" != "players/reitter.jar" ]; then
