@@ -37,46 +37,6 @@ public class Tournament {
     static boolean pauseInitially = false;
     static boolean quiet = false;
 
-    static Class name2class(String name, String[] postfix) {
-        // we'll try different variants
-
-        String[] n = new String[4];
-        n[0] = name;
-        n[1] = name.toLowerCase();
-        n[2] = name.substring(0, 1).toUpperCase() + name.substring(1).toLowerCase();
-        n[3] = name.toUpperCase();
-
-        if (postfix == null) {
-            postfix = new String[0];
-        }
-
-        Class c = null;
-        for (String s : n) {
-            try {
-                for (String p : postfix) {
-                    try {
-                        c = Class.forName(s + p);
-                    } catch (ClassNotFoundException ex) {
-                    }
-                }
-            } catch (SecurityException ex) {
-                Logger.getLogger(Tournament.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            if (c != null) {
-                break;
-            }
-        }
-
-        if (c == null) {
-            System.err.print("No such class: " + n[1] + postfix);
-//            for (String s : n) {
-//                System.err.print(s + postfix + ", ");
-//            }
-            System.err.println("");
-        }
-
-        return c;
-    }
     static HighScore crashLog = new HighScore().setTitle("crashes");
 
     static void logPlayerCrash(Class pl, Exception ex) {
@@ -84,80 +44,10 @@ public class Tournament {
         crashLog.inc(pl.getName() + ".Crash\\" + ex);
     }
 
-    Player playerFactory(Class cl, String symbol) {
-        try {
-            Constructor c = cl.getConstructor();
-            try {
-                return (Player) c.newInstance();
-            } catch (InstantiationException ex) {
-                Logger.getLogger(Tournament.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (IllegalAccessException ex) {
-                Logger.getLogger(Tournament.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (IllegalArgumentException ex) {
-                Logger.getLogger(Tournament.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (RuntimeException ex) {
-
-                if (Player.catchExceptions) {
-                    if (!Player.logToFile) {
-                        Logger.getLogger(Tournament.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                    logPlayerCrash(cl, ex);
-                } else {
-                    throw ex;
-                }
-            } catch (InvocationTargetException ex) {
-                if (!Player.logToFile) {
-                    Logger.getLogger(Tournament.class.getName()).log(Level.SEVERE, null, ex);
-                }
-                logPlayerCrash(cl, ex);
-                if (!Player.catchExceptions) {
-
-                    throw new RuntimeException("Exception in Player constructor!");
-
-
-                }
-            }
-        } catch (NoSuchMethodException ex) {
-            Logger.getLogger(Tournament.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SecurityException ex) {
-            Logger.getLogger(Tournament.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-
-
-        return null;
-    }
     HighScore timing = new HighScore();
     HighScore highscore = new HighScore();
     HighScore scenarioScore = new HighScore();
 
-    static ArrayList<Class> string2classlist(String listofPlayerClassNames, String postfix) {
-
-        StringTokenizer st = new StringTokenizer(listofPlayerClassNames, ":");
-        if (st.hasMoreElements()) {
-            st.nextToken();
-            if (st.hasMoreElements()) {
-                listofPlayerClassNames = st.nextToken();
-            }
-        }
-
-        String[] pfa = new String[]{postfix};
-
-
-
-        ArrayList<Class> players = new ArrayList<Class>();
-        st = new StringTokenizer(listofPlayerClassNames, ", ");
-
-        while (st.hasMoreElements()) {
-            Class cs = name2class(st.nextToken(), pfa);
-            if (cs != null) {
-                players.add(cs);
-            }
-        }
-
-
-        return players;
-    }
 
     static String prefix(String s) {
         StringTokenizer st = new StringTokenizer(s, ":");
@@ -174,36 +64,36 @@ public class Tournament {
     /**
      * Create a new tournament and run it.
      *
-     * @param listofPlayerClassNames String of comma-separated, fully qualified
+     * @param listofPlayerPClassNames String of comma-separated, fully qualified
      * classnames of players, e.g. "smith.Sheep,smith.Sheep,smith.Sheep,
      * reitter.SheepPlayer,reitter.WolfPlayer". Needs a minimum number of
      * players. Repeat player class names if necessary.
      *
      * @param repeats number of repetitions
      */
-    static public void run(String listofPlayerClassNames, int repeats) {
+    static public void run(String listofPlayerPClassNames, int repeats) {
 
 
-        run(string2classlist(listofPlayerClassNames, ""), repeats);
+        run(PlayerFactory.string2classlist(listofPlayerPClassNames, ""), repeats);
 
     }
 
     /**
      * creates and runs a tournament, printing the results.
      *
-     * @param playerClasses Array of classes of players. Each player has to
+     * @param playerPClasses Array of classes of players. Each player has to
      * implement the was.Player interface.
      * @param r number of repetitions to run
      */
-    static public void run(List<Class> playerClasses, int r) {
+    static public void run(List<Class> playerPClasses, int r) {
 
-        run(playerClasses, r, false, 0, true, true);
+        run(playerPClasses, r, false, 0, true, true);
     }
 
     /**
      * creates and runs a tournament, printing the results.
      *
-     * @param playerClasses Array of classes of players. Each player has to
+     * @param playerPClasses Array of classes of players. Each player has to
      * implement the was.Player interface.
      * @param r number of repetitions to run
      * @param ui true if UI is to be shown
@@ -212,14 +102,14 @@ public class Tournament {
      * players. Otherwise, all given players will be added to the game board at
      * once.
      */
-    static public Tournament run(List<Class> playerClasses, int r, boolean ui, int scenario, boolean comb, boolean printHighScore) {
+    static public Tournament run(List<Class> playerPClasses, int r, boolean ui, int scenario, boolean comb, boolean printHighScore) {
 
         Tournament t;
 
 
-        t = new Tournament(playerClasses, r, ui);
+        t = new Tournament(playerPClasses, r, ui);
 
-        int totalgames = r * playerClasses.size() * Math.max(1, playerClasses.size() - 1) * Math.max(1, playerClasses.size() - 2) * Math.max(1, playerClasses.size() - 3);
+        int totalgames = r * playerPClasses.size() * Math.max(1, playerPClasses.size() - 1) * Math.max(1, playerPClasses.size() - 2) * Math.max(1, playerPClasses.size() - 3);
 
 //        System.err.println("Total trials: " + totalgames);
 
@@ -321,8 +211,8 @@ public class Tournament {
 
             if (selectedPlayers.size() > 0) {
                 for (Integer i : selectedPlayers) {
-                    Class plClass = players.get(i);
-                    if (isWolf(plClass)) {
+                    Class plPClass = players.get(i);
+                    if (isWolf(plPClass)) {
                         selWolves.add(i);
                     } else {
                         selSheep.add(i);
@@ -336,8 +226,8 @@ public class Tournament {
                 
             } else {
                 for (Integer i=0; i<players.size(); i++) {
-                    Class plClass = players.get(i);
-                    if (isWolf(plClass)) {
+                    Class plPClass = players.get(i);
+                    if (isWolf(plPClass)) {
                         selWolves.add(i);
                     } else {
                         selSheep.add(i);
@@ -373,7 +263,6 @@ public class Tournament {
                         selectedPlayers.addAll(selWolfComb);
                         selectedPlayers.addAll(selSheepComb);
 
-
                         GameBoard board = new GameBoard(scenario.boardSize(), scenario.boardSize(), boardUI, 80);
 
 
@@ -384,24 +273,24 @@ public class Tournament {
 
 //                      System.err.println("sel pl len="+selectedPlayers.size());
                         for (Integer i : selectedPlayers) {
-                            Class plClass = players.get(i);
-                            Stack<GameLocation> queue = isWolf(plClass) ? wolfQueue : sheepQueue;
+                            Class pclass = players.get(i);
+                            Stack<GameLocation> queue = isWolf(pclass) ? wolfQueue : sheepQueue;
                             GameLocation initialLocation = queue.empty() ? board.randomEmptyLocation(wolfQueue, sheepQueue) : queue.pop();
 
-                            Player player = playerFactory(plClass, (isWolf(plClass) ? "w" : "s"));
+                            Player player = PlayerFactory.makePlayerInstance(pclass);
                             if (player != null) {
                                 board.addPlayer(player, initialLocation);
                             }
                             // note use even if player wasn't added (due to crash!)
-                            highscore.noteUse(plClass.getName());
-                            scenarioScore.noteUse("Scenario " + scenario.toString() + "\\" + plClass.getName());
+                            highscore.noteUse(pclass.getName());
+                            scenarioScore.noteUse("Scenario " + scenario.toString() + "\\" + pclass.getName());
 
-                            if (teams.get(plClass) == null) {
+                            if (teams.get(pclass) == null) {
                                 //System.err.println(i);
                                 //System.err.println("WARNING: can't get team for " + players.get(i));
                             } else {
                                 // note use of player so that team score can be normalized later
-                                highscore.noteUse(teams.get(plClass) + (isWolf(plClass) ? ".WolfTeam" : ".SheepTeam"));
+                                highscore.noteUse(teams.get(pclass) + (isWolf(pclass) ? ".WolfTeam" : ".SheepTeam"));
                             }
                         }
 
@@ -420,7 +309,7 @@ public class Tournament {
 
                             if (r == 0 && !quiet) {
                                 board.printPlayerOverview();
-                                board.print();
+                                // board.print();
                             }
 
                             try {
@@ -465,8 +354,8 @@ public class Tournament {
     }
     boolean boardUI = false;
 
-    Tournament(List<Class> playerClasses, int r, boolean ui) {
-        //(Class[] playerClasses, int m, int n, int r) {
+    Tournament(List<Class> playerPClasses, int r, boolean ui) {
+        //(Class[] playerPClasses, int m, int n, int r) {
 
         boardUI = ui;
 
@@ -478,7 +367,7 @@ public class Tournament {
 
 
 
-        for (Class p : playerClasses) {
+        for (Class p : playerPClasses) {
 
 
             if (PlayerTest.runTest(p, crashLog)) {
@@ -508,7 +397,7 @@ public class Tournament {
             "Creepy Sheepies:vickery,chin,kim,wei", // 
             "Dolly's Den:dori,boyd,stramitis,dori", //   MUST REPEAT MISSING STUDENTS (4 sheep guaranteed)
             "Nervous Wreck:harsham,heath,harsham,heath", //
-            "Old Mutton (Classic):derhammer,chan,derhammer,chan"
+            "Old Mutton (PClassic):derhammer,chan,derhammer,chan"
                      
         };
 
@@ -519,7 +408,7 @@ public class Tournament {
             "Furry Fury:gehr,hatzell,jesukiewicz,lankay",
             "The Gray:miller,rao,scanlon,stoltz",
             "Wolf in Sheep's Clothing:tomechko,toohig,weiler",
-            "Meat Eater (Classic):reitter,greene,norante"
+            "Meat Eater (PClassic):reitter,greene,norante"
         };
 
 
@@ -534,7 +423,7 @@ public class Tournament {
         int totalRuns = 0;
         for (String wteam : wolves) {
 
-            totalRuns += string2classlist(wteam, ".Wolf").size();
+            totalRuns += PlayerFactory.string2classlist(wteam, ".Wolf").size();
         }
         totalRuns = totalRuns * sheepteams.length * Scenario.getParameterValues().size();
         int runcount = 1;
@@ -549,7 +438,7 @@ public class Tournament {
             for (String w : wolves) { // each wolf team
                 String wolfteam = prefix(w);
 
-                ArrayList<Class> wolves2 = string2classlist(w, ".Wolf");
+                ArrayList<Class> wolves2 = PlayerFactory.string2classlist(w, ".Wolf");
 
                 System.out.print("Wolf team:" + wolfteam + ": ");
 
@@ -557,7 +446,7 @@ public class Tournament {
                 {
                     teams.put(w2, wolfteam);
 
-                    ArrayList<Class> p = string2classlist(s, ".Sheep"); // all sheep
+                    ArrayList<Class> p = PlayerFactory.string2classlist(s, ".Sheep"); // all sheep
 
                     for (Class sh : p) {
                         teams.put(sh, sheepteam);
@@ -710,7 +599,7 @@ public class Tournament {
                 pauseInitially = true;
 
             } else {
-                players.add(name2class(s, new String[]{"", ".Wolf", ".Sheep"}));
+                players.add(PlayerFactory.getClassForName(s));
             }
         }
 
