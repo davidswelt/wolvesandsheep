@@ -39,7 +39,7 @@ def now ():
 prefix = "{% extends \"base_generic.html\" %}{% block content %}<h1>Tournament results</h1><i>Time: "+now()+"</i><p><pre>"
 
 cmdtmpfile = tmpfile+".run"
-runclass = "was.IST240Tournament" if ist240 else: "was.Tournament"
+runclass = "was.IST240Tournament" if ist240 else "was.Tournament"
 
 cmd = "java -cp WolvesAndSheep.jar:lib/\*:players/\*:classic.players/\*:../was/\* %s %s %s >>%s" % (runclass, tourn_args, " ".join(jars), cmdtmpfile)
 
