@@ -30,7 +30,7 @@ public class Tournament {
     int initNumSheep = 4;
     int initNumWolves = 1;
     int numSheep, numWolves;
-    protected static Map<Class, String> teams = new HashMap();
+    protected static Map<Object, String> teams = new HashMap();
     static int minNumSheepRequiredToRun = 0;  // run won't start a game otherwise
     static int minNumWolvesRequiredToRun = 0;
     static boolean exitRequested = false;
@@ -390,146 +390,6 @@ public class Tournament {
         //TIMEOUT = (long) ((float) TIMEOUT * (float) Benchmark.runBenchmark());
     }
     static String dividerLine = "_______________________________________________________________________________________________________________________________\n\n";
-
-    public static void ist240(int repeats, int minutes) {
-        String[] sheepteams = new String[]{
-            "Black Sheep:skotleski,cotter,svinte,mancini",
-            "Creepy Sheepies:vickery,chin,kim,wei", // 
-            "Dolly's Den:dori,boyd,stramitis,dori", //   MUST REPEAT MISSING STUDENTS (4 sheep guaranteed)
-            "Nervous Wreck:harsham,heath,harsham,heath", //
-            "Old Mutton (PClassic):derhammer,chan,derhammer,chan"
-                     
-        };
-
-        // team scores are averages, not sums - so team size doesn't matter
-        String[] wolves = new String[]{
-            "Wolves:scottmurphy,amberson,wenzel",
-            "Lone Hunters:bouknight,chong,fannon,fox",
-            "Furry Fury:gehr,hatzell,jesukiewicz,lankay",
-            "The Gray:miller,rao,scanlon,stoltz",
-            "Wolf in Sheep's Clothing:tomechko,toohig,weiler",
-            "Meat Eater (PClassic):reitter,greene,norante"
-        };
-
-
-        HighScore totalHighscore = new HighScore().setTitle("total");
-        HighScore totalTiming = new HighScore().setTitle("timing");
-
-        Map<String, HighScore> scenarioHighScore = new TreeMap();
-
-        minNumSheepRequiredToRun = 1;
-        minNumWolvesRequiredToRun = 1;
-
-        int totalRuns = 0;
-        for (String wteam : wolves) {
-
-            totalRuns += PlayerFactory.string2classlist(wteam, ".Wolf").size();
-        }
-        totalRuns = totalRuns * sheepteams.length * Scenario.getParameterValues().size();
-        int runcount = 1;
-        long targetTimeSecs = Math.max(1, minutes * 60); // 10 minutes
-        long startTime = System.currentTimeMillis();
-
-        while ((System.currentTimeMillis() - startTime)< targetTimeSecs*1000)
-        {
-        for (String s : sheepteams) { // each sheep team
-            String sheepteam = prefix(s);
-
-            for (String w : wolves) { // each wolf team
-                String wolfteam = prefix(w);
-
-                ArrayList<Class> wolves2 = PlayerFactory.string2classlist(w, ".Wolf");
-
-                System.out.print("Wolf team:" + wolfteam + ": ");
-
-                for (Class w2 : wolves2) // for each wolf within a group
-                {
-                    teams.put(w2, wolfteam);
-
-                    ArrayList<Class> p = PlayerFactory.string2classlist(s, ".Sheep"); // all sheep
-
-                    for (Class sh : p) {
-                        teams.put(sh, sheepteam);
-                    }
-
-                    p.add(w2); // one wolf
-
-                    // randomize order of sheep
-                    Collections.shuffle(p);
-
-                    double avgtimeperrun = 0;
-                    if (runcount > Scenario.getParameterValues().size()) {
-                        avgtimeperrun = (System.currentTimeMillis() - startTime) / runcount;
-                    }
-                    // all scenarios
-                    for (int sp : Scenario.getParameterValues()) {
-
-                        if (avgtimeperrun > 0) {
-                            long mleft = (long) ((targetTimeSecs*1000-(System.currentTimeMillis() - startTime))/1000.0);
-                            if (mleft<1)
-                            {
-                                mleft = (int) (((totalRuns - runcount) * avgtimeperrun) / 1000.0 +0.5);
-                                System.err.printf("running (%s out of %s).  %s secs. left\n", runcount, totalRuns, mleft);
-                                  
-                            }
-                            else
-                            {
-                                System.err.printf("running (%s).  %s secs. left\n", runcount, mleft);
-                                  
-                            }
-                            
-                              
-                        }
-                        runcount++;
-
-                        //Scenario sc = Scenario.makeScenario(sp);
-                        //for (int sc = 1; sc < Scenario.NUMSCENARIOS && exitRequested==false; sc++) {
-                        Tournament t = run(p, repeats, false, sp, false, false);
-                        totalHighscore.addHighScore(t.highscore);
-                        if (scenarioHighScore.get(t.scenario.toString()) == null) {
-                            scenarioHighScore.put(t.scenario.toString(), new HighScore().setTitle(t.scenario.toString()));
-                        }
-                        scenarioHighScore.get(t.scenario.toString()).addHighScore(t.highscore);
-                        totalTiming.addHighScore(t.timing);
-
-                        if (exitRequested) {
-                            break;
-                        }
-                    }
-                    if (! quiet)
-                    {
-                    totalHighscore.printByCategory(null);
-                    }
-                }
-            }
-        }
-        }
-        System.out.println("###########################"); // marker for processing script
-        System.out.print(dividerLine);
-        System.out.println("IST240 Tournament results:");
-        for (String s : sheepteams) {
-            System.out.println(s);
-        }
-        for (String s : wolves) {
-            System.out.println(s);
-        }
-        System.out.println("\n");
-
-        totalHighscore.printByClass(scenarioHighScore.values());
-
-        
-        System.out.print(dividerLine);
-        System.out.println("Player Crashes:");
-        crashLog.printByCategory(null);
-
-        System.out.println(dividerLine);
-        System.out.println("Timing (ms.):");
-        totalTiming.print();
-
-        System.out.println(dividerLine);
-
-
-    }
     // static init
     private static boolean secPolicySet = false;
 
@@ -557,9 +417,8 @@ public class Tournament {
         int r = 1;
         int sc = 0; // random scenario
         boolean ui = true;
-        boolean run240 = false;
         boolean tourn = false;
-        int duration = 0;
+        
 
         // parse the command line
         int i = 0;
@@ -577,14 +436,6 @@ public class Tournament {
             } else if (s.equals("-r")) {
 
                 r = Integer.parseInt(args[i++]);
-
-            } else if (s.equals("-ist240")) {
-
-                run240 = true;
-
-            } else if (s.equals("-d")) {
-
-                duration = Integer.parseInt(args[i++]);
 
             } else if (s.equals("-s")) {
 
@@ -604,9 +455,7 @@ public class Tournament {
         }
 
 
-        if (run240) {
-            ist240(r,duration);
-        } else {
+        
             if (players.size() > 0) {
 
                 was.Tournament.run(players, r, ui, sc, tourn, true); // m, n, k,
@@ -629,7 +478,7 @@ public class Tournament {
                 // for testing prposes:  greene.Wolf zielenski.Wolf Wilkinson.Wolf derhammer.Sheep chan.Sheep derhammer.Sheep tailor.Sheep
                 // (greene is one of the stronger wolves.)
             }
-        }
+        
         System.exit(0);
     }
 }
