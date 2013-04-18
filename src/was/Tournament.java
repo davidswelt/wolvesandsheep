@@ -22,7 +22,6 @@ import java.util.logging.Logger;
  */
 public class Tournament {
 
-    protected ArrayList<Class> disqualifiedPlayers = new ArrayList<Class>();
     protected GameBoard eboard;
     protected ArrayList<Class> players = new ArrayList<Class>();
     protected static Random random = new Random();
@@ -64,36 +63,36 @@ public class Tournament {
     /**
      * Create a new tournament and run it.
      *
-     * @param listofPlayerPClassNames String of comma-separated, fully qualified
+     * @param listofPlayerClassNames String of comma-separated, fully qualified
      * classnames of players, e.g. "smith.Sheep,smith.Sheep,smith.Sheep,
      * reitter.SheepPlayer,reitter.WolfPlayer". Needs a minimum number of
      * players. Repeat player class names if necessary.
      *
      * @param repeats number of repetitions
      */
-    static public void run(String listofPlayerPClassNames, int repeats) {
+    static public void run(String listofPlayerClassNames, int repeats) {
 
 
-        run(PlayerFactory.string2classlist(listofPlayerPClassNames, ""), repeats);
+        run(PlayerFactory.string2classlist(listofPlayerClassNames, ""), repeats);
 
     }
 
     /**
      * creates and runs a tournament, printing the results.
      *
-     * @param playerPClasses Array of classes of players. Each player has to
+     * @param playerClasses Array of classes of players. Each player has to
      * implement the was.Player interface.
      * @param r number of repetitions to run
      */
-    static public void run(List<Class> playerPClasses, int r) {
+    static public void run(List<Class> playerClasses, int r) {
 
-        run(playerPClasses, r, false, 0, true, true);
+        run(playerClasses, r, false, 0, true, true);
     }
 
     /**
      * creates and runs a tournament, printing the results.
      *
-     * @param playerPClasses Array of classes of players. Each player has to
+     * @param playerClasses Array of classes of players. Each player has to
      * implement the was.Player interface.
      * @param r number of repetitions to run
      * @param ui true if UI is to be shown
@@ -102,14 +101,14 @@ public class Tournament {
      * players. Otherwise, all given players will be added to the game board at
      * once.
      */
-    static public Tournament run(List<Class> playerPClasses, int r, boolean ui, int scenario, boolean comb, boolean printHighScore) {
+    static public Tournament run(List<Class> playerClasses, int r, boolean ui, int scenario, boolean comb, boolean printHighScore) {
 
         Tournament t;
 
 
-        t = new Tournament(playerPClasses, r, ui);
+        t = new Tournament(playerClasses, r, ui);
 
-        int totalgames = r * playerPClasses.size() * Math.max(1, playerPClasses.size() - 1) * Math.max(1, playerPClasses.size() - 2) * Math.max(1, playerPClasses.size() - 3);
+        int totalgames = r * playerClasses.size() * Math.max(1, playerClasses.size() - 1) * Math.max(1, playerClasses.size() - 2) * Math.max(1, playerClasses.size() - 3);
 
 //        System.err.println("Total trials: " + totalgames);
 
@@ -211,8 +210,8 @@ public class Tournament {
 
             if (selectedPlayers.size() > 0) {
                 for (Integer i : selectedPlayers) {
-                    Class plPClass = players.get(i);
-                    if (isWolf(plPClass)) {
+                    Class plClass = players.get(i);
+                    if (isWolf(plClass)) {
                         selWolves.add(i);
                     } else {
                         selSheep.add(i);
@@ -226,8 +225,8 @@ public class Tournament {
                 
             } else {
                 for (Integer i=0; i<players.size(); i++) {
-                    Class plPClass = players.get(i);
-                    if (isWolf(plPClass)) {
+                    Class plClass = players.get(i);
+                    if (isWolf(plClass)) {
                         selWolves.add(i);
                     } else {
                         selSheep.add(i);
@@ -354,8 +353,8 @@ public class Tournament {
     }
     boolean boardUI = false;
 
-    Tournament(List<Class> playerPClasses, int r, boolean ui) {
-        //(Class[] playerPClasses, int m, int n, int r) {
+    Tournament(List<Class> playerClasses, int r, boolean ui) {
+        //(Class[] playerClasses, int m, int n, int r) {
 
         boardUI = ui;
 
@@ -367,7 +366,7 @@ public class Tournament {
 
 
 
-        for (Class p : playerPClasses) {
+        for (Class p : playerClasses) {
 
 
             if (PlayerTest.runTest(p, crashLog)) {
