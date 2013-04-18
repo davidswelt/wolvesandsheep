@@ -8,9 +8,15 @@ import java.io.PrintStream;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
@@ -22,7 +28,14 @@ import java.util.logging.Logger;
  * @author reitter
  */
 public abstract class Player {
-    
+
+    // Timeout rules
+    // we discard a player's move if it takes longer than 2*180 ms., and disqualify the player for the rest of the game.
+    final private static int individualRunFactor = 20; // overage for individual runs
+    // we disqualify a player if on overage a function call takes more than this much time
+    final private static long TIMEOUT = 7; // 4 milliseconds
+    // permanent disqualification occurs if a player is disqualified due to overtime in 10 games.
+    final private static int permanentDisqualificationThreshold = 5;
     private static final int MOVE = 0;
     private static final int INITIALIZE = 1;
     private static final int IS_BEING_EATEN = 2;
@@ -43,10 +56,13 @@ public abstract class Player {
     static boolean catchExceptions = false;
     static boolean logToFile = false;
     PrintStream logstream = null;
-    double totalRunTime = 0.0;
-    long totalRuns = 0;
-    boolean disqualified = false;
-
+    private double totalRunTime = 0.0;
+    private long totalRuns = 0;
+    private boolean disqualified = false; // this player object is disqualified (i.e., player is gone for this game)
+    // disqualified counts per class:
+    private static Map<String, Integer> disqualifiedCount = new TreeMap();
+    private Thread myThread = null;
+    
     public Player() {
         if (logToFile) {
             String filename = "log/" + getClass().getName() + ".log";
@@ -60,13 +76,13 @@ public abstract class Player {
         }
 
     }
-    
+
     /**
      * Override this function to run your own unit test.
      *
      * @return true if the the test was passed, false otherwise.
      */
-    public static boolean test () {
+    public static boolean test() {
         return true;
     }
 
@@ -110,6 +126,25 @@ public abstract class Player {
 
     abstract GamePiece getPiece();
 
+    private boolean isDisqualified() {
+        Integer dc = (Integer) disqualifiedCount.get(this.getClass().getName());
+        if (dc == null) {
+            dc = 0;
+        }
+
+        return (dc > permanentDisqualificationThreshold || disqualified);
+    }
+
+    private void markDisqualified() {
+
+        Integer dc = (Integer) disqualifiedCount.get(this.getClass().getName());
+        if (dc == null) {
+            dc = 0;
+        }
+        disqualifiedCount.put(this.getClass().getName(), dc + 1);
+        disqualified = true;
+    }
+
     final void setGameBoard(GameBoard gb) // available only to was class members
     {
         if (this.gb == null) {
@@ -142,7 +177,6 @@ public abstract class Player {
      * board has been set up.
      */
     public void initialize() {
-        
     }
 
     final public String getID() {
@@ -155,8 +189,7 @@ public abstract class Player {
      * @return a gameboard object
      */
     final public GameBoard getGameBoard() {
-        if (gb == null)
-        {
+        if (gb == null) {
             throw new RuntimeException("getGameBoard may not be called from a player constructor.  Use the Player class's 'initialize' method.");
         }
         return gb;
@@ -214,15 +247,28 @@ public abstract class Player {
             return 0.0;
         }
     }
-    // we discard a player's move if it takes longer than 2*180 ms.
-    // currently, players are not disqualified.
-    int individualRunFactor = 3;
-    long TIMEOUT = 70;
 
     final Object callPlayerFunction(int fn) {
         Object m = null; // return var
 
-        if (disqualified) {
+        if (isDisqualified()) {
+            String reason = "";
+            switch (fn) {
+                case MOVE:
+                    reason = "move";
+                    break;
+                case INITIALIZE:
+                    reason = "initialize";
+                    break;
+                case IS_BEING_EATEN:
+                    reason = "is_being_eaten";
+                    break;
+                case IS_EATING:
+                    reason = "is_eating";
+                    break;
+            }
+
+            Tournament.logPlayerCrash(this.getClass(), new RuntimeException("Player disqualified due to timeout in function " + reason));
             return null;
         }
 
@@ -234,6 +280,7 @@ public abstract class Player {
 
         FutureTask ft = new FutureTask<Object[]>(new Callable<Object[]>() {
             private static final int MOVE = 0;
+
             @Override
             public Object[] call() {
                 ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
@@ -277,7 +324,9 @@ public abstract class Player {
                 System.setErr(logstream);
             }
 
-
+            // must execute in separate thread for it to be stoppable
+            myThread = new Thread(ft);
+            myThread.run();
 
             ft.run();
 
@@ -286,8 +335,10 @@ public abstract class Player {
              * cases where a player hangs.  Because we disqualify it in that situation,
              * we can afford to wait a whole second.
              */
-            Object[] result = (Object[]) ft.get(1, TimeUnit.SECONDS); // timeout
+            Object[] result = (Object[]) ft.get(300, TimeUnit.MILLISECONDS); // timeout
 
+            // we only need to do this if an exception occurs
+            //myThread.stop();
             /* dur will contain the actual, measured CPU time for the thread. 
              This is going to be much more accurate. */
             long dur = (Long) result[1];
@@ -301,23 +352,22 @@ public abstract class Player {
                 totalRuns++;
             }
 
-            if (dur > individualRunFactor * TIMEOUT * 1000) {  // convert to 1000*millisec
-                System.err.println("!! Runtime: " + dur / 1000 + "ms."); // convert to millisec.
-                disqualified = true;
+            if (dur > individualRunFactor * TIMEOUT * 1000 || (totalRuns > 10 && meanRunTime() > TIMEOUT)) {  // convert to 1000*millisec
+
+
+                // totalRunTime will be reset to 0 when a new player object is created.
                 throw new TimeoutException();
             }
-            if (dur > TIMEOUT * 1000) {  // convert to 1000*millisec
-                System.err.println("Runtime: " + dur / 1000 + "ms."); // convert to millisec.
-                throw new TimeoutException();
-            }
+
+        } catch (CancellationException ex) {
         } catch (InterruptedException ex) {
             Logger.getLogger(Tournament.class.getName()).log(Level.SEVERE, null, ex);
             Tournament.logPlayerCrash(this.getClass(), ex);
             //throw new IllegalGameMoveException("makeMove was interrupted.", p, null);
         } catch (ExecutionException ex) {
-            
+
             if (catchExceptions) {
-                
+
                 LOG("Player " + this.getClass().getName() + " runtime exception " + ex.getCause());
                 Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex.getCause());
                 Tournament.logPlayerCrash(this.getClass(), (RuntimeException) ex.getCause());
@@ -332,6 +382,18 @@ public abstract class Player {
             //            int chosen = random.nextInt(availableMoves.length);
             //            move = availableMoves[chosen];
 //                        disqualifiedPlayers.add(p.getClass());
+
+            if (myThread.isAlive()) {
+                myThread.interrupt();
+                try {
+                    Thread.sleep(400); // wait to give it a chance to stop
+                } catch (InterruptedException ex1) {
+                }
+                if (myThread.isAlive()) {
+                    myThread.stop();
+                }
+            }
+            markDisqualified();
 
         } catch (RuntimeException ex) {
             System.err.println("runtime ex.");
@@ -360,7 +422,7 @@ public abstract class Player {
     final void callInitialize() {
         callPlayerFunction(INITIALIZE);
     }
-    
+
     final void callIsBeingEaten() {
         callPlayerFunction(IS_BEING_EATEN);
     }
@@ -412,7 +474,7 @@ public abstract class Player {
             tx = Math.min(gb.getCols() - 1, tx);
             ty = Math.min(gb.getRows() - 1, ty);
 
-            m = new Move(tx - x, ty - y);            
+            m = new Move(tx - x, ty - y);
         }
 
         if (gb.noteMove(this, m)) {
@@ -508,7 +570,6 @@ public abstract class Player {
     final public int hashCode() {
         return count;
     }
-
     // helper
     // hack
 //    public long getBuildTime() {
