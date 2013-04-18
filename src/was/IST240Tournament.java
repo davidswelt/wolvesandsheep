@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import static was.Tournament.dividerLine;
 import static was.Tournament.quiet;
 
 /**
@@ -14,9 +15,18 @@ import static was.Tournament.quiet;
 public class IST240Tournament extends Tournament {
 
     public static void ist240(int repeats, int minutes) {
-        String[] sheepteams = new String[]{"Black Sheep:skotleski,cotter,svinte,mancini", "Creepy Sheepies:vickery,chin,kim,wei", "Dolly's Den:dori,boyd,stramitis,dori", "Nervous Wreck:harsham,heath,harsham,heath", "Old Mutton (PClassic):derhammer,chan,derhammer,chan"};
+        String[] sheepteams = new String[]{"Black Sheep:skotleski,cotter,svinte,mancini",
+            "Creepy Sheepies:vickery,chin,kim,wei", 
+            "Dolly's Den:dori,boyd,stramitis,dori", 
+            "Cotton Balls:harsham,heath,harsham,heath",
+            "Old Mutton (Classic):derhammer,chan,derhammer,chan"};
         // team scores are averages, not sums - so team size doesn't matter
-        String[] wolves = new String[]{"Wolves:scottmurphy,amberson,wenzel", "Lone Hunters:bouknight,chong,fannon,fox", "Furry Fury:gehr,hatzell,jesukiewicz,lankay", "The Gray:miller,rao,scanlon,stoltz", "Wolf in Sheep's Clothing:tomechko,toohig,weiler", "Meat Eater (PClassic):reitter,greene,norante"};
+        String[] wolves = new String[]{"Wolves:scottmurphy,amberson,wenzel", 
+            "Lone Hunters:bouknight,chong,fannon,fox", 
+            "Furry Fury:gehr,stoltz,weiler", 
+            "The Gray:miller,rao,scanlon,toohig", 
+            "Wolf in Sheep's Clothing:tomechko,jesukiewicz,hatzell,lankay", 
+            "Meat Eater (Classic):reitter,greene,norante"};
         HighScore totalHighscore = new HighScore().setTitle("total");
         HighScore totalTiming = new HighScore().setTitle("timing");
         Map<String, HighScore> scenarioHighScore = new TreeMap();
@@ -88,6 +98,10 @@ public class IST240Tournament extends Tournament {
                             }
                             scenarioHighScore.get(t.scenario.toString()).addHighScore(t.highscore);
                             totalTiming.addHighScore(t.timing);
+                            
+                                    System.out.println("Timing (ms.):");
+                                    t.timing.print();
+                            totalTiming.print();
                             if (exitRequested) {
                                 break;
                             }
@@ -109,16 +123,17 @@ public class IST240Tournament extends Tournament {
         System.out.println("\n");
         totalHighscore.printByClass(scenarioHighScore.values());
         System.out.print(dividerLine);
-        System.out.println("Player Crashes:");
-        crashLog.printByCategory(null);
-        System.out.println(dividerLine);
         System.out.println("Timing (ms.):");
         totalTiming.print();
         System.out.println(dividerLine);
+        System.out.println("Player Crashes:");
+        crashLog.printByCategory(null);
+        System.out.println(dividerLine);
+       
     }
 
-    public IST240Tournament(List<Class> playerPClasses, int r, boolean ui) {
-        super(playerPClasses, r, ui);
+    public IST240Tournament(List<Class> playerClasses, int r, boolean ui) {
+        super(playerClasses, r, ui);
         throw new RuntimeException("not implemented.");
                 
     }
