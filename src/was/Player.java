@@ -143,6 +143,14 @@ public abstract class Player {
         }
         disqualifiedCount.put(this.getClass().getName(), dc + 1);
         disqualified = true;
+        
+        if (dc+1>permanentDisqualificationThreshold)
+        {
+            Tournament.logPlayerCrash(this.getClass(), new RuntimeException("Player permanently disqualified."));            
+        } else
+        {
+            Tournament.logPlayerCrash(this.getClass(), new RuntimeException("Player disqualified."));
+        }
     }
 
     final void setGameBoard(GameBoard gb) // available only to was class members
@@ -252,24 +260,12 @@ public abstract class Player {
         Object m = null; // return var
 
         if (isDisqualified()) {
-            String reason = "";
-            switch (fn) {
-                case MOVE:
-                    reason = "move";
-                    break;
-                case INITIALIZE:
-                    reason = "initialize";
-                    break;
-                case IS_BEING_EATEN:
-                    reason = "is_being_eaten";
-                    break;
-                case IS_EATING:
-                    reason = "is_eating";
-                    break;
-            }
 
-            Tournament.logPlayerCrash(this.getClass(), new RuntimeException("Player disqualified due to timeout in function " + reason));
-            return null;
+            if (fn==MOVE)
+            {
+                Tournament.logPlayerCrash(this.getClass(), new RuntimeException("not playing (disqualified)"));
+            }
+             return null;
         }
 
         PrintStream prevErrStream = System.err;
@@ -328,12 +324,13 @@ public abstract class Player {
             myThread = new Thread(ft);
             myThread.run();
 
-            ft.run();
+            // running it directly would just run it in the current thread
+            // ft.run();
 
             /* I think the timeout in FutureTask refers to clock time, not CPU time.
              * Thus, we need to allow for a much longer timeout.  This will only catch
              * cases where a player hangs.  Because we disqualify it in that situation,
-             * we can afford to wait a whole second.
+             * we can afford to wait 300 milliseconds.
              */
             Object[] result = (Object[]) ft.get(300, TimeUnit.MILLISECONDS); // timeout
 
@@ -376,12 +373,30 @@ public abstract class Player {
                 throw (RuntimeException) ex.getCause();
             }
         } catch (TimeoutException ex) {
-            System.err.println("Player " + thePlayer.getClass().getName() + " timed out " + TIMEOUT + "ms max.");
+                        String reason = "";
+            switch (fn) {
+                case MOVE:
+                    reason = "move";
+                    break;
+                case INITIALIZE:
+                    reason = "initialize";
+                    break;
+                case IS_BEING_EATEN:
+                    reason = "is_being_eaten";
+                    break;
+                case IS_EATING:
+                    reason = "is_eating";
+                    break;
+            }
+
+            System.err.println("Player " + thePlayer.getClass().getName() + " timed out " + TIMEOUT + "ms max." + " in function "+reason);
             Tournament.logPlayerCrash(this.getClass(), ex);
             //            int[][] availableMoves = (int[][]) board.getFreeCells();
             //            int chosen = random.nextInt(availableMoves.length);
             //            move = availableMoves[chosen];
 //                        disqualifiedPlayers.add(p.getClass());
+
+            markDisqualified();
 
             if (myThread.isAlive()) {
                 myThread.interrupt();
@@ -393,7 +408,6 @@ public abstract class Player {
                     myThread.stop();
                 }
             }
-            markDisqualified();
 
         } catch (RuntimeException ex) {
             System.err.println("runtime ex.");
