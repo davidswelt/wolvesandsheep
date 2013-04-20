@@ -3,14 +3,16 @@
 import random
 
 targetfile = "/home/dreitter/submission/media/results/latest.html"
-tmpf = "%s"%random.randint(1, 10)
+tmpf = "%s"%random.randint(1, 10000)
 ist240 = True # run actual 240 tournament
 tourn_args = "-d 10 -c -e"  # run for 10 minutes
 #tourn_args = "-c -t -e -q -r 8"
 
+playerspath = "players/"
+
 import os
 
-os.system("rm -r players >/dev/null; mkdir players; cp ../submission/media/was/*.jar players/");
+os.system("rm -r players >/dev/null; mkdir players; cp -p ../submission/media/was/*.jar "+playerspath);
 
 
 if ist240:
@@ -41,13 +43,15 @@ prefix = "{% extends \"base_generic.html\" %}{% block content %}<h1>Tournament r
 cmdtmpfile = tmpfile+".run"
 runclass = "was.IST240Tournament" if ist240 else "was.Tournament"
 
-cmd = "java -cp WolvesAndSheep.jar:lib/\*:players/\*:classic.players/\*:../was/\* %s %s %s >>%s" % (runclass, tourn_args, " ".join(jars), cmdtmpfile)
+cmd = "java -cp WolvesAndSheep.jar:lib/\*:players/\*:classic.players/\*:../was/\* %s %s %s >%s" % (runclass, tourn_args, " ".join(jars), cmdtmpfile)
 
 print cmd
 
+
+os.system(cmd)
+
 with open(tmpfile, "w") as text_file:
     text_file.write(prefix)
-os.system(cmd)
 
 if ist240:
     # insert portion after marker only
@@ -55,7 +59,24 @@ if ist240:
 else:
     os.system("cat \"%s\" >>\"%s\""%(cmdtmpfile,tmpfile))
 
+    
+import os.path,time
+import datetime
 with open(tmpfile, "a") as text_file:
+    
+    print  >>text_file, "<h3>File versions</h3>"
+    print  >>text_file, "<table border=0 cellspacing=10>"
+
+    l = os.listdir(playerspath)
+    l.sort(cmp)
+    for infile in l:
+   
+        t = os.path.getmtime(playerspath+infile)
+        print >>text_file, ("<tr><td>%s</td><td>%s</td></tr>"%(infile,datetime.datetime.fromtimestamp(t)))
+
+    print  >>text_file, "</table>"
+
     text_file.write("</pre>Finished:"+now()+".{% endblock content %}")
 
 os.system("mv \"%s\" \"%s\""%(tmpfile,targetfile))
+os.system("rm \"%s\""%(cmdtmpfile))
