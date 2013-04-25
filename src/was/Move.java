@@ -32,7 +32,12 @@ public class Move {
     final public double length() {
         return Math.sqrt((delta_x*delta_x) + (delta_y*delta_y));
     }
-    
+     /**
+     * Scale length of a move
+     * @return scale the length of a move to match length
+     * @param length target length of the move
+     * @return Move of scaled (not quantized) length in same direction as this move.
+     */  
     public Move scaledToLength(double length) {
             double ratio = length() / length;
             return new Move((delta_x / ratio ), (delta_y / ratio ));
