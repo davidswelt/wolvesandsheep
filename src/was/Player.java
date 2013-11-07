@@ -24,6 +24,10 @@ import java.util.logging.Logger;
 
 /**
  * This is a general player class.
+ * 
+ * The class is abstract and defines the general interface for players.
+ * {@link SheepPlayer} and {@link WolfPlayer}, among others, inherit from
+ * this class.
  *
  * @author reitter
  */
@@ -31,11 +35,11 @@ public abstract class Player {
 
     // Timeout rules
     // we discard a player's move if it takes longer than 2*180 ms., and disqualify the player for the rest of the game.
-    final private static int individualRunFactor = 20; // overage for individual runs
+    final private static int individualRunFactor = 20; // 300; // overage for individual runs
     // we disqualify a player if on overage a function call takes more than this much time
-    final private static long TIMEOUT = 7; // 4 milliseconds
+    final private static long TIMEOUT = 7; // 500; // 4 milliseconds
     // permanent disqualification occurs if a player is disqualified due to overtime in 10 games.
-    final private static int permanentDisqualificationThreshold = 5;
+    final private static int permanentDisqualificationThreshold = 5; // 80;
     private static final int MOVE = 0;
     private static final int INITIALIZE = 1;
     private static final int IS_BEING_EATEN = 2;
@@ -62,7 +66,15 @@ public abstract class Player {
     // disqualified counts per class:
     private static Map<String, Integer> disqualifiedCount = new TreeMap();
     private Thread myThread = null;
-    
+
+    /**
+     * Constructor for Player objects.
+     *
+     * Note: do not expect to have the game board available at this time.
+     * Perform player initialization instead in {@link #initialize()}.
+     *
+     * @return true if the the test was passed, false otherwise.
+     */
     public Player() {
         if (logToFile) {
             String filename = "log/" + getClass().getName() + ".log";
@@ -124,6 +136,11 @@ public abstract class Player {
         return getClass().getPackage().getName();
     }
 
+    /**
+     * Get the GamePiece assigned to this player
+     *
+     * @return an object of type GamePiece
+     */
     abstract GamePiece getPiece();
 
     private boolean isDisqualified() {
@@ -143,12 +160,10 @@ public abstract class Player {
         }
         disqualifiedCount.put(this.getClass().getName(), dc + 1);
         disqualified = true;
-        
-        if (dc+1>permanentDisqualificationThreshold)
-        {
-            Tournament.logPlayerCrash(this.getClass(), new RuntimeException("Player permanently disqualified."));            
-        } else
-        {
+
+        if (dc + 1 > permanentDisqualificationThreshold) {
+            Tournament.logPlayerCrash(this.getClass(), new RuntimeException("Player permanently disqualified."));
+        } else {
             Tournament.logPlayerCrash(this.getClass(), new RuntimeException("Player disqualified."));
         }
     }
@@ -180,21 +195,30 @@ public abstract class Player {
     }
 
     /**
-     * Initialize the player. Override this method to do any initialization of
-     * the player. This will be called once before each game, and after the game
-     * board has been set up.
+     * Initialize the player.
+     *
+     * Override this method to do any initialization of the player. This will be
+     * called once before each game, and after the game board has been set up.
      */
     public void initialize() {
     }
 
+    /**
+     * Get a human-readable identification string for this player object.
+     *
+     * This may be used to display the player. The string contains the version
+     * number (see {@link #versionNumber()}).
+     *
+     * @return a String
+     */
     final public String getID() {
         return getClass().getName() + "." + versionNumber() + count;
     }
 
     /**
-     * Get the Gameboard for this player.
+     * Get the Gameboard used by this player.
      *
-     * @return a gameboard object
+     * @return a reference to the game board shared by all players in this round.
      */
     final public GameBoard getGameBoard() {
         if (gb == null) {
@@ -223,7 +247,7 @@ public abstract class Player {
     }
 
     /**
-     * Get this player's location
+     * Get this player's location.
      *
      * @return a GameLocation object
      */
@@ -246,7 +270,7 @@ public abstract class Player {
     /**
      * Return the average runtime of this player (all functions)
      *
-     * @return avg. runtime in milliseconds or 0.0 if no measurements
+     * @return Avg. runtime in milliseconds or 0.0 if no measurements
      */
     final public double meanRunTime() {
         if (totalRuns > 0) {
@@ -261,11 +285,10 @@ public abstract class Player {
 
         if (isDisqualified()) {
 
-            if (fn==MOVE)
-            {
+            if (fn == MOVE) {
                 Tournament.logPlayerCrash(this.getClass(), new RuntimeException("not playing (disqualified)"));
             }
-             return null;
+            return null;
         }
 
         PrintStream prevErrStream = System.err;
@@ -274,7 +297,29 @@ public abstract class Player {
         final Player thePlayer = this;
         final int func = fn;
 
+        /*
+         * Dear Student,
+         * Cool that you're looking at this to understand my code.
+         * This uses syntax and Java functions that we haven't discussed in class.
+         * What is happening here is that we execute the player move in a separate
+         * 'thread', that is, in parallel.  The reason why we are doing it this way
+         * is that the player code that does a "move" or an "initialize" may hang
+         * or take too long.  By running it in a separate thread, we can abandon
+         * it and keep control of the execution.  Otherwise, a single "rogue" player 
+         * could halt the tournament.  D.R.
+         * 
+         */
+        
+        
         FutureTask ft = new FutureTask<Object[]>(new Callable<Object[]>() {
+            /* What follows is a code block that is given as an argument
+             * to the "Callable" constructor.  This is essentially like an
+             * "anonymous function" or a "lambda expression" that you may know
+             * from CS theory, or from functional programming in a language such 
+             * as Lisp or Python.
+             */
+            
+            
             private static final int MOVE = 0;
 
             @Override
@@ -322,7 +367,8 @@ public abstract class Player {
 
             // must execute in separate thread for it to be stoppable
             myThread = new Thread(ft);
-            myThread.run();
+            myThread.start();
+
 
             // running it directly would just run it in the current thread
             // ft.run();
@@ -333,6 +379,10 @@ public abstract class Player {
              * we can afford to wait 300 milliseconds.
              */
             Object[] result = (Object[]) ft.get(300, TimeUnit.MILLISECONDS); // timeout
+
+            // finish off the thread so we don't have old threads hanging around
+            myThread.join();
+            myThread = null;
 
             // we only need to do this if an exception occurs
             //myThread.stop();
@@ -373,7 +423,8 @@ public abstract class Player {
                 throw (RuntimeException) ex.getCause();
             }
         } catch (TimeoutException ex) {
-                        String reason = "";
+            System.err.println("player TimeoutException");
+            String reason = "";
             switch (fn) {
                 case MOVE:
                     reason = "move";
@@ -389,7 +440,7 @@ public abstract class Player {
                     break;
             }
 
-            System.err.println("Player " + thePlayer.getClass().getName() + " timed out " + TIMEOUT + "ms max." + " in function "+reason);
+            System.err.println("Player " + thePlayer.getClass().getName() + " timed out " + TIMEOUT + "ms max." + " in function " + reason);
             Tournament.logPlayerCrash(this.getClass(), ex);
             //            int[][] availableMoves = (int[][]) board.getFreeCells();
             //            int chosen = random.nextInt(availableMoves.length);
@@ -398,28 +449,38 @@ public abstract class Player {
 
             markDisqualified();
 
-            if (myThread.isAlive()) {
-                myThread.interrupt();
-                try {
-                    Thread.sleep(400); // wait to give it a chance to stop
-                } catch (InterruptedException ex1) {
-                }
+            if (myThread != null) {
+//                System.err.println("killing thread");
                 if (myThread.isAlive()) {
-                    myThread.stop();
+//                    System.err.println("is alive, sending interrupt");
+                    myThread.interrupt();
+                    try {
+//                        System.err.println("sleeping");
+                        Thread.sleep(400); // wait to give it a chance to stop
+                    } catch (InterruptedException ex1) {
+                    }
+                    if (myThread.isAlive()) {
+//                        System.err.println("still alive after 400ms.  stopping");
+                        myThread.stop();
+//                        System.err.println("thread stopped? " + myThread.isAlive());
+                    }
+                } else {
+//                    System.err.println("thread no longer alive");
                 }
+
             }
 
         } catch (RuntimeException ex) {
-            System.err.println("runtime ex.");
+//            System.err.println("runtime ex.");
             if (catchExceptions) {
-                System.err.println("catching");
+//                System.err.println("catching");
                 LOG("Player " + this.getClass().getName() + " runtime exception " + ex);
                 Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex);
                 Tournament.logPlayerCrash(this.getClass(), ex);
 
                 m = null;
             } else {
-                System.err.println("NOT catching");
+//                System.err.println("NOT catching");
                 throw ex;
             }
         } finally {
@@ -512,9 +573,14 @@ public abstract class Player {
     }
 
     /**
-     * Returns the name of the image file representing this player Implement
-     * this function to return a custom sprite.
+     * Returns the name of the image file representing this player
      *
+     * Implement this function to return a custom sprite.
+     * 
+     * You may return a different image file (e.g., put it
+     * in the "pics" folder and include that folder in the returned string
+     * (e.g., "pics/joes_sheep.jpg").
+     * 
      * @return a string with the path and file name of the image file
      */
     abstract public String imageFile();
@@ -532,6 +598,11 @@ public abstract class Player {
      */
     abstract public Move move();
 
+    /**
+     * Provide a string representation
+     * 
+     * @return a short string suitable to depict the type of the player
+     */
     @Override
     public String toString() {
         String s = "";
@@ -564,9 +635,17 @@ public abstract class Player {
     static void LOG(String s) {
     }
 
+    /**
+     * Check for equivalency
+     *
+     * @return true if this Player objects is equivalent to another one
+     */
     // Don't override these
     @Override
     final public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
         if (obj == null) {
             return false;
         }
@@ -580,6 +659,11 @@ public abstract class Player {
         return true;
     }
 
+    /**
+     * Return a code unique to the player object within this tournament.
+     *
+     * @return An integer containing a unique hash code.
+     */
     @Override
     final public int hashCode() {
         return count;
