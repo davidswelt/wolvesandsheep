@@ -4,22 +4,21 @@ import java.util.ArrayList;
 
 
 /**
- * Every sheep class has to extend SheepPlayer.
+ * Every sheep class has to extend this SheepPlayer class.
  * Implement move() (see Player class), and, optionally, isBeingEaten.
  * 
- * @author dr
+ * @author reitter
  */
 public abstract class SheepPlayer extends Player {
     
     
     @Override
-    public GamePiece getPiece() 
+    final public GamePiece getPiece() 
     {
         return GamePiece.SHEEP;
     }
     
     // you may override if you like
-    
     @Override
     public String imageFile () {
         return "pics/sheep_head_small.jpg";
