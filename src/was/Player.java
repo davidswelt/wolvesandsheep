@@ -52,6 +52,7 @@ public abstract class Player {
     private static int counter = 0;
     private int count = counter++;
     private double maxAllowedDistance = -1;
+    private double allowedDistanceDivider = 1; // none for now
     Actor playerProxy = null;
     private int isBusyUntilTime = 0; // wolf is eating
     GameBoard gb = null;
@@ -193,6 +194,10 @@ public abstract class Player {
     final String getTeam() {
         return team;
     }
+    
+    final boolean isActive() {
+        return (gb != null);
+    }
 
     /**
      * Initialize the player.
@@ -230,6 +235,10 @@ public abstract class Player {
     final void setMaxAllowedDistance(double d) {
         maxAllowedDistance = d;
     }
+    final void shortenMaxAllowedDistance(double divider) {
+        maxAllowedDistance /= divider;
+        allowedDistanceDivider *= divider;
+    }
 
     final void setPlayerProxy(Actor a) {
         playerProxy = a;
@@ -252,8 +261,8 @@ public abstract class Player {
      * @return a GameLocation object
      */
     public final GameLocation getLocation() {
-        if (gb == null) {
-            throw new RuntimeException("can't call getLocation before board has been initialized.");
+        if (! isActive()) {
+            throw new RuntimeException("can't call getLocation for inactive players (before board has been initialized)");
         }
         return new GameLocation(x, y); // copies location
     }
@@ -526,7 +535,7 @@ public abstract class Player {
         } else {
             if (m.length() > 0.1) {
 //            System.err.println("Len: "+m.length()+" maxallowed: "+ maxAllowedDistance);
-                if (m.length() > maxAllowedDistance + 0.000005) {
+                if (m.length() > allowedDistanceDivider*maxAllowedDistance + 0.000005) {
                     // String str = "illegal move: too long! " + m + ": " + m.length() + " > " + maxAllowedDistance;
                     //System.err.println(this.getClass() + str);
 
@@ -537,6 +546,10 @@ public abstract class Player {
                     // we penalize the player a little by reducing the maxAllowedDistance
                     // to 1  (i.e., no diagonal moves allowed)
                     m = m.scaledToLength(1.0);
+                }
+                else if (allowedDistanceDivider != 1.0)
+                {
+                    m = m.scaledToLength(maxAllowedDistance);
                 }
                 m = m.quantized(maxAllowedDistance);
             }
