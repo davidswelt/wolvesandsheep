@@ -235,9 +235,9 @@ public abstract class Player {
     final void setMaxAllowedDistance(double d) {
         maxAllowedDistance = d;
     }
-    final void shortenMaxAllowedDistance(double divider) {
-        maxAllowedDistance /= divider;
-        allowedDistanceDivider *= divider;
+    final void shortenMaxAllowedDistance(double factor) {
+        maxAllowedDistance *= factor;
+        allowedDistanceDivider /= factor;
     }
 
     final void setPlayerProxy(Actor a) {
