@@ -5,7 +5,7 @@ import random
 targetfile = "/home/dreitter/submission/media/results/latest.html"
 tmpf = "%s"%random.randint(1, 10000)
 ist240 = True # run actual 240 tournament
-tourn_args = "-d 10 -c -e"  # run for 10 minutes
+tourn_args = "-d 20 -c -e"  # run for 10 minutes
 #tourn_args = "-c -t -e -q -r 8"
 
 playerspath = "players/"
