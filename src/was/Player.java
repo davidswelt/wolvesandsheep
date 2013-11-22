@@ -37,7 +37,7 @@ public abstract class Player {
     // we discard a player's move if it takes longer than 2*180 ms., and disqualify the player for the rest of the game.
     final private static int individualRunFactor = 20; // 300; // overage for individual runs
     // we disqualify a player if on overage a function call takes more than this much time
-    final private static long TIMEOUT = 7; // 500; // 4 milliseconds
+    final private static long TIMEOUT = 30; // 500; // 4 milliseconds
     // permanent disqualification occurs if a player is disqualified due to overtime in 10 games.
     final private static int permanentDisqualificationThreshold = 5; // 80;
     private static final int MOVE = 0;
