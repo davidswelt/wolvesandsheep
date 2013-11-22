@@ -272,6 +272,16 @@ public class Tournament {
                 for (ArrayList selWolfComb : wolvesComb) {
                     for (ArrayList selSheepComb : sheepComb) {
                         selectedPlayers = new ArrayList();
+                        
+                        /* players play in the order in which they are added:
+                         * the last player added plays first.
+                         * 
+                         * In W&S, the wolf will play last.
+                         * The game engine relies on this partially by checking
+                         * for a sheep-attacking-wolf scenario just before 
+                         * executing the wolf's move.
+                         */
+                        
                         selectedPlayers.addAll(selWolfComb);
                         selectedPlayers.addAll(selSheepComb);
 

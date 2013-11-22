@@ -3,10 +3,10 @@ package was;
 import ch.aplu.jgamegrid.GGExitListener;
 import java.util.ArrayList;
 import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -27,7 +27,7 @@ public class GameBoard {
     private final int cols;
     private final int rows;
     private List<Player> board = new ArrayList<Player>();
-    Queue<Player> players = new ArrayDeque();
+    Deque<Player> players = new ArrayDeque();
     private HashMap<Player, int[]> scores = new HashMap();
     HashMap<String, Object> sheepWhiteboard = new HashMap();
     /**

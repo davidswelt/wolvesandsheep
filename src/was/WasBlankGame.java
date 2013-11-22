@@ -2,6 +2,8 @@ package was;
 
 import ch.aplu.jgamegrid.Actor;
 import ch.aplu.jgamegrid.Location;
+import java.util.Iterator;
+import java.util.ListIterator;
 import was.Player.GamePiece;
 
 
@@ -41,30 +43,33 @@ class WasBlankGame implements WasGameBackend {
         return true;
     }
     // Wolf moves last
-    static GamePiece[] moveOrder = new GamePiece[]{GamePiece.SHEEP, GamePiece.WOLF};
+//    static GamePiece[] moveOrder = new GamePiece[]{GamePiece.SHEEP, GamePiece.WOLF};
 
     @Override
     public void doRun() {
         while (!board.isFinished()) {
-            
+
             board.gameNextTimeStep();
 
             // sheep
-            for (GamePiece g : moveOrder) {
-                for (Player c : board.players) {
-                    if (c == null || c.isGone()) { // player has been removed
-                        continue;
-                    }
-                    if (c.getPiece() != g) {
-                        continue;
-                    }
-                    if (c.isBusy()) {
-                        // Wolf is eating
-                        continue;
-                    }
-                    Move move = c.calcMove(); // calls gameboard.noteMove
+            Iterator li = board.players.descendingIterator();
+            // Iterate in reverse.  
+            // JGameGrid calls act() on the last-added player first.
+            // So we'll do the same.
+            while (li.hasNext()) {
+                Player c = (Player) li.next();
+
+
+                if (c == null || c.isGone()) { // player has been removed
+                    continue;
                 }
+                if (c.isBusy()) {
+                    // Wolf is eating
+                    continue;
+                }
+                Move move = c.calcMove(); // calls gameboard.noteMove
             }
+
         }
         synchronized (board) {
             board.notify();
