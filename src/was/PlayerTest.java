@@ -126,7 +126,8 @@ public class PlayerTest {
             return true; // no unit test
         } catch (SecurityException ex) {
             Logger.getLogger(Tournament.class.getName()).log(Level.SEVERE, null, ex);
-            logPlayerCrash(cl, new RuntimeException("Player violated security rule.  Proceeding."));
+            logPlayerCrash(cl, new RuntimeException("Player unit test violated security rule.  Proceeding."));
+            return true;
         }
 
         return false;
