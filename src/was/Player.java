@@ -44,6 +44,7 @@ public abstract class Player {
     private static final int INITIALIZE = 1;
     private static final int IS_BEING_EATEN = 2;
     private static final int IS_EATING = 3;
+    private static final int IS_ATTACKED = 4;
 
     public static enum GamePiece {
 
@@ -356,6 +357,12 @@ public abstract class Player {
                             ((WolfPlayer) thePlayer).isEating();
                         }
                         break;
+                    case IS_ATTACKED:
+                        m = null;
+                        if (thePlayer instanceof WolfPlayer) {
+                            ((WolfPlayer) thePlayer).isAttacked();
+                        }
+                        break;
                 }
 
 
@@ -513,6 +520,9 @@ public abstract class Player {
 
     final void callIsEating() {
         callPlayerFunction(IS_EATING);
+    }
+    final void callIsAttacked() {
+        callPlayerFunction(IS_ATTACKED);
     }
 
     final Move calcMove() {

@@ -156,6 +156,7 @@ public class GameBoard {
             }
             if (closeSheep >= 3) {
                 sheepSurroundWolf(player);
+                return true;
             }
 
         }
@@ -202,6 +203,7 @@ public class GameBoard {
         LOG("Sheep have overpowered the wolf.  Poor wolf!");
         wolfPlayer.keepBusyFor(wolfEatingTime);
         wolfPlayer.shortenMaxAllowedDistance(0.75); // cut speed by 25%
+        wolfPlayer.callIsAttacked();
     }
 
     void wolfEatSheep(int WolfIndex, int SheepIndex) {

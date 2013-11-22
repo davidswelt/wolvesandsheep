@@ -24,9 +24,15 @@ abstract public class WolfPlayer extends Player {
     /**
      * isEating() is called just before this wolf is eating a sheep
      *
-     * the method is called only if this player is a wolf.
      */
     public void isEating() {
     }
-;
+     
+    /**
+     * isAttacked() is called when this wolf is about to be attacked by sheep
+     * 
+     */
+    public void isAttacked() {
+    }
+
 }
