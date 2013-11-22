@@ -15,21 +15,20 @@ import static was.Tournament.quiet;
 public class IST240Tournament extends Tournament {
 
     public static void ist240(int repeats, int minutes) {
-        String[] sheepteams = new String[]{"Black Sheep:skotleski,cotter,svinte,mancini",
-            "Creepy Sheepies:vickery,chin,kim,wei", 
-            "Dolly's Den:dori,boyd,stramitis,dori", 
-            "Cotton Balls:harsham,heath,harsham,heath",
-            "Old Mutton (Classic):derhammer,chan,derhammer,chan"};
+       
+        String[] sheepteams = new String[]{"Team A:flanigan,lipshutz,senat,zomok",
+            "Team B:hancharik,hilliard,lutsenko,rump",
+            "Team C:cao,charles,hoffman,zwierzynski",
+            "Old Mutton (Classic):derhammer,dori,vickery,reitter"};
         // team scores are averages, not sums - so team size doesn't matter
-        String[] wolves = new String[]{"Wolves:scottmurphy,amberson,wenzel", 
-            "Lone Hunters:bouknight,chong,fannon,fox", 
-            "Furry Fury:gehr,stoltz,weiler", 
-            "The Gray:miller,rao,scanlon,toohig", 
-            "Wolf in Sheep's Clothing:tomechko,jesukiewicz,hatzell,lankay", 
-            "Meat Eater (Classic):reitter,greene,norante"};
+        String[] wolves = new String[]{"Team A:bellisario,petcu,redman",
+            "Team B:fung,robb,zhao",
+            "Meat Eater (Classic):reitter,greene,norante,gehr,wilkinson"};
+        
         HighScore totalHighscore = new HighScore().setTitle("total");
         HighScore totalTiming = new HighScore().setTitle("timing");
         Map<String, HighScore> scenarioHighScore = new TreeMap();
+        Map<String, HighScore> scenarioTiming = new TreeMap();
         for (String player : sheepteams) {
             // each sheep team
             String sheepteam = prefix(player);
@@ -93,14 +92,17 @@ public class IST240Tournament extends Tournament {
                             //for (int sc = 1; sc < Scenario.NUMSCENARIOS && exitRequested==false; sc++) {
                             Tournament t = run(p, repeats, false, sp, false, false);
                             totalHighscore.addHighScore(t.highscore);
+                            totalTiming.addHighScore(t.timing);
                             if (scenarioHighScore.get(t.scenario.toString()) == null) {
                                 scenarioHighScore.put(t.scenario.toString(), new HighScore().setTitle(t.scenario.toString()));
+                                scenarioTiming.put(t.scenario.toString(), new HighScore().setTitle(t.scenario.toString()));
                             }
                             scenarioHighScore.get(t.scenario.toString()).addHighScore(t.highscore);
-                            totalTiming.addHighScore(t.timing);
+                            scenarioTiming.get(t.scenario.toString()).addHighScore(t.timing);
                             
-                                    System.out.println("Timing (ms.):");
-                                    t.timing.print();
+                               
+                            System.out.println("Timing (ms.):");
+                            t.timing.print();
                             totalTiming.print();
                             if (exitRequested) {
                                 break;
@@ -124,7 +126,7 @@ public class IST240Tournament extends Tournament {
         totalHighscore.printByClass(scenarioHighScore.values());
         System.out.print(dividerLine);
         System.out.println("Timing (ms.):");
-        totalTiming.print();
+        totalTiming.printByClass(scenarioTiming.values());
         System.out.println(dividerLine);
         System.out.println("Player Crashes:");
         crashLog.printByCategory(null);
