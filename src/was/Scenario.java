@@ -6,7 +6,6 @@ package was;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
@@ -24,26 +23,51 @@ public class Scenario {
     static Random rand = new Random();
     int requested = 0;
     GameBoard tmpGb = null;
+    static List<Integer> parmValues = new ArrayList(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8));
 
-    static List<Integer> parmValues = new ArrayList(Arrays.asList(1, 2, 3, 4, 5, 6, 7,8));
     protected Scenario() {
     }
+
+    static Class scenarioClass() {
+        Class cl = null;
+        try {
+            cl = Class.forName("was.SecretScenario"); // not provided to students - held out evaluation scenarios
+        } catch (ClassNotFoundException ex) {
+            try {
+                cl = Class.forName("was.Scenario");
+            } catch (ClassNotFoundException ex1) {
+                throw new RuntimeException(ex1);
+            }
+        }
+        return cl;
+    }
+
     static List<Integer> getParameterValues() {
-        // to do: should maybe aggregate the parm values here
-       
-       //    return SecretScenario.getParameterValues();
-          
+        // get parameter values for best available Scenario class
+        try {
+            java.lang.reflect.Field f1;
+            f1 = scenarioClass().getDeclaredField("parmValues");
+            return (List<Integer>) f1.get(null);
+        } catch (Exception ex) {
+            Logger.getLogger(Scenario.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
         return parmValues;
     }
 
     static Scenario makeScenario(int requestedScenario) {
         Scenario sc = null;
-        
-        // sc = new SecretScenario();
-        
-        sc = new Scenario();
-        
-            sc.requested = requestedScenario;
+
+        try {
+            sc = (Scenario) scenarioClass().newInstance();
+            //        sc = new Scenario();
+        } catch (InstantiationException ex) {
+            throw new RuntimeException(ex);
+        } catch (IllegalAccessException ex) {
+            throw new RuntimeException(ex);
+        }
+
+        sc.requested = requestedScenario;
         // any parametrization should happen here
         if (sc.requested == 0) {
             sc.requested = getParameterValues().get(rand.nextInt(getParameterValues().size()));
@@ -172,28 +196,32 @@ public class Scenario {
                 break;
             case 8:
                 // 50x50
-                green(30,0); green(31,0); green(32,0);
-                green(30,1); green(31,1); green(32,1);
-                line(15,19,50-15,19);
-                line(15,19,15,25);
-                line(-15,19,-15,28);
-                line(15,25,17,27);
-                line(0,-1,8,-8);
-                line(0,-2,8,-9);
-                line(0,-3,8,-10);
-                line(8,-8,12,-4);
-                line(9,-8,13,-4);
-                line(9,-9,14,-4);
-                line(12,-4,9,-2);
-                line(10,-2,-4,-2);
-                line(10,-3,-4,-3);
-                line(-1,-5,-10,-5);
-                line(-1,-6,-10,-6);
-                wolfP.add(loc(5,-3));
-                sheepP.add(loc(17,22));
-                sheepP.add(loc(20,22));
-                sheepP.add(loc(23,22));
-                sheepP.add(loc(26,22));
+                green(30, 0);
+                green(31, 0);
+                green(32, 0);
+                green(30, 1);
+                green(31, 1);
+                green(32, 1);
+                line(15, 19, 50 - 15, 19);
+                line(15, 19, 15, 25);
+                line(-15, 19, -15, 28);
+                line(15, 25, 17, 27);
+                line(0, -1, 8, -8);
+                line(0, -2, 8, -9);
+                line(0, -3, 8, -10);
+                line(8, -8, 12, -4);
+                line(9, -8, 13, -4);
+                line(9, -9, 14, -4);
+                line(12, -4, 9, -2);
+                line(10, -2, -4, -2);
+                line(10, -3, -4, -3);
+                line(-1, -5, -10, -5);
+                line(-1, -6, -10, -6);
+                wolfP.add(loc(5, -3));
+                sheepP.add(loc(17, 22));
+                sheepP.add(loc(20, 22));
+                sheepP.add(loc(23, 22));
+                sheepP.add(loc(26, 22));
                 board.MAXTIMESTEP = Math.max(board.MAXTIMESTEP, 200);
                 break;
         }
@@ -203,7 +231,7 @@ public class Scenario {
         switch (requested) {
             case 7:
                 return (int) (150);
-                case 8:
+            case 8:
                 return (int) (50);
         }
         return (int) (30);
@@ -231,8 +259,6 @@ public class Scenario {
         hash = 97 * hash + this.getClass().hashCode();
         return hash;
     }
-
-    
 
     void green(int x, int y) {
         setFigure(Pasture.class, x, y);
@@ -284,47 +310,44 @@ public class Scenario {
             }
         }
     }
-    protected void line(int x1,int y1,int x2,int y2)
-    {
-        x1=normX(x1);
-        y1=normY(y1);
-        x2=normX(x2);
-        y2=normY(y2);
-        if (x2<x1)
-        {
+
+    protected void line(int x1, int y1, int x2, int y2) {
+        x1 = normX(x1);
+        y1 = normY(y1);
+        x2 = normX(x2);
+        y2 = normY(y2);
+        if (x2 < x1) {
             int t = x2;
-            x2=x1;
-            x1=t;
+            x2 = x1;
+            x1 = t;
             t = y2;
-            y2=y1;
-            y1=t;
+            y2 = y1;
+            y1 = t;
         }
-        
-        double sy = (double) (y2-y1)/(x2-x1);
+
+        double sy = (double) (y2 - y1) / (x2 - x1);
         double sx = 1;
-        
-        if (sy>1 || sy<-1)
-        {
+
+        if (sy > 1 || sy < -1) {
             sx /= sy;
             sy = 1;
-            if (sx<0)
-            {
+            if (sx < 0) {
                 sx = -sx;
                 sy = -1;
             }
         }
-        
-        
+
+
         double x = x1;
-        double y=y1;
-        while((sy>0?y<=y2:y>=y2) && (sx>0?x<=x2:x>=x2))
-        {
+        double y = y1;
+        while ((sy > 0 ? y <= y2 : y >= y2) && (sx > 0 ? x <= x2 : x >= x2)) {
             setFigure(Obstacle.class, (int) x, (int) y);
             x += sx;
             y += sy;
         }
-        
+
     }
+
     @Override
     public String toString() {
         return "Sc." + requested;
