@@ -96,46 +96,11 @@ public class GameBoard {
         if (player == null) {
             throw new RuntimeException("movePlayer: trying to move an empty cell.");
         }
-        if (player.isBusy()) {
-            return false; // can't move Player
-        }
-        LOG(player + " " + player.getLocation() + " " + m);
-
-        if (player != board.get(getIndex(player.getLocation()))) {
-            System.err.println("player " + player + "location mismatch. player thinks its at " + player.getLocation() + " while board has something else there.. ");
-            System.err.println("The board has, at " + player.getLocation() + ":" + board.get(getIndex(player.getLocation())));
-        }
-
-        if (m.length() > allowedMoveDistance(player) + 0.000005) {
-            return false;
-        }
-
-        GameLocation loc = player.getLocation();
-        int x = loc.x;
-        int y = loc.y;
-        int i = getIndex(x, y);
-
-        x += (int) m.delta_x;
-        y += (int) m.delta_y;
-        x = Math.max(0, x);
-        y = Math.max(0, y);
-        x = Math.min(cols - 1, x);
-        y = Math.min(rows - 1, y);
-
-        int idx = getIndex(x, y);
-
-        if (idx == i) {
-            return true; // empty move
-        }
-
+        
         GamePiece playerCellPiece = player.getPiece();
-        GamePiece targetCellPiece = getPiece(idx);
+        GameLocation loc = player.getLocation();
 
-        GameLocation nloc = clearShot(loc, new GameLocation(x, y));
-        x = nloc.x;
-        y = nloc.y;
-
-
+        
         if (playerCellPiece == GamePiece.WOLF) {
             // is move surrounded by sheep?
             // check all sheep in game
@@ -160,6 +125,47 @@ public class GameBoard {
             }
 
         }
+
+        
+        
+        
+        if (player.isBusy()) {
+            return false; // can't move Player
+        }
+        LOG(player + " " + player.getLocation() + " " + m);
+
+        if (player != board.get(getIndex(player.getLocation()))) {
+            System.err.println("player " + player + "location mismatch. player thinks its at " + player.getLocation() + " while board has something else there.. ");
+            System.err.println("The board has, at " + player.getLocation() + ":" + board.get(getIndex(player.getLocation())));
+        }
+
+        if (m.length() > allowedMoveDistance(player) + 0.000005) {
+            return false;
+        }
+
+        int x = loc.x;
+        int y = loc.y;
+        int i = getIndex(x, y);
+
+        x += (int) m.delta_x;
+        y += (int) m.delta_y;
+        x = Math.max(0, x);
+        y = Math.max(0, y);
+        x = Math.min(cols - 1, x);
+        y = Math.min(rows - 1, y);
+
+        int idx = getIndex(x, y);
+
+        if (idx == i) {
+            return true; // empty move
+        }
+
+        GamePiece targetCellPiece = getPiece(idx);
+
+        GameLocation nloc = clearShot(loc, new GameLocation(x, y));
+        x = nloc.x;
+        y = nloc.y;
+
 
 
         if (isEmptyCell(x, y)) {
