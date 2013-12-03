@@ -9,7 +9,7 @@ target=dist/WolvesAndSheep.jar
 
 alljars=
 allclasses=
-for file in `ls players/*.jar players/*/*.jar`; do
+for file in `ls players/*.jar players/*/*.jar classic.players/*.jar classic.players/*/*.jar`; do
 
 file2=`echo $file | tr [:upper:] [:lower:]` 
 mv $file $file2 
