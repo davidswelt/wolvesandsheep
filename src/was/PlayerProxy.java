@@ -157,7 +157,8 @@ class PlayerProxy extends Actor {
             bg.drawGeneralPath(track);
             if (player.shortName() != null) {
 
-                bg.setFont(new Font("TimesRoman", Font.PLAIN, 12));
+                bg.setPaintColor(java.awt.Color.black);
+                bg.setFont(new Font("TimesRoman", Font.PLAIN, 14));
                 bg.drawText(player.shortName(), new Point(pt.x + 5, pt.y));
             }
         }

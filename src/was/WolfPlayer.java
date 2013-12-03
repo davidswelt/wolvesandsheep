@@ -17,7 +17,7 @@ abstract public class WolfPlayer extends Player {
     // you may override if you like
     @Override
     public String imageFile() {
-        return "pics/wolf_head_small.gif";
+        return "pics/wolf_head_small_red.gif";
     }
 
     // this inherits the move() method from Player.
