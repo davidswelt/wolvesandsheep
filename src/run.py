@@ -2,6 +2,7 @@
 
 import random
 
+assignment_name = 'wasJAR'
 targetfile = "/home/dreitter/submission/media/results/latest.html"
 tmpf = "%s"%random.randint(1, 10000)
 ist240 = True # run actual 240 tournament
@@ -12,8 +13,7 @@ playerspath = "players/"
 
 import os
 
-os.system("rm -r players >/dev/null; mkdir players; cp -p ../submission/media/was/*.jar "+playerspath);
-
+os.system("rm -r players >/dev/null; mkdir players; cp -p ../submission/media/%s/*.jar %s"%(assignment_name,playerspath));
 
 if ist240:
     tourn_args = "-ist240 " + tourn_args
