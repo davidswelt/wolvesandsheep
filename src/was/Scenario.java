@@ -224,6 +224,8 @@ public class Scenario {
                 sheepP.add(loc(26, 22));
                 board.MAXTIMESTEP = Math.max(board.MAXTIMESTEP, 200);
                 break;
+            default:
+                throw new RuntimeException("Specified scenario unavailable.");
         }
     }
 
