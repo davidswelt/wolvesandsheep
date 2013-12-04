@@ -24,20 +24,28 @@ public class Scenario {
     int requested = 0;
     GameBoard tmpGb = null;
     static List<Integer> parmValues = new ArrayList(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8));
+    static boolean useSecretScenarioClass = false;
 
     protected Scenario() {
     }
 
     static Class scenarioClass() {
         Class cl = null;
+
         try {
-            cl = Class.forName("was.SecretScenario"); // not provided to students - held out evaluation scenarios
-        } catch (ClassNotFoundException ex) {
-            try {
+            if (useSecretScenarioClass) {
+                try {
+                    cl = Class.forName("was.SecretScenario"); // not provided to students - held out evaluation scenarios
+                } catch (ClassNotFoundException ex) {
+
+                    cl = Class.forName("was.Scenario");
+
+                }
+            } else {
                 cl = Class.forName("was.Scenario");
-            } catch (ClassNotFoundException ex1) {
-                throw new RuntimeException(ex1);
             }
+        } catch (ClassNotFoundException ex1) {
+            throw new RuntimeException(ex1);
         }
         return cl;
     }

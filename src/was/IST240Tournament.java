@@ -169,10 +169,12 @@ public class IST240Tournament extends Tournament {
 
                 duration = Integer.parseInt(args[i++]);
 
+            } else if (s.equals("--secret")) {
+
+                Scenario.useSecretScenarioClass = true;
+
             }
         }
-
-
 
         System.err.println("Usage: java -jar WolvesAndSheep.jar -r R -s S -t -e -p -c -q CLASS1 CLASS2 CLASS3 CLASS4 CLASS5 (...)");
         //System.err.println("       -t M,N,K  ==> play a M*N board with K sheep.");
