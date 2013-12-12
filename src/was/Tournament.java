@@ -472,6 +472,10 @@ public class Tournament {
 
                 pauseInitially = true;
 
+            } else if (s.equals("--secret")) {
+
+                Scenario.useSecretScenarioClass = true;
+
             } else {
                 players.add(PlayerFactory.getClassForName(s));
             }
