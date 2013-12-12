@@ -313,6 +313,8 @@ public class Scenario {
                     tmpGb.addPlayer((Player) p.newInstance(), l);
 
                 }
+            } catch (IndexOutOfBoundsException ex)
+            {
             } catch (InstantiationException ex) {
                 Logger.getLogger(Scenario.class.getName()).log(Level.SEVERE, null, ex);
             } catch (IllegalAccessException ex) {
@@ -320,8 +322,22 @@ public class Scenario {
             }
         }
     }
-
+    
+    int lastLineX = 0;
+    int lastLineY = 0;
+    protected void lineTo(int x, int y)
+    {
+        line(lastLineX, lastLineY, x, y);
+        lastLineX=x;
+        lastLineY=y;
+    }
+            
+            
     protected void line(int x1, int y1, int x2, int y2) {
+        
+        lastLineX = x2;
+        lastLineY = y2;
+        
         x1 = normX(x1);
         y1 = normY(y1);
         x2 = normX(x2);
@@ -352,10 +368,15 @@ public class Scenario {
         double y = y1;
         while ((sy > 0 ? y <= y2 : y >= y2) && (sx > 0 ? x <= x2 : x >= x2)) {
             setFigure(Obstacle.class, (int) x, (int) y);
+            if ((int) x < (int) x+sx)
+            // horizontal shift?
+            {
+                
+                setFigure(Obstacle.class, (int) x+1, (int) y);
+            }
             x += sx;
             y += sy;
         }
-
     }
 
     @Override
