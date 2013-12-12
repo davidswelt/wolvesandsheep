@@ -48,6 +48,7 @@ public class GameBoard {
 
     // can move along line between a and b
     GameLocation clearShot(GameLocation a, GameLocation b) {
+        
         // diagonal steps are OK
         Move m = new Move(b.x - a.x, b.y - a.y);
 
@@ -92,6 +93,11 @@ public class GameBoard {
     // make a move
     boolean movePlayer(Player player, Move m) {
 
+        if (m == null) // obstacles, and the like
+        {
+            return true;
+        }
+        
         LOG(player + " moves " + m);
         if (player == null) {
             throw new RuntimeException("movePlayer: trying to move an empty cell.");
@@ -157,16 +163,18 @@ public class GameBoard {
         int idx = getIndex(x, y);
 
         if (idx == i) {
-            return true; // empty move
+          return true; // empty move
         }
-
-        GamePiece targetCellPiece = getPiece(idx);
 
         GameLocation nloc = clearShot(loc, new GameLocation(x, y));
         x = nloc.x;
         y = nloc.y;
 
-
+        idx = getIndex(x, y);
+        if (idx == i) {
+          return true; // empty move
+        }
+        GamePiece targetCellPiece = getPiece(idx);
 
         if (isEmptyCell(x, y)) {
             // swap empty cell

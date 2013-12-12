@@ -21,10 +21,9 @@ final public class Pasture extends Player{
     {
         return null;
     }
-    static Move emptyMove = new Move(0,0);
     @Override
     public Move move() {
-        return emptyMove;
+        return null;
     }
     
     
