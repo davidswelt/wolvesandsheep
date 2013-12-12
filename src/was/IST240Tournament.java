@@ -16,14 +16,14 @@ public class IST240Tournament extends Tournament {
 
     public static void ist240(int repeats, int minutes) {
        
-        String[] sheepteams = new String[]{"Team A:flanigan,lipshutz,senat,zomok",
+        String[] sheepteams = new String[]{"TABZ:flanigan,lipshutz,senat,zomok",
             "Team B:hancharik,hilliard,lutsenko,rump",
             "Team C:cao,charles,hoffman,zwierzynski",
-            "Old Mutton (Classic):derhammer,dori,vickery,reitter"};
+            "Old Mutton (Classic):derhammer,dori,vickery,dori,tailor"};
         // team scores are averages, not sums - so team size doesn't matter
-        String[] wolves = new String[]{"Team A:bellisario,petcu,redman",
-            "Team B:fung,robb,zhao",
-            "Meat Eater (Classic):reitter,greene,norante,gehr,wilkinson"};
+        String[] wolves = new String[]{"Wolfenstein:bellisario,petcu,redman",
+            "Wolfram Alphas:fung,robb,zhao",
+            "Meat Eater (Classic):greene,zielenski,gehr,wilkinson"};
         
         HighScore totalHighscore = new HighScore().setTitle("total");
         HighScore totalTiming = new HighScore().setTitle("timing");
