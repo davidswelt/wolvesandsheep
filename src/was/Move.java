@@ -90,8 +90,14 @@ public class Move {
         {
             return m2;
         }
-
-        return new Move(roundDown(delta_x), roundDown(delta_y));
+        
+        Move m3 = new Move(roundDown(delta_x), roundDown(delta_y));
+        if (m3.length()<=maxLen)
+        {
+            return m3;
+        }
+        return scaledToLength(maxLen).quantized(maxLen);
+        
     }
     /**
      * Converts move to integer
