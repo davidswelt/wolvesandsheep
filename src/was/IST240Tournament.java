@@ -16,13 +16,18 @@ public class IST240Tournament extends Tournament {
 
     public static void ist240(int repeats, int minutes) {
        
-        String[] sheepteams = new String[]{"TABZ:flanigan,lipshutz,senat,zomok",
-            "Team B:hancharik,hilliard,lutsenko,rump",
-            "Team C:cao,charles,hoffman,zwierzynski",
+    String[] sheepteams = new String[]{"Lambchop:hegarty,holsinger,lafferty,montague",
+            "Splendiferous Sheep:kohler2,nader,silva",
+            "Team C:cave,dwyer,pipkin,smith",
+            "Team D:li,neigh,sandler,zucker",
+            "Baaad Boys:balickie,battista,curtis,owen",
+            "Team F:kohler,learn,mahon",
             "Old Mutton (Classic):derhammer,dori,vickery,dori,tailor"};
         // team scores are averages, not sums - so team size doesn't matter
-        String[] wolves = new String[]{"Wolfenstein:bellisario,petcu,redman",
-            "Wolfram Alphas:fung,robb,zhao",
+        String[] wolves = new String[]{
+            "Wolfram Alphas:cinque,fagan,flynn,mittal",
+            "Team B:finuoli,frangoudis,ling",
+            "Team C:monick,pinter,snell",
             "Meat Eater (Classic):greene,zielenski,gehr,wilkinson"};
         
         HighScore totalHighscore = new HighScore().setTitle("total");
@@ -83,6 +88,7 @@ public class IST240Tournament extends Tournament {
                             avgtimeperrun = (System.currentTimeMillis() - startTime) / runcount;
                         }
                         // all scenarios
+             //           List x = Scenario.getParameterValues();
                         for (int sp : Scenario.getParameterValues()) {
                             if (avgtimeperrun > 0) {
                                 System.out.printf("running (%s out of %s).  %s mins. left\n", runcount, totalRuns, (int) (((totalRuns - runcount) * avgtimeperrun) / 1000 / 60));
