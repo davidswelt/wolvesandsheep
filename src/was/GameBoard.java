@@ -365,11 +365,49 @@ public class GameBoard {
         return findAllPlayersLoc(GamePiece.OBSTACLE);
     }
 
+    /**
+     * Get the position of a named player.
+     * Return null if this player does not or no longer exists.
+     * @param playerIDString
+     * @return a GameLocation object
+     */
+    public GameLocation getPlayerPositionByID(String playerIDString) {
+        // Note: this is not very efficient.
+        // To Do: maintain a map for this if people end up using it.
+        ArrayList<was.GameLocation> sp = new ArrayList();
+        for (Player p : players) {
+            if (p != null && !p.isGone() && p.getID().equals(playerIDString)) {
+                return p.getLocation(); // this is a copy
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Get the ID of the player at a given position.
+     * Return null if there is no player at that position.
+     * @param location
+     * @return a String with the unique ID of the player instance
+     */
+    public String getPlayerIDatPosition(GameLocation loc) {
+        if (loc.x < 0 || loc.x >= cols || loc.y < 0 || loc.y >= rows) {
+            return null;
+        }
+        int idx = getIndex(loc.x, loc.y);
+        Player p = getPlayer(idx);
+        if (p != null)
+        {
+            return p.getID();
+        }
+        return null;
+    }
+            
+
     ArrayList<GameLocation> findAllPlayersLoc(GamePiece type) {
         ArrayList<was.GameLocation> sp = new ArrayList();
         for (Player p : players) {
             if (p != null && !p.isGone() && p.getPiece() == type) {
-                sp.add(p.getLocation());
+                sp.add(p.getLocation());// this is a copy
             }
         }
         return sp;
