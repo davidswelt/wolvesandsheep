@@ -29,12 +29,12 @@ public class PlayerTest {
     }
     public static boolean runTest(Class playerClass, HighScore log) {
         PlayerTest.log = log;
-        try {
+        
             String str;
             boolean isWolf;
-            if (Class.forName("was.SheepPlayer").isAssignableFrom(playerClass)) {
+            if (SheepPlayer.class.isAssignableFrom(playerClass)) {
                 isWolf = false;
-            } else if (Class.forName("was.WolfPlayer").isAssignableFrom(playerClass)) {
+            } else if (WolfPlayer.class.isAssignableFrom(playerClass)) {
                 isWolf = true;
             } else {
                 str = String.format("Class %s is neither derived from was.WolfPlayer nor from was.SheepPlayer.\n", playerClass.getName());
@@ -42,19 +42,38 @@ public class PlayerTest {
                 System.err.println(str);
                 return false;
             } 
-            
-            if ( mayNotInheritFrom(playerClass, "reitter.Wolf") ||
-                    mayNotInheritFrom(playerClass, "greene.Wolf") ||
-                    mayNotInheritFrom(playerClass, "reitter.Sheep"))
+ 
+            // If named Sheep, has to be a SheepPlayer
+            String st = playerClass.getSimpleName().toLowerCase();
+            if (playerClass.getSimpleName().toLowerCase().contains("sheep") && 
+                    ! SheepPlayer.class.isAssignableFrom(playerClass))
             {
+                str = String.format("Class %s is named like a Sheep, but does not extend was.SheepPlayer.\n", playerClass.getName());
+                log.inc(str);
+                System.err.println(str);
+                return false;
+                
+            }
+            if (playerClass.getSimpleName().toLowerCase().contains("wolf") && 
+                    ! WolfPlayer.class.isAssignableFrom(playerClass))
+            {
+                str = String.format("Class %s is named like a Wolf, but does not extend was.WolfPlayer.\n", playerClass.getName());
+                log.inc(str);
+                System.err.println(str);
                 return false;
             }
-                    
+            
+            // to do
+            // may not inherit from any other package
+//            if ( mayNotInheritFrom(playerClass, "reitter.Wolf") ||
+//                    mayNotInheritFrom(playerClass, "greene.Wolf") ||
+//                    mayNotInheritFrom(playerClass, "reitter.Sheep"))
+//            {
+//                return false;
+//            }
+//                    
             return true;
-        } catch (ClassNotFoundException ex) {
-            // reitter.* may not be included
-            return true;
-        }
+        
     }
 
     public static boolean runTest(String playerClassStr, HighScore log) {
