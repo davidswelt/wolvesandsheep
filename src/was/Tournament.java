@@ -351,7 +351,7 @@ public class Tournament {
                                     scenarioScore.inc(scenPlayStr, score.getValue()[0]);
                                     timing.noteUse(cl.getName());
                                     scenarioTiming.noteUse(scenPlayStr);
-
+                                    score.getValue()[0] = 0; // set to 0 to make sure it doesn't get added twice
                                 }
                             } finally {
                                 if (printHighscores) {
@@ -363,8 +363,6 @@ public class Tournament {
                             }
                         }
                     }
-
-
                 }
             }
         } catch (IllegalArgumentException ex) {
