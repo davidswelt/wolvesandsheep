@@ -14,6 +14,12 @@ abstract public class WolfPlayer extends Player {
         return GamePiece.WOLF;
     }
 
+    @Override
+    final public boolean isIncludedInHighScore() {
+        return true;
+    }
+    
+    
     // you may override if you like
     @Override
     public String imageFile() {

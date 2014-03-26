@@ -339,19 +339,21 @@ public class Tournament {
 
                                 for (Map.Entry<Player, int[]> score : s.entrySet()) {
                                     Class cl = score.getKey().getClass();
-                                    highscore.inc(cl.getName(), score.getValue()[0]);
+                                    if (score.getKey().isIncludedInHighScore()) {
+                                        highscore.inc(cl.getName(), score.getValue()[0]);
 
-                                    if (teams.get(cl) != null) { // Pastures etc don't have a team
+                                        if (teams.get(cl) != null) { // Pastures etc don't have a team
 
-                                        highscore.inc(teams.get(cl) + (score.getKey() instanceof WolfPlayer ? ".WolfTeam" : ".SheepTeam"), score.getValue()[0]);
+                                            highscore.inc(teams.get(cl) + (score.getKey() instanceof WolfPlayer ? ".WolfTeam" : ".SheepTeam"), score.getValue()[0]);
+                                        }
+                                        timing.inc(cl.getName(), score.getKey().meanRunTime());
+                                        final String scenPlayStr = "Scenario " + scenario.toString() + "\\" + cl.getName();
+                                        scenarioTiming.inc(scenPlayStr, score.getKey().meanRunTime());
+                                        scenarioScore.inc(scenPlayStr, score.getValue()[0]);
+                                        timing.noteUse(cl.getName());
+                                        scenarioTiming.noteUse(scenPlayStr);
+                                        score.getValue()[0] = 0; // set to 0 to make sure it doesn't get added twice
                                     }
-                                    timing.inc(cl.getName(), score.getKey().meanRunTime());
-                                    final String scenPlayStr = "Scenario " + scenario.toString() + "\\" + cl.getName();
-                                    scenarioTiming.inc(scenPlayStr, score.getKey().meanRunTime());
-                                    scenarioScore.inc(scenPlayStr, score.getValue()[0]);
-                                    timing.noteUse(cl.getName());
-                                    scenarioTiming.noteUse(scenPlayStr);
-                                    score.getValue()[0] = 0; // set to 0 to make sure it doesn't get added twice
                                 }
                             } finally {
                                 if (printHighscores) {

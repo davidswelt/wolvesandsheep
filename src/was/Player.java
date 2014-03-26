@@ -110,6 +110,15 @@ public abstract class Player {
     }
 
     /**
+     * Identify a tallied-up player.
+     * This method is overloaded by SheepPlayer and WolfPlayer.
+     * @return true if this player is included in the High Score.
+     */
+    public boolean isIncludedInHighScore() {
+        return false;
+    }
+    
+    /**
      * Called when the game is over. The player may do any cleanup here.
      */
     void finished() {

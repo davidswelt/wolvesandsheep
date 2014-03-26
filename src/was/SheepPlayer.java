@@ -12,13 +12,21 @@ import java.util.ArrayList;
 public abstract class SheepPlayer extends Player {
     
     
+    // cannot override
     @Override
     final public GamePiece getPiece() 
     {
         return GamePiece.SHEEP;
     }
     
+    // cannot override
+    @Override
+    final public boolean isIncludedInHighScore() {
+        return true;
+    }
+    
     // you may override if you like
+    // image file must be included in your own package
     @Override
     public String imageFile () {
         return "pics/sheep_head_small.jpg";

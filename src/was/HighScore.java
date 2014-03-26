@@ -12,7 +12,8 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 /**
- *
+ * This class contains hacks.
+ * To do: re-write.
  * @author dr
  */
 public class HighScore extends TreeMap<String, Double> {
@@ -21,6 +22,7 @@ public class HighScore extends TreeMap<String, Double> {
 
     final int COLUMNWIDTH = 8;
     
+    String title = "";
     HighScore setTitle(String t) {
         title = t;
         return this;
@@ -34,7 +36,7 @@ public class HighScore extends TreeMap<String, Double> {
             inc(e.getKey(), e.getValue());
         }
     }
-
+    
     void inc(String s) {
         //            System.out.println("increase " + s);
         inc(s, 1.0);
@@ -96,7 +98,6 @@ public class HighScore extends TreeMap<String, Double> {
             printAlignment = Math.max(printAlignment, removePrefix(k).length());
         }
     }
-    String title = "";
 
     String leftAlign(String s, int a) {
         return (a - s.length() > 0 ? String.format("%" + (a - s.length()) + "s", "") : "")
@@ -167,6 +168,8 @@ public class HighScore extends TreeMap<String, Double> {
         Map<String, List<String>> cats = new TreeMap(); // categories
         // categories
         for (String k : keys) {
+            
+            // UGLY HACK.  DON'T DO THIS AT HOME.
             //categories marked with \ or .
             StringTokenizer t = new StringTokenizer(k, k.contains("\\") ? "\\" : (byClass? "." : ""));
             String classname;
