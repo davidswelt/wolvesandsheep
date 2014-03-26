@@ -50,4 +50,4 @@ jarsigner -storepass javakey  -keypass javakey dist/WolvesAndSheep.jar dr
 
 
 echo "Suggsted run command:"
-echo "./java17 -Xmx1500m -classpath dist/WolvesAndSheep.jar:$alljars was.Tournament -e -c -ist240 -r 3"
+echo "./java17 -Xmx1500m -classpath dist/WolvesAndSheep.jar:$alljars was.ClassTournament -e -c -r 3"

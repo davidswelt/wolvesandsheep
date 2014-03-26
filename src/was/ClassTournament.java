@@ -12,21 +12,21 @@ import static was.Tournament.quiet;
  *
  * @author dr
  */
-public class IST240Tournament extends Tournament {
+public class ClassTournament extends Tournament {
 
-    public static void ist240(int repeats, int minutes) {
+    public static void teamStructureInit(int repeats, int minutes) {
        
-    String[] sheepteams = new String[]{"Lambchop:hegarty,holsinger,lafferty,montague",
+    String[] sheepteams = new String[]{"Lambchop:holsinger,lafferty,montague",  // hegarty probably dropped
             "Splendiferous Sheep:kohler2,nader,silva",
-            "Team C:cave,dwyer,pipkin,smith",
-            "Team D:li,neigh,sandler,zucker",
-            "Baaad Boys:balickie,battista,curtis,owen",
+            "Team C:cave,dwyer,smith",  // pipkin probably dropped
+            "Team D:neigh,sandler,zucker", // li probably dropped
+            "Baaad Boys:balickie,battista,curtis", // owen (dropped),   curtis, blickie
             "Team F:kohler,learn,mahon",
             "Old Mutton (Classic):derhammer,dori,vickery,dori,tailor"};
         // team scores are averages, not sums - so team size doesn't matter
         String[] wolves = new String[]{
-            "Wolfram Alphas:cinque,fagan,flynn,mittal",
-            "Team B:finuoli,frangoudis,ling",
+            "Wolfram Alphas:cinque,fagan,flynn",  // mittal probably dropped
+            "Team Wolfenstein:finuoli,frangoudis,ling",
             "Team C:monick,pinter,snell",
             "Meat Eater (Classic):greene,zielenski,gehr,wilkinson"};
         
@@ -121,10 +121,12 @@ public class IST240Tournament extends Tournament {
         }
         System.out.println("###########################"); // marker for processing script
         System.out.print(dividerLine);
-        System.out.println("IST240 Tournament results:");
+        System.out.println("TOURNAMENT");
+        System.out.println("Sheep teams:");
         for (String s : sheepteams) {
             System.out.println(s);
         }
+        System.out.println("Wolf teams:");
         for (String s : wolves) {
             System.out.println(s);
         }
@@ -140,7 +142,7 @@ public class IST240Tournament extends Tournament {
        
     }
 
-    public IST240Tournament(List<Class> playerClasses, int r, boolean ui) {
+    public ClassTournament(List<Class> playerClasses, int r, boolean ui) {
         super(playerClasses, r, ui);
         throw new RuntimeException("not implemented.");
                 
@@ -187,7 +189,7 @@ public class IST240Tournament extends Tournament {
         System.err.println("       -r R      ==> play R repeats of each game.");
         System.err.println("       -q        ==> do not print progress info ");
 
-        ist240(r, duration);
+        teamStructureInit(r, duration);
 
 
     }

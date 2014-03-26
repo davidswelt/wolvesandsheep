@@ -9,10 +9,12 @@ use a softlink and run it from the project directory.
 test-was.sh is needed if .jar files are run from within NetBeans (with graphical output).  This will strip them of the "was" packages, most importantly.
 run it from the project directory.
 
-run.py runs the tournament (either free-form, or as defined by TOurnament.ist240).  This is typically a cron job on the server.
-If set up to run the 240 tournament, it'll keep repeating it for 10 minutes before producing output in a specified HTML file.
+run.py runs the tournament (either free-form, or as defined by ClassTournament.teamStructureInit).  
+This is typically a cron job on the server.
+If set up to run the class tournament, it'll keep repeating it for a set number of
+minutes before producing output in a specified HTML file.
 
 
-DR 4/2013
+DR 03/2014
 
 
