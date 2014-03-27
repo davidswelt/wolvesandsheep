@@ -15,20 +15,19 @@ import static was.Tournament.quiet;
 public class ClassTournament extends Tournament {
 
     public static void teamStructureInit(int repeats, int minutes) {
-       
-    String[] sheepteams = new String[]{"Lambchop:holsinger,lafferty,montague",  // hegarty probably dropped
-            "Splendiferous Sheep:kohler2,nader,silva",
-            "Team C:cave,dwyer,smith",  // pipkin probably dropped
-            "Team D:neigh,sandler,zucker", // li probably dropped
-            "Baaad Boys:balickie,battista,curtis", // owen (dropped),   curtis, blickie
-            "Team F:kohler,learn,mahon",
-            "Old Mutton (Classic):derhammer,dori,vickery,dori,tailor"};
+       String[] sheepteams = new String[]{"Lambchop:aaa,bbb,ccc",  // hegarty probably dropped
+            "Splendiferous Sheep:ddd,eee,fff",
+            "Team C:ggg,hhh,iii",  // pipkin probably dropped
+            "Team D:jjj,kkk,lll", // li probably dropped
+            "Baaad Boys:mmm,nnn,ooo", // owen (dropped),   curtis, blickie
+            "Team F:ppp,qqq,rrr",
+            "Old Mutton (Classic):sss,ttt,uuu,vvv,xxx"};
         // team scores are averages, not sums - so team size doesn't matter
         String[] wolves = new String[]{
-            "Wolfram Alphas:cinque,fagan,flynn",  // mittal probably dropped
-            "Team Wolfenstein:finuoli,frangoudis,ling",
-            "Team C:monick,pinter,snell",
-            "Meat Eater (Classic):greene,zielenski,gehr,wilkinson"};
+            "Wolfram Alphas:aa,bb,cc",  // mittal probably dropped
+            "Team Wolfenstein:dd,ee,ff",
+            "Team C:gg,hh,ii",
+            "Meat Eater (Classic):jj,kk,ll,mm"};
         
         HighScore totalHighscore = new HighScore().setTitle("total");
         HighScore totalTiming = new HighScore().setTitle("timing");
