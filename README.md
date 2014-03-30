@@ -1,8 +1,19 @@
 Wolves And Sheep
-==============
+========
+
+This is a multi-agent, bio-inspired simulation; it is a competitive game and a tournament written for 5-50 beginner programmers.
+
+It is designed as educational tool:  Students of an intermediate programming class taught in Java write code that controls a single player in this simulation.  Players are pitched against each other; typically 5 at a time.  A tournament runs many combinations of players in many adjustable scenarios.
+
+The tournament is set up to run regularly on a server, taking .jar files provided by students.  It uses standard visibility and sandboxing features of Java to provide a basic level of
+
+The project is described in detail here:
+
+Reitter, David T. Hungry Wolves, Creepy Sheepies: The Gamification of the Programmer’s Classroom.  In: Carroll, J. (Ed.), Innovative Practices in Teaching Information Sciences and Technology.  Springer, 2014.
+
 
 Instructions: Wolves and Sheep
-IST 240, Reitter
+====
 
 During the final project, you will apply many of the things you learned in this class.  You will also improve your team-working skills.  In order to do this job well, you need to understand how different classes interface with each other.
 
@@ -17,7 +28,7 @@ Beware... the rules of the game are simple, but its dynamics can be very complex
 
 
 Teamwork
-===
+-------
 
 Each student is submit their own player class (either a wolf or a sheep).
 
@@ -43,7 +54,7 @@ Rule 2: You should collaborate with the other students within your team.  While 
 Rule 3: You must submit only your own code and may not write code for others.  Small, shared functions that are marked as such are OK.
 
 Game Rules
-===
+-----
 
 The playing field is a m by n rectangular grid with m*n cells.  In each game, there are a number of players (several sheep players, and one wolf).   Each player occupies exactly one cell in the grid, and no cell will contain more than one player (except a combination of the wolf and a sheep).  Cells may also contain an obstacle, in which case no player can occupy the cell. 
  Players start at an assigned location. There are multiple steps (iterations): In each iteration, each sheep may move exactly one step to the left, the right, up, down, or diagonally, but not beyond the boundaries of the grid.  In each iteration, the wolf may also move a constant k steps (k is to be determined by the game, and fixed throughout the tournament.  All players will be told k).  All players make one move at a time and see the updated positions.  The wolf moves last.
@@ -95,14 +106,7 @@ Performance Requirements
 Each player has to execute its functions (chiefly, “move”) in reasonable time.
 The definition of “reasonable” may change, but in principle, players are disqualified for either the game or the whole tournament if they take too long to make a move.
 For example:  If a player takes more than 7 ms. on average to run its functions (per turn), it will be disqualified for the rest of the game (it will no longer make a move).  If a player spends more than 200ms on a single function or turn, it will also be disqualified for the rest of the game. If this happens more than 5 times during a tournament, it will be disqualified permanently for the tournament.
-If your player takes up too much memory, it may also be banned.  Be reasonable.Grading
-Your project grade is composed as follows:
-
-1/3:  Performance in the tournament of the individual agent.  You must beat the others to get a high grade!
-1/3:  Average performance of the agents submitted by the team.
-1/3:  Code quality.  (As per syllabus.)
-
-To figure out a performance grade for individuals and groups, we will rank all contributed agents according to their performance.,  This translates to a grade of 50% (lowest-ranked entries) to 100% (top achievers). We reserve discretion in judging performance; we will add some simple and some good agents to the mix to establish performance standards.  Note that we may also adjust this scheme where the performance of some entries is not statistically distinguishable.
+If your player takes up too much memory, it may also be banned.  Be reasonable.
 
 Submission
 ===
