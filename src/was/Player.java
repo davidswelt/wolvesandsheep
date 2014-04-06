@@ -21,13 +21,14 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import static was.Tournament.crashLog;
 
 /**
  * This is a general player class.
- * 
+ *
  * The class is abstract and defines the general interface for players.
- * {@link SheepPlayer} and {@link WolfPlayer}, among others, inherit from
- * this class.
+ * {@link SheepPlayer} and {@link WolfPlayer}, among others, inherit from this
+ * class.
  *
  * @author reitter
  */
@@ -45,7 +46,11 @@ public abstract class Player {
     private static final int IS_BEING_EATEN = 2;
     private static final int IS_EATING = 3;
     private static final int IS_ATTACKED = 4;
-
+    boolean willNotMove = false;
+    
+    static boolean debuggable = true; // is set to false by class tournament code
+    // not accessible from outside of was package.
+    
     public static enum GamePiece {
 
         EMPTY, SHEEP, WOLF, OBSTACLE, PASTURE
@@ -110,14 +115,15 @@ public abstract class Player {
     }
 
     /**
-     * Identify a tallied-up player.
-     * This method is overloaded by SheepPlayer and WolfPlayer.
+     * Identify a tallied-up player. This method is overloaded by SheepPlayer
+     * and WolfPlayer.
+     *
      * @return true if this player is included in the High Score.
      */
     public boolean isIncludedInHighScore() {
         return false;
     }
-    
+
     /**
      * Called when the game is over. The player may do any cleanup here.
      */
@@ -204,7 +210,7 @@ public abstract class Player {
     final String getTeam() {
         return team;
     }
-    
+
     final boolean isActive() {
         return (gb != null);
     }
@@ -233,7 +239,8 @@ public abstract class Player {
     /**
      * Get the Gameboard used by this player.
      *
-     * @return a reference to the game board shared by all players in this round.
+     * @return a reference to the game board shared by all players in this
+     * round.
      */
     final public GameBoard getGameBoard() {
         if (gb == null) {
@@ -245,6 +252,7 @@ public abstract class Player {
     final void setMaxAllowedDistance(double d) {
         maxAllowedDistance = d;
     }
+
     final void shortenMaxAllowedDistance(double factor) {
         maxAllowedDistance *= factor;
         allowedDistanceDivider /= factor;
@@ -271,7 +279,7 @@ public abstract class Player {
      * @return a GameLocation object
      */
     public final GameLocation getLocation() {
-        if (! isActive()) {
+        if (!isActive()) {
             throw new RuntimeException("can't call getLocation for inactive players (before board has been initialized)");
         }
         return new GameLocation(x, y); // copies location
@@ -282,7 +290,7 @@ public abstract class Player {
     }
 
     final boolean isBusy() {
-        return (gb == null || gb.currentTimeStep < isBusyUntilTime);
+        return (gb == null || willNotMove || gb.currentTimeStep < isBusyUntilTime);
     }
     // called by PlayerProxy
 
@@ -300,8 +308,10 @@ public abstract class Player {
     }
 
     final Object callPlayerFunction(int fn) {
-        Object m = null; // return var
-
+        
+        if (fn == MOVE) {
+            Tournament.logPlayerMoveAttempt(this.getClass());
+        }
         if (isDisqualified()) {
 
             if (fn == MOVE) {
@@ -310,11 +320,6 @@ public abstract class Player {
             return null;
         }
 
-        PrintStream prevErrStream = System.err;
-        PrintStream prevOutStream = System.out;
-
-        final Player thePlayer = this;
-        final int func = fn;
 
         /*
          * Dear Student,
@@ -328,8 +333,67 @@ public abstract class Player {
          * could halt the tournament.  D.R.
          * 
          */
-        
-        
+
+
+        if (debuggable) {
+            ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
+            long startTime = threadMXBean.getCurrentThreadCpuTime();
+
+            Object m = callPlayerFunction_direct(fn);
+            long dur = (Long) ((threadMXBean.getCurrentThreadCpuTime() - startTime) / 1000); // nanosec to 1000*millisec
+            if (dur > TIMEOUT * 1000) // convert to 1000*millisec
+            {
+                System.err.println("Warning: player takes too long.");
+            }
+            return m;
+        } else {
+            return callPlayerFunction_timed(fn);
+        }
+    }
+
+    final Object callPlayerFunction_direct(int func) {
+        final Player thePlayer = this;
+
+        Object m = null;
+        switch (func) {
+            case MOVE:
+                m = move(); // move is defined by extending class
+                break;
+            case INITIALIZE:
+                initialize(); // move is defined by extending class
+                break;
+            case IS_BEING_EATEN:
+                m = null;
+                if (thePlayer instanceof SheepPlayer) {
+                    ((SheepPlayer) thePlayer).isBeingEaten();
+                }
+                break;
+            case IS_EATING:
+                m = null;
+                if (thePlayer instanceof WolfPlayer) {
+                    ((WolfPlayer) thePlayer).isEating();
+                }
+                break;
+            case IS_ATTACKED:
+                m = null;
+                if (thePlayer instanceof WolfPlayer) {
+                    ((WolfPlayer) thePlayer).isAttacked();
+                }
+                break;
+        }
+        return m;
+
+    }
+
+    final Object callPlayerFunction_timed(int fn) {
+        Object m = null; // return var
+
+        PrintStream prevErrStream = System.err;
+        PrintStream prevOutStream = System.out;
+
+        final Player thePlayer = this;
+        final int func = fn;
+
         FutureTask ft = new FutureTask<Object[]>(new Callable<Object[]>() {
             /* What follows is a code block that is given as an argument
              * to the "Callable" constructor.  This is essentially like an
@@ -337,8 +401,6 @@ public abstract class Player {
              * from CS theory, or from functional programming in a language such 
              * as Lisp or Python.
              */
-            
-            
             private static final int MOVE = 0;
 
             @Override
@@ -347,32 +409,8 @@ public abstract class Player {
                 long startTime = threadMXBean.getCurrentThreadCpuTime();
 
                 Object m = null;
-                switch (func) {
-                    case MOVE:
-                        m = move(); // move is defined by extending class
-                        break;
-                    case INITIALIZE:
-                        initialize(); // move is defined by extending class
-                        break;
-                    case IS_BEING_EATEN:
-                        m = null;
-                        if (thePlayer instanceof SheepPlayer) {
-                            ((SheepPlayer) thePlayer).isBeingEaten();
-                        }
-                        break;
-                    case IS_EATING:
-                        m = null;
-                        if (thePlayer instanceof WolfPlayer) {
-                            ((WolfPlayer) thePlayer).isEating();
-                        }
-                        break;
-                    case IS_ATTACKED:
-                        m = null;
-                        if (thePlayer instanceof WolfPlayer) {
-                            ((WolfPlayer) thePlayer).isAttacked();
-                        }
-                        break;
-                }
+                m = callPlayerFunction_direct(func);
+
 
 
                 Object[] ret2 = new Object[4];
@@ -442,10 +480,10 @@ public abstract class Player {
 
                 LOG("Player " + this.getClass().getName() + " runtime exception " + ex.getCause());
                 Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex.getCause());
-                Tournament.logPlayerCrash(this.getClass(), (RuntimeException) ex.getCause());
+                Tournament.logPlayerCrash(this.getClass(), ex.getCause());
                 m = null;
             } else {
-                throw (RuntimeException) ex.getCause();
+                throw new RuntimeException("Exception in Player " + this.getClass(), ex.getCause());
             }
         } catch (TimeoutException ex) {
             System.err.println("player TimeoutException");
@@ -530,6 +568,7 @@ public abstract class Player {
     final void callIsEating() {
         callPlayerFunction(IS_EATING);
     }
+
     final void callIsAttacked() {
         callPlayerFunction(IS_ATTACKED);
     }
@@ -540,6 +579,7 @@ public abstract class Player {
 
             return null; // can't make a move
         }
+
 
         Move m;
 
@@ -554,7 +594,7 @@ public abstract class Player {
         } else {
             if (m.length() > 0.1) {
 //            System.err.println("Len: "+m.length()+" maxallowed: "+ maxAllowedDistance);
-                if (m.length() > allowedDistanceDivider*maxAllowedDistance + 0.000005) {
+                if (m.length() > allowedDistanceDivider * maxAllowedDistance + 0.000005) {
                     // String str = "illegal move: too long! " + m + ": " + m.length() + " > " + maxAllowedDistance;
                     //System.err.println(this.getClass() + str);
 
@@ -565,9 +605,7 @@ public abstract class Player {
                     // we penalize the player a little by reducing the maxAllowedDistance
                     // to 1  (i.e., no diagonal moves allowed)
                     m = m.scaledToLength(1.0);
-                }
-                else if (allowedDistanceDivider != 1.0)
-                {
+                } else if (allowedDistanceDivider != 1.0) {
                     m = m.scaledToLength(maxAllowedDistance);
                 }
                 m = m.quantized(maxAllowedDistance);
@@ -608,11 +646,11 @@ public abstract class Player {
      * Returns the name of the image file representing this player
      *
      * Implement this function to return a custom sprite.
-     * 
-     * You may return a different image file (e.g., put it
-     * in the "pics" folder and include that folder in the returned string
-     * (e.g., "pics/joes_sheep.jpg").
-     * 
+     *
+     * You may return a different image file (e.g., put it in the "pics" folder
+     * and include that folder in the returned string (e.g.,
+     * "pics/joes_sheep.jpg").
+     *
      * @return a string with the path and file name of the image file
      */
     abstract public String imageFile();
@@ -632,7 +670,7 @@ public abstract class Player {
 
     /**
      * Provide a string representation
-     * 
+     *
      * @return a short string suitable to depict the type of the player
      */
     @Override

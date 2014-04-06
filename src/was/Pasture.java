@@ -5,8 +5,12 @@ package was;
  * Pastures are added to the board as if they were players.
  * @author dr
  */
-final public class Pasture extends Player{
+final public class Pasture extends Player {
 
+    Pasture () {
+        willNotMove = true;
+    }
+    
     @Override
     GamePiece getPiece() {
         return GamePiece.PASTURE;

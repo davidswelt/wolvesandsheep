@@ -6,7 +6,9 @@ package was;
  * @author dr
  */
 final public class Obstacle extends Player{
-
+    Obstacle () {
+        willNotMove = true;
+    }
     @Override
     Player.GamePiece getPiece() {
         return Player.GamePiece.OBSTACLE;
