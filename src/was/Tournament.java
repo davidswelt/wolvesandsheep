@@ -32,7 +32,7 @@ import java.util.logging.Logger;
  *
  * @author dr
  */
-public class Tournament {
+public class Tournament implements GameBoard.WolfSheepDelegate {
 
     protected GameBoard eboard;
     protected ArrayList<Class> players = new ArrayList<Class>();
@@ -47,19 +47,36 @@ public class Tournament {
     static boolean exitRequested = false;
     static boolean pauseInitially = false;
     static boolean quiet = false;
-
     static HighScore crashLog = new HighScore().setTitle("crashes");
-
-    static void logPlayerCrash(Class pl, Exception ex) {
+    static HighScore moveLog = new HighScore().setTitle("moves");
+    static int loadedScenario = -1; // used for logging crashes
+    
+    static void logPlayerMoveAttempt(Class pl) {
+        moveLog.inc(pl.getName() + ".MoveAttempt");
+        if (loadedScenario>-1)
+        {
+            moveLog.inc(pl.getName() + ".MoveAttempt\\Scenario " 
+                        + String.format("%2d",loadedScenario));
+        }
+    }
+    static void logPlayerCrash(Class pl, Throwable ex) {
+        logPlayerCrash(pl, ex, loadedScenario);
+    }
+    static void logPlayerCrash(Class pl, Throwable ex, Integer info) {
         crashLog.inc(pl.getName() + ".Crash");
         crashLog.inc(pl.getName() + ".Crash\\" + ex);
+        
+        if (info>-1)
+        {
+            crashLog.inc(pl.getName() + ".Crash\\Scenario" 
+                        + String.format("%2s",info.toString()));
+        }
     }
-
     HighScore timing = new HighScore();
     HighScore scenarioTiming = new HighScore();
     HighScore highscore = new HighScore();
     HighScore scenarioScore = new HighScore();
-
+    HighScore eatingScore = new HighScore();
 
     static String prefix(String s) {
         StringTokenizer st = new StringTokenizer(s, ":");
@@ -137,6 +154,8 @@ public class Tournament {
                 System.out.print(dividerLine);
                 System.out.println("Player Crashes:");
                 crashLog.printByCategory(null);
+                System.out.println("Player Move Counts:");
+                moveLog.printByCategory(null);
 
                 System.out.println(dividerLine);
                 System.out.println("Timing:");
@@ -230,14 +249,14 @@ public class Tournament {
                         selSheep.add(i);
                     }
                 }
-                    sheepComb = new ArrayList();
-                    sheepComb.add(selSheep);
-                    wolvesComb = new ArrayList();
-                    wolvesComb.add(selWolves);
+                sheepComb = new ArrayList();
+                sheepComb.add(selSheep);
+                wolvesComb = new ArrayList();
+                wolvesComb.add(selWolves);
 
-                
+
             } else {
-                for (Integer i=0; i<players.size(); i++) {
+                for (Integer i = 0; i < players.size(); i++) {
                     Class plClass = players.get(i);
                     if (isWolf(plClass)) {
                         selWolves.add(i);
@@ -254,12 +273,11 @@ public class Tournament {
                 sheepComb = c.drawNwithoutReplacement(Math.min(numSheep, selSheep.size()));
 
             }
-            
-            if (! quiet)
-            {
-                System.out.println(""+sheepComb.size()+" sheep teams, "+wolvesComb.size()+" wolves, "+repeats+" reps.");
+
+            if (!quiet) {
+                System.out.println("" + sheepComb.size() + " sheep teams, " + wolvesComb.size() + " wolves, " + repeats + " reps.");
             }
-            
+
             for (int r = 0; r < repeats && exitRequested == false; r++) {
 
                 int theSc = scenarioNum;
@@ -268,11 +286,12 @@ public class Tournament {
                 }
 
                 scenario = Scenario.makeScenario(theSc);
+                loadedScenario = theSc;
 
                 for (ArrayList selWolfComb : wolvesComb) {
                     for (ArrayList selSheepComb : sheepComb) {
                         selectedPlayers = new ArrayList();
-                        
+
                         /* players play in the order in which they are added:
                          * the last player added plays first.
                          * 
@@ -281,12 +300,12 @@ public class Tournament {
                          * for a sheep-attacking-wolf scenario just before 
                          * executing the wolf's move.
                          */
-                        
+
                         selectedPlayers.addAll(selWolfComb);
                         selectedPlayers.addAll(selSheepComb);
 
                         GameBoard board = new GameBoard(scenario.boardSize(), scenario.boardSize(), boardUI, 80);
-
+                        board.wolfEatSheepDelegate = this;
 
                         Stack<GameLocation> wolfQueue = new Stack();
                         Stack<GameLocation> sheepQueue = new Stack();
@@ -353,6 +372,7 @@ public class Tournament {
                                         timing.noteUse(cl.getName());
                                         scenarioTiming.noteUse(scenPlayStr);
                                         score.getValue()[0] = 0; // set to 0 to make sure it doesn't get added twice
+                                        
                                     }
                                 }
                             } finally {
@@ -441,7 +461,7 @@ public class Tournament {
         int sc = 0; // random scenario
         boolean ui = true;
         boolean tourn = false;
-        
+
 
         // parse the command line
         int i = 0;
@@ -482,30 +502,36 @@ public class Tournament {
         }
 
 
-        
-            if (players.size() > 0) {
 
-                was.Tournament.run(players, r, ui, sc, tourn, true); // m, n, k,
+        if (players.size() > 0) {
 
-            } else {
-                System.err.println("Usage: java -jar WolvesAndSheep.jar -r R -s S -t -e -p -c -q CLASS1 CLASS2 CLASS3 CLASS4 CLASS5 (...)");
-                //System.err.println("       -t M,N,K  ==> play a M*N board with K sheep.");
-                System.err.println("       -r R      ==> play R repeats of each game.");
-                System.err.println("       -s S      ==> set up scenario no. S (0 or default for random)");
-                System.err.println("       -t        ==> play a tournament of all combinations of players (4 sheep, one wolf)");
-                System.err.println("       -e        ==> ignore player's exceptions");
-                System.err.println("       -p        ==> pause initially if using graphical UI");
-                System.err.println("       -c        ==> do not show the graphical user interface ");
-                System.err.println("       -q        ==> do not print progress info ");
-                System.err.println("Example: java -jar WolvesAndSheep.jar -r 10 basic.Wolf basic.Sheep basic.Sheep basic.Sheep basic.Sheep");
-                System.err.println("Example for NetBeans (Run Configuration, Program arguments): -r 10 basic.Wolf basic.Sheep basic.Sheep basic.Sheep basic.Sheep");
-                // do not run a default case to make sure it doesn't cause confusion.
-                //            was.Tournament.run("reitter.SheepPlayer,reitter.WolfPlayer,reitter.SheepPlayer,reitter.SheepPlayer, reitter.SheepPlayer", 100);
+            was.Tournament.run(players, r, ui, sc, tourn, true); // m, n, k,
 
-                // for testing prposes:  greene.Wolf zielenski.Wolf Wilkinson.Wolf derhammer.Sheep chan.Sheep derhammer.Sheep tailor.Sheep
-                // (greene is one of the stronger wolves.)
-            }
-        
+        } else {
+            System.err.println("Usage: java -jar WolvesAndSheep.jar -r R -s S -t -e -p -c -q CLASS1 CLASS2 CLASS3 CLASS4 CLASS5 (...)");
+            //System.err.println("       -t M,N,K  ==> play a M*N board with K sheep.");
+            System.err.println("       -r R      ==> play R repeats of each game.");
+            System.err.println("       -s S      ==> set up scenario no. S (0 or default for random)");
+            System.err.println("       -t        ==> play a tournament of all combinations of players (4 sheep, one wolf)");
+            System.err.println("       -e        ==> ignore player's exceptions");
+            System.err.println("       -p        ==> pause initially if using graphical UI");
+            System.err.println("       -c        ==> do not show the graphical user interface ");
+            System.err.println("       -q        ==> do not print progress info ");
+            System.err.println("Example: java -jar WolvesAndSheep.jar -r 10 basic.Wolf basic.Sheep basic.Sheep basic.Sheep basic.Sheep");
+            System.err.println("Example for NetBeans (Run Configuration, Program arguments): -r 10 basic.Wolf basic.Sheep basic.Sheep basic.Sheep basic.Sheep");
+            // do not run a default case to make sure it doesn't cause confusion.
+            //            was.Tournament.run("reitter.SheepPlayer,reitter.WolfPlayer,reitter.SheepPlayer,reitter.SheepPlayer, reitter.SheepPlayer", 100);
+
+            // for testing prposes:  greene.Wolf zielenski.Wolf Wilkinson.Wolf derhammer.Sheep chan.Sheep derhammer.Sheep tailor.Sheep
+            // (greene is one of the stronger wolves.)
+        }
+
         System.exit(0);
+    }
+
+    @Override
+    public void wolfEatSheep(Player wolf, Player sheep) {        
+        // keep track
+        eatingScore.inc(wolf.getClass().getName()+"\\"+sheep.getClass().getName());
     }
 }

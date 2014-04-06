@@ -99,10 +99,7 @@ public class PlayerFactory {
                 }
                 logPlayerCrash(c, ex);
                 if (!Player.catchExceptions) {
-
                     throw new RuntimeException("Exception in Player constructor!");
-
-
                 }
             }
         } catch (NoSuchMethodException ex) {

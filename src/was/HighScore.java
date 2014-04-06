@@ -7,6 +7,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -22,6 +23,8 @@ public class HighScore extends TreeMap<String, Double> {
 
     final int COLUMNWIDTH = 8;
     
+    boolean normalizing = false;  // set to true if noteUse is called once
+    public boolean printAsPercentage = false;
     String title = "";
     HighScore setTitle(String t) {
         title = t;
@@ -54,6 +57,7 @@ public class HighScore extends TreeMap<String, Double> {
     void noteUse(String s, int by) {
         Integer prev = uses.get(s);
         uses.put(s, new Integer(prev == null ? by : prev + by));
+        normalizing = true;
     }
 
     public double get(String s) {
@@ -131,7 +135,21 @@ public class HighScore extends TreeMap<String, Double> {
                 for (HighScore h : extraColumns) {
 
                     if (h != null) {
-                        System.out.print(rightAlign(String.format("%.3f", h.getNormalized(k)), COLUMNWIDTH));
+                        double n = h.getNormalized(k);
+                        String format;
+                        if (normalizing)
+                        {
+                             format = "%.3f";
+                        } else
+                        {
+                             format = "%d";
+                        }
+                        if (printAsPercentage)
+                        {
+                            n *= 100;
+                            format += "%%";
+                        }
+                        System.out.print(rightAlign(String.format(format, n), COLUMNWIDTH));
                     }
                 }
 
@@ -149,7 +167,65 @@ public class HighScore extends TreeMap<String, Double> {
         }
         return result;
     }
+    
+    public String getPackage(String k) {
+            StringTokenizer t = new StringTokenizer(k, ".");
+            if (t.hasMoreTokens())
+            {
+                return t.nextToken();
+            }     
+            return k;
+    }
 
+    /* Print this high score as a 2-dimensional table
+     * keys are assumed to be of form cat1//cat2
+     */
+    public void printAsTable() {
+        Set<String> keys = keySet();
+        SortedSet<String> cols = new TreeSet();
+        SortedSet<String> rows = new TreeSet();
+        int rowlen = 1;
+        
+        // categories
+        for (String k : keys) {
+            String row = "";
+            String column = "";
+            StringTokenizer t = new StringTokenizer(k, k.contains("\\") ? "\\" : "");
+            String classname;
+            String r = t.nextToken();
+            rows.add(r);
+            rowlen = Math.max(rowlen, getPackage(r).length());
+            if (t.hasMoreTokens()) {
+                cols.add(t.nextToken()); 
+            }
+        }
+        
+        // Header line (all column names)
+        System.out.print(rightAlign("",rowlen)+"\t");
+        for (String c : cols)
+            {
+                String cs = getPackage(c);
+                System.out.print(leftAlign(cs, cs.length()) + "\t");
+                
+            }
+        System.out.println();
+        for (String r : rows)
+        {
+            System.out.print(rightAlign(getPackage(r),rowlen)+"\t");
+            for (String c : cols)
+            {
+                String key = r+"\\"+c;
+                Integer count = (int) get(key);
+                
+                System.out.print(leftAlign(count.toString(), getPackage(c).length()) + "\t");
+                
+            }
+            System.out.println();
+        
+        }
+    }
+    
+    
     public void printByCategory(Collection<HighScore> extraColumns) {
         printInternal(extraColumns, false);
 

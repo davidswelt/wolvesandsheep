@@ -23,6 +23,10 @@ import was.Player.GamePiece;
  */
 public class GameBoard {
 
+    interface WolfSheepDelegate {
+        public void wolfEatSheep (Player wolf, Player sheep);
+    }
+    
     boolean ui = false;
     private final int cols;
     private final int rows;
@@ -30,6 +34,9 @@ public class GameBoard {
     Deque<Player> players = new ArrayDeque();
     private HashMap<Player, int[]> scores = new HashMap();
     HashMap<String, Object> sheepWhiteboard = new HashMap();
+    
+    WolfSheepDelegate wolfEatSheepDelegate = null;
+    
     /**
      * distance in grid squares that a wolf can cover
      */
@@ -246,7 +253,11 @@ public class GameBoard {
 
         wolf.keepBusyFor(wolfEatingTime);
 
-        // scoring and removal of objects            
+        // scoring and removal of objects  
+        if (wolfEatSheepDelegate != null)
+        {
+            wolfEatSheepDelegate.wolfEatSheep(wolf,sheep); // logging
+        }
         playerWins(wolf);
         playerLoses(sheep); // removes sheep
         // sheep is gone now, cell should be empty

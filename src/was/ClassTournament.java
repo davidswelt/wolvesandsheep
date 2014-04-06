@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import static was.Tournament.crashLog;
 import static was.Tournament.dividerLine;
 import static was.Tournament.quiet;
 
@@ -33,6 +34,7 @@ public class ClassTournament extends Tournament {
         HighScore totalTiming = new HighScore().setTitle("timing");
         Map<String, HighScore> scenarioHighScore = new TreeMap();
         Map<String, HighScore> scenarioTiming = new TreeMap();
+        HighScore totalEatingScore = new HighScore().setTitle("eating");
         for (String player : sheepteams) {
             // each sheep team
             String sheepteam = prefix(player);
@@ -98,6 +100,7 @@ public class ClassTournament extends Tournament {
                             Tournament t = run(p, repeats, false, sp, false, false);
                             totalHighscore.addHighScore(t.highscore);
                             totalTiming.addHighScore(t.timing);
+                            totalEatingScore.addHighScore(t.eatingScore);  
                             if (scenarioHighScore.get(t.scenario.toString()) == null) {
                                 scenarioHighScore.put(t.scenario.toString(), new HighScore().setTitle(t.scenario.toString()));
                                 scenarioTiming.put(t.scenario.toString(), new HighScore().setTitle(t.scenario.toString()));
@@ -105,7 +108,6 @@ public class ClassTournament extends Tournament {
                             scenarioHighScore.get(t.scenario.toString()).addHighScore(t.highscore);
                             scenarioTiming.get(t.scenario.toString()).addHighScore(t.timing);
                             
-                               
                             System.out.println("Timing (ms.):");
                             t.timing.print();
                             totalTiming.print();
@@ -138,7 +140,13 @@ public class ClassTournament extends Tournament {
         System.out.println("Player Crashes:");
         crashLog.printByCategory(null);
         System.out.println(dividerLine);
-       
+        System.out.println("Wolf attacks:");
+        totalEatingScore.printAsTable();
+        System.out.println(dividerLine);
+        System.out.println("Player Moves:");
+        moveLog.printByCategory(null);
+        System.out.println(dividerLine);
+        
     }
 
     public ClassTournament(List<Class> playerClasses, int r, boolean ui) {
@@ -151,7 +159,8 @@ public class ClassTournament extends Tournament {
 
         Player.catchExceptions = true;
         Player.logToFile = true;
-
+        Player.debuggable = false; // enables time-keeping
+        
         ArrayList<Class> players = new ArrayList<Class>();
 //        int m = -1;
 //        int n = -;
