@@ -98,7 +98,9 @@ public class GameBoard {
     }
 
     // make a move
-    boolean movePlayer(Player player, Move m) {
+    // do not call this directly.  player moves must take place
+    // during call to calcMove() so the game frontend (GUI) can see them.
+    private boolean movePlayer(Player player, Move m) {
 
         if (m == null) // obstacles, and the like
         {
@@ -619,7 +621,8 @@ public class GameBoard {
 
     }
 
-    void addPlayer(Player p, GameLocation loc) {
+    
+    Player addPlayer(Player p, GameLocation loc) {
 
         p.setGameBoard(this);
 
@@ -649,10 +652,11 @@ public class GameBoard {
             wasgamegrid.addActor(pprox, loc);
             p.setPlayerProxy(pprox);
         }
+        return p;
     }
 
     /**
-     * Calculates distance that a certain game piece is allowed to movePlayer
+     * Calculates distance that a certain game piece is allowed to move
      *
      * @param g GameBoard.GamePiece, e.g., GameBoard.GamePiece.SHEEP
      * @return distance in steps
@@ -668,7 +672,7 @@ public class GameBoard {
     }
 
     /**
-     * Gets distance that a certain player is allowed to movePlayer
+     * Gets distance that a certain player is allowed to move
      *
      * @param p player
      * @return distance in steps
@@ -708,10 +712,16 @@ public class GameBoard {
         Tournament.exitRequested = true;
     }
 
+    Scenario scenario = null;
     // callback from game backend
     void gameNextTimeStep() {
         test(7);
         currentTimeStep++; // advance time
+        if (scenario != null)
+        {
+        scenario.updateBoard(this, currentTimeStep);
+        }   
+            
     }
 
     // callback from game backend
@@ -799,7 +809,7 @@ public class GameBoard {
         test(5);
     }
 
-    private void removePlayer(Player p) {
+    void removePlayer(Player p) {
 
 
         if (p == null || wasgamegrid == null) // already deleted

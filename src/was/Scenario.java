@@ -377,6 +377,7 @@ public class Scenario {
             x += sx;
             y += sy;
         }
+    void updateBoard(GameBoard board, int it) {
     }
 
     @Override

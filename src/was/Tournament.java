@@ -307,7 +307,8 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
 
                         GameBoard board = new GameBoard(scenario.boardSize(), scenario.boardSize(), boardUI, 80);
                         board.wolfEatSheepDelegate = this;
-
+                        board.scenario = scenario;
+                        
                         Stack<GameLocation> wolfQueue = new Stack();
                         Stack<GameLocation> sheepQueue = new Stack();
 
