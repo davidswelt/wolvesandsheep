@@ -65,6 +65,7 @@ class PlayerProxy extends Actor {
     static BufferedImage scaledImage(Player player) {
         try {            
             String s = player.imageFile();
+
             URL r = player.getClass().getResource(s);
             if (r==null)
             {
@@ -128,6 +129,8 @@ class PlayerProxy extends Actor {
             angle = Math.toDegrees(Math.atan(theMove.delta_y / theMove.delta_x)); // in radians            
         }
 
+        // let JGameGrid know...
+        
         turn(angle - getDirection()); // relative turn
 
         // make the move (not precise - integer)
