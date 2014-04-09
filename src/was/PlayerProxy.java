@@ -38,7 +38,7 @@ class PlayerProxy extends Actor {
         super(true, scaledImage(player));
         this.player = player;
 
-        
+
 
     }
 
@@ -50,25 +50,23 @@ class PlayerProxy extends Actor {
         return bi;
     }
 
-    static int getCellSize (GameBoard board)
-    {
-        
-     Toolkit toolkit = Toolkit.getDefaultToolkit();
+    static int getCellSize(GameBoard board) {
+
+        Toolkit toolkit = Toolkit.getDefaultToolkit();
         Dimension dim = toolkit.getScreenSize();
 
-        int csize = (int) ((dim.height-120) / board.getRows());
+        int csize = (int) ((dim.height - 120) / board.getRows());
 
-        cellSize = Math.min(12, csize-1);
+        cellSize = Math.min(12, csize - 1);
         return cellSize;
     }
-    
+
     static BufferedImage scaledImage(Player player) {
-        try {            
+        try {
             String s = player.imageFile();
 
             URL r = player.getClass().getResource(s);
-            if (r==null)
-            {
+            if (r == null) {
                 r = PlayerProxy.class.getResource(s);
             }
             Image img = javax.imageio.ImageIO.read(r);
@@ -83,6 +81,7 @@ class PlayerProxy extends Actor {
     }
     List<java.awt.Point> trackPolygon = new ArrayList();
     GeneralPath track = new GeneralPath(GeneralPath.WIND_EVEN_ODD);
+    List<List<GameLocation>> generalTracks = new ArrayList();
 
     @Override
     final public void act() {
@@ -130,7 +129,7 @@ class PlayerProxy extends Actor {
         }
 
         // let JGameGrid know...
-        
+
         turn(angle - getDirection()); // relative turn
 
         // make the move (not precise - integer)
@@ -140,33 +139,67 @@ class PlayerProxy extends Actor {
 
         setX(target_x);
         setY(target_y);
-        
-        if (player instanceof WolfPlayer || player instanceof SheepPlayer)
-        {
-            
-        
-        // update the polygon
 
-        ch.aplu.jgamegrid.GGBackground bg = getBackground();
+        if (player instanceof WolfPlayer || player instanceof SheepPlayer) {
 
-        Point pt = getPixelLocation();
 
-        track.lineTo(pt.x, pt.y);
+            // update the polygon
+            Point pt = getPixelLocation();
+            track.lineTo(pt.x, pt.y);
+            showPath(track, player.trackColor(), player.shortName(), pt);
 
-        java.awt.Color color = player.trackColor();
+            // now make polygon set by player
+            for (List<GameLocation> path : generalTracks) {
+                GeneralPath p = new GeneralPath(GeneralPath.WIND_EVEN_ODD);
+                if (path.size() > 0) {
+                    boolean first = true;
+                    for (GameLocation point : path) {
+                        pt = gameGrid.toPoint(new Location(point.x, point.y));
+                        if (first)
+                        {
+                        p.moveTo(pt.x, pt.y);
+                        first = false;
+                        } else
+                        {
+                            p.lineTo(pt.x, pt.y);
+                        }
+                    }
+                    showPath(p, java.awt.Color.GRAY, null, pt);
+                }
+            }
+        }
+    }
+    /*
+     * Add a list of GameLocations to be visualized.
+     * Note: List is not copied and may be changed by caller
+     * later.
+     */
+
+    public void visualizeTrack(List<GameLocation> locList) {
+        generalTracks.add(locList);
+    }
+    /*
+     * Remove all additional visualizations.
+     */
+
+    public void removeVisualizations() {
+        generalTracks.clear();
+    }
+
+    private void showPath(GeneralPath track, java.awt.Color color, String label, Point labelPos) {
+
         if (color != null) {
+            ch.aplu.jgamegrid.GGBackground bg = getBackground();
             bg.setPaintColor(color);
             bg.setLineWidth(2);
             bg.drawGeneralPath(track);
-            if (player.shortName() != null) {
+            if (label != null) {
 
                 bg.setPaintColor(java.awt.Color.black);
                 bg.setFont(new Font("TimesRoman", Font.PLAIN, 14));
-                bg.drawText(player.shortName(), new Point(pt.x + 5, pt.y));
+                bg.drawText(label, new Point(labelPos.x + 5, labelPos.y));
             }
         }
-        }
-//    if (!isMoveValid())
-//      turn(180);
+
     }
 }

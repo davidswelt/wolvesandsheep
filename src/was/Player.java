@@ -7,6 +7,7 @@ import java.io.PrintStream;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
@@ -52,7 +53,7 @@ public abstract class Player {
     private int count = counter++;
     private double maxAllowedDistance = -1;
     private double allowedDistanceDivider = 1; // none for now
-    Actor playerProxy = null;
+    PlayerProxy playerProxy = null;
     private int isBusyUntilTime = 0; // wolf is eating
     GameBoard gb = null;
     private int x = 0, y = 0;
@@ -259,9 +260,27 @@ public abstract class Player {
         allowedDistanceDivider /= factor;
     }
 
-    final void setPlayerProxy(Actor a) {
+    final void setPlayerProxy(PlayerProxy a) {
         playerProxy = a;
     }
+    
+        /*
+     * Add a list of GameLocations to be visualized.
+     * Note: List is not copied and may be changed by caller
+     * later.
+     */
+    public void visualizeTrack (List<GameLocation> locList)
+    {
+        playerProxy.visualizeTrack(locList);
+    }
+    /*
+     * Remove all additional visualizations.
+     */
+    public void removeVisualizations ()
+    {
+        playerProxy.removeVisualizations();
+    }
+
 
     // can't be called by inheriting classes
     final void setLoc(int x, int y) {
