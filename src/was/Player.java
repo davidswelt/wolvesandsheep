@@ -308,7 +308,7 @@ public abstract class Player {
     }
 
     final Object callPlayerFunction(int fn) {
-        
+
         if (fn == MOVE) {
             Tournament.logPlayerMoveAttempt(this.getClass());
         }
@@ -334,24 +334,37 @@ public abstract class Player {
          * 
          */
 
+        try {
+            if (debuggable) {
+                ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
+                long startTime = threadMXBean.getCurrentThreadCpuTime();
 
-        if (debuggable) {
-            ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
-            long startTime = threadMXBean.getCurrentThreadCpuTime();
+                Object m = callPlayerFunction_direct(fn);
+                long dur = (Long) ((threadMXBean.getCurrentThreadCpuTime() - startTime) / 1000); // nanosec to 1000*millisec
+                if (dur > TIMEOUT * 1000) // convert to 1000*millisec
+                {
+                    System.err.println("Warning: player takes too long.");
+                }
+                return m;
+            } else {
 
-            Object m = callPlayerFunction_direct(fn);
-            long dur = (Long) ((threadMXBean.getCurrentThreadCpuTime() - startTime) / 1000); // nanosec to 1000*millisec
-            if (dur > TIMEOUT * 1000) // convert to 1000*millisec
-            {
-                System.err.println("Warning: player takes too long.");
+                return callPlayerFunction_timed(fn);
             }
-            return m;
-        } else {
-            return callPlayerFunction_timed(fn);
+        } catch (RuntimeException ex) {
+            if (catchExceptions) {
+                LOG("Player " + this.getClass().getName() + " runtime exception " + ex);
+                Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex);
+                Tournament.logPlayerCrash(this.getClass(), ex);
+            } else {
+                throw ex;
+            }
         }
+        return null;
     }
 
     final Object callPlayerFunction_direct(int func) {
+        // this function may be executed from the secondary thread.
+        // (no direct try/catch in here to prevent re-entrance)
         final Player thePlayer = this;
 
         Object m = null;
@@ -533,20 +546,8 @@ public abstract class Player {
 
             }
 
-        } catch (RuntimeException ex) {
-//            System.err.println("runtime ex.");
-            if (catchExceptions) {
-//                System.err.println("catching");
-                LOG("Player " + this.getClass().getName() + " runtime exception " + ex);
-                Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex);
-                Tournament.logPlayerCrash(this.getClass(), ex);
-
-                m = null;
-            } else {
-//                System.err.println("NOT catching");
-                throw ex;
-            }
-        } finally {
+        } // RuntimeException is caught higher up
+        finally {
             if (logstream != null && logToFile) {
                 System.setOut(prevOutStream);
                 System.setErr(prevErrStream);
