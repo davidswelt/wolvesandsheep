@@ -70,6 +70,7 @@ public class ClassTournament extends Tournament {
         long targetTimeSecs = Math.max(1, minutes * 60); // 10 minutes
         long startTime = System.currentTimeMillis();
         while ((System.currentTimeMillis() - startTime) < targetTimeSecs * 1000) {
+            Scenario.repeatCount ++;
             for (String s : sheepteams) {
                 // each sheep team
                 String sheepteam = prefix(s);

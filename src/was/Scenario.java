@@ -25,6 +25,8 @@ public class Scenario {
     GameBoard tmpGb = null;
     static List<Integer> parmValues = new ArrayList(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8));
     static boolean useSecretScenarioClass = false;
+    static int repeatCount = 0; // used to avoid randomization when repeating rounds
+    GameBoard gb = null;
 
     protected Scenario() {
     }
