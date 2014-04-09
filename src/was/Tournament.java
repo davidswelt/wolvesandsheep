@@ -367,6 +367,7 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
 
                                             highscore.inc(teams.get(cl) + (score.getKey() instanceof WolfPlayer ? ".WolfTeam" : ".SheepTeam"), score.getValue()[0]);
                                         }
+                                                                                
                                         timing.inc(cl.getName(), score.getKey().meanRunTime());
                                         final String scenPlayStr = "Scenario " + scenario.toString() + "\\" + cl.getName();
                                         scenarioTiming.inc(scenPlayStr, score.getKey().meanRunTime());
@@ -389,12 +390,13 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
                     }
                 }
             }
-        } catch (IllegalArgumentException ex) {
+        
+        } catch (Throwable ex) {
             Logger.getLogger(Tournament.class
-                    .getName()).log(Level.SEVERE, null, ex);
-        } catch (SecurityException ex) {
-            Logger.getLogger(Tournament.class
-                    .getName()).log(Level.SEVERE, null, ex);
+                    .getName()).log(Level.SEVERE, null, ex);            
+        } 
+        finally {
+            System.exit(0); // make sure end the JGameGrid thread as well.
         }
     }
     boolean boardUI = false;
