@@ -137,14 +137,15 @@ public class ClassTournament extends Tournament {
         System.out.println("Timing (ms.):");
         totalTiming.printByClass(scenarioTiming.values());
         System.out.println(dividerLine);
-        System.out.println("Player Crashes:");
-        crashLog.printByCategory(null);
         System.out.println(dividerLine);
         System.out.println("Wolf attacks:");
         totalEatingScore.printAsTable();
         System.out.println(dividerLine);
-        System.out.println("Player Moves:");
-        moveLog.printByCategory(null);
+        System.out.println("Player Crashes:");
+        
+        List li = new ArrayList();
+        li.add(moveLog);
+        crashLog.printByCategory(li);
         System.out.println(dividerLine);
         
     }

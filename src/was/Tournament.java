@@ -3,6 +3,7 @@ package was;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -48,15 +49,16 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
     static boolean pauseInitially = false;
     static boolean quiet = false;
     static HighScore crashLog = new HighScore().setTitle("crashes");
-    static HighScore moveLog = new HighScore().setTitle("moves");
+    static HighScore moveLog = new HighScore().setTitle("total calls to move()");
     static int loadedScenario = -1; // used for logging crashes
     
     static void logPlayerMoveAttempt(Class pl) {
-        moveLog.inc(pl.getName() + ".MoveAttempt");
+        moveLog.inc(pl.getName() + ".Crash");
         if (loadedScenario>-1)
         {
-            moveLog.inc(pl.getName() + ".MoveAttempt\\Scenario " 
-                        + String.format("%2d",loadedScenario));
+            String ss = "Scenario"+String.format("%2d",loadedScenario);
+
+            moveLog.inc(pl.getName() + ".Crash."+ss);
         }
     }
     static void logPlayerCrash(Class pl, Throwable ex) {
@@ -64,12 +66,13 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
     }
     static void logPlayerCrash(Class pl, Throwable ex, Integer info) {
         crashLog.inc(pl.getName() + ".Crash");
-        crashLog.inc(pl.getName() + ".Crash\\" + ex);
+//        crashLog.inc(pl.getName() + ".Crash\\" + ex);
         
         if (info>-1)
         {
-            crashLog.inc(pl.getName() + ".Crash\\Scenario" 
-                        + String.format("%2s",info.toString()));
+            String ss = "Scenario"+String.format("%2s",info.toString());
+            crashLog.inc(pl.getName() + ".Crash." +ss );
+            crashLog.inc(pl.getName() + ".Crash." + ss + "\\"+ex );
         }
     }
     HighScore timing = new HighScore();
@@ -153,9 +156,7 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
                 t.scenarioScore.printByCategory(null);
                 System.out.print(dividerLine);
                 System.out.println("Player Crashes:");
-                crashLog.printByCategory(null);
-                System.out.println("Player Move Counts:");
-                moveLog.printByCategory(null);
+                crashLog.printByCategory(Arrays.asList(moveLog));
 
                 System.out.println(dividerLine);
                 System.out.println("Timing:");

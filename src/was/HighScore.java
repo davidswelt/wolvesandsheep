@@ -13,19 +13,18 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 /**
- * This class contains hacks.
- * To do: re-write.
+ * This class contains hacks. To do: re-write.
+ *
  * @author dr
  */
 public class HighScore extends TreeMap<String, Double> {
 
     TreeMap<String, Integer> uses = new TreeMap();
-
     final int COLUMNWIDTH = 8;
-    
     boolean normalizing = false;  // set to true if noteUse is called once
     public boolean printAsPercentage = false;
     String title = "";
+
     HighScore setTitle(String t) {
         title = t;
         return this;
@@ -39,7 +38,7 @@ public class HighScore extends TreeMap<String, Double> {
             inc(e.getKey(), e.getValue());
         }
     }
-    
+
     void inc(String s) {
         //            System.out.println("increase " + s);
         inc(s, 1.0);
@@ -70,15 +69,19 @@ public class HighScore extends TreeMap<String, Double> {
     }
 
     public double getNormalized(String s) {
+        return getNormalized(s, 0.0);
+    }
+
+    public Double getNormalized(String s, Double def) {
         Double f = super.get(s);
         if (f == null) {
-            return 0.0;
+            return def;
         } else {
             Integer n = uses.get(s);
             if (n == null || n.equals(0)) {
-                return f.floatValue();
+                return (double) f.floatValue();
             }
-            return f.floatValue() / n;
+            return (double) f.floatValue() / n;
         }
     }
 
@@ -125,31 +128,35 @@ public class HighScore extends TreeMap<String, Double> {
     }
 
     public void printKeys(List<String> keys, boolean sorted, Collection<HighScore> extraColumns) {
+
+        String format;
+        if (normalizing) {
+            format = "%.3f";
+        } else {
+            format = "%.0f";
+        }
+
+        if (printAsPercentage) {
+            format += "%%";
+        }
         // sort it
         Collections.sort(keys, new TreeValueComparator());
         for (String k : keys) {
 
             System.out.print(rightAlign(removePrefix(k), printAlignment) + ": ");
-            System.out.print(rightAlign(String.format("%.3f", getNormalized(k)), COLUMNWIDTH));
+            System.out.print(rightAlign(String.format(format, getNormalized(k)), COLUMNWIDTH));
             if (extraColumns != null) {
                 for (HighScore h : extraColumns) {
 
                     if (h != null) {
-                        double n = h.getNormalized(k);
-                        String format;
-                        if (normalizing)
-                        {
-                             format = "%.3f";
-                        } else
-                        {
-                             format = "%d";
+                        Double n = h.getNormalized(k, null);
+                        if (n != null) {
+
+                            if (printAsPercentage) {
+                                n *= 100;
+                            }
+                            System.out.print(rightAlign(String.format(format, n), COLUMNWIDTH));
                         }
-                        if (printAsPercentage)
-                        {
-                            n *= 100;
-                            format += "%%";
-                        }
-                        System.out.print(rightAlign(String.format(format, n), COLUMNWIDTH));
                     }
                 }
 
@@ -167,14 +174,13 @@ public class HighScore extends TreeMap<String, Double> {
         }
         return result;
     }
-    
+
     public String getPackage(String k) {
-            StringTokenizer t = new StringTokenizer(k, ".");
-            if (t.hasMoreTokens())
-            {
-                return t.nextToken();
-            }     
-            return k;
+        StringTokenizer t = new StringTokenizer(k, ".");
+        if (t.hasMoreTokens()) {
+            return t.nextToken();
+        }
+        return k;
     }
 
     /* Print this high score as a 2-dimensional table
@@ -185,7 +191,7 @@ public class HighScore extends TreeMap<String, Double> {
         SortedSet<String> cols = new TreeSet();
         SortedSet<String> rows = new TreeSet();
         int rowlen = 1;
-        
+
         // categories
         for (String k : keys) {
             String row = "";
@@ -196,39 +202,34 @@ public class HighScore extends TreeMap<String, Double> {
             rows.add(r);
             rowlen = Math.max(rowlen, getPackage(r).length());
             if (t.hasMoreTokens()) {
-                cols.add(t.nextToken()); 
+                cols.add(t.nextToken());
             }
         }
-        
+
         // Header line (all column names)
-        System.out.print(rightAlign("",rowlen)+"\t");
-        for (String c : cols)
-            {
-                String cs = getPackage(c);
-                System.out.print(leftAlign(cs, cs.length()) + "\t");
-                
-            }
+        System.out.print(rightAlign("", rowlen) + "\t");
+        for (String c : cols) {
+            String cs = getPackage(c);
+            System.out.print(leftAlign(cs, cs.length()) + "\t");
+
+        }
         System.out.println();
-        for (String r : rows)
-        {
-            System.out.print(rightAlign(getPackage(r),rowlen)+"\t");
-            for (String c : cols)
-            {
-                String key = r+"\\"+c;
+        for (String r : rows) {
+            System.out.print(rightAlign(getPackage(r), rowlen) + "\t");
+            for (String c : cols) {
+                String key = r + "\\" + c;
                 Integer count = (int) get(key);
-                
+
                 System.out.print(leftAlign(count.toString(), getPackage(c).length()) + "\t");
-                
+
             }
             System.out.println();
-        
+
         }
     }
-    
-    
+
     public void printByCategory(Collection<HighScore> extraColumns) {
         printInternal(extraColumns, false);
-
     }
 
     public void printByClass(Collection<HighScore> extraColumns) {
@@ -244,10 +245,10 @@ public class HighScore extends TreeMap<String, Double> {
         Map<String, List<String>> cats = new TreeMap(); // categories
         // categories
         for (String k : keys) {
-            
+
             // UGLY HACK.  DON'T DO THIS AT HOME.
             //categories marked with \ or .
-            StringTokenizer t = new StringTokenizer(k, k.contains("\\") ? "\\" : (byClass? "." : ""));
+            StringTokenizer t = new StringTokenizer(k, k.contains("\\") ? "\\" : (byClass ? "." : ""));
             String classname;
             classname = t.nextToken();
             if (byClass && t.hasMoreTokens()) {

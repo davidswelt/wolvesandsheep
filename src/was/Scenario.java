@@ -381,6 +381,6 @@ public class Scenario {
 
     @Override
     public String toString() {
-        return "Sc." + requested;
+        return "Sc." + String.format("%02d", requested);
     }
 }
