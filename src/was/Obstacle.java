@@ -25,9 +25,12 @@ final public class Obstacle extends Player{
         return null;
     }
 
+    
     @Override
     public Move move() {
-        return null;
+        Move m = requestedNextMove; // typically null!
+        requestedNextMove=null;
+        return m;
     }   
     
 }

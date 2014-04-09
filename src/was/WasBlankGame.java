@@ -49,7 +49,7 @@ class WasBlankGame implements WasGameBackend {
     public void doRun() {
         while (!board.isFinished()) {
 
-            board.gameNextTimeStep();
+            board.gameNextTimeStep(); // this may move (scenario)
 
             // sheep
             Iterator li = board.players.descendingIterator();

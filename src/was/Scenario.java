@@ -270,12 +270,12 @@ public class Scenario {
         return hash;
     }
 
-    void green(int x, int y) {
-        setFigure(Pasture.class, x, y);
+    Player green(int x, int y) {
+        return setFigure(Pasture.class, x, y);
     }
 
-    void grey(int x, int y) {
-        setFigure(Obstacle.class, x, y);
+    Player grey(int x, int y) {
+        return setFigure(Obstacle.class, x, y);
     }
 
     GameLocation loc(double x, double y) {
@@ -305,39 +305,47 @@ public class Scenario {
         return y;
     }
 
-    void setFigure(Class p, int x, int y) {
-        GameLocation l = loc(x, y);
-        if (l != null) {
-            try {
-                if (tmpGb.isEmptyCell(l.x, l.y)) {
-                    tmpGb.addPlayer((Player) p.newInstance(), l);
-
+    Player setFigure(Class p, int x, int y) {
+        if (x > 0 && x < tmpGb.getCols() && y > 0 && y < tmpGb.getRows()) {
+            GameLocation l = loc(x, y);
+            if (l != null) {
+                try {
+                    if (tmpGb.isEmptyCell(l.x, l.y)) {
+                        return tmpGb.addPlayer((Player) p.newInstance(), l);
+                    }
+                } catch (IndexOutOfBoundsException ex) {
+                } catch (InstantiationException ex) {
+                    Logger.getLogger(Scenario.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (IllegalAccessException ex) {
+                    Logger.getLogger(Scenario.class.getName()).log(Level.SEVERE, null, ex);
                 }
-            } catch (IndexOutOfBoundsException ex)
-            {
-            } catch (InstantiationException ex) {
-                Logger.getLogger(Scenario.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (IllegalAccessException ex) {
-                Logger.getLogger(Scenario.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
+        return null;
     }
-    
+
+    protected void delete(Player[] dots) {
+        for (Player p : dots) {
+            tmpGb.removePlayer(p);
+        }
+    }
     int lastLineX = 0;
     int lastLineY = 0;
-    protected void lineTo(int x, int y)
-    {
-        line(lastLineX, lastLineY, x, y);
-        lastLineX=x;
-        lastLineY=y;
+
+    protected Player[] lineTo(int x, int y) {
+        Player[] dots;
+        dots = line(lastLineX, lastLineY, x, y);
+        lastLineX = x;
+        lastLineY = y;
+        return dots;
     }
-            
-            
-    protected void line(int x1, int y1, int x2, int y2) {
-        
+
+    protected Player[] line(int x1, int y1, int x2, int y2) {
+
+        List<Player> dots = new ArrayList();
         lastLineX = x2;
         lastLineY = y2;
-        
+
         x1 = normX(x1);
         y1 = normY(y1);
         x2 = normX(x2);
@@ -367,16 +375,24 @@ public class Scenario {
         double x = x1;
         double y = y1;
         while ((sy > 0 ? y <= y2 : y >= y2) && (sx > 0 ? x <= x2 : x >= x2)) {
-            setFigure(Obstacle.class, (int) x, (int) y);
-            if ((int) x < (int) x+sx)
-            // horizontal shift?
+            Player p = setFigure(Obstacle.class, (int) x, (int) y);
+            if (p != null) {
+                dots.add(p);
+            }
+            if ((int) x < (int) x + sx) // horizontal shift?
             {
-                
-                setFigure(Obstacle.class, (int) x+1, (int) y);
+
+                p = setFigure(Obstacle.class, (int) x + 1, (int) y);
+                if (p != null) {
+                    dots.add(p);
+                }
             }
             x += sx;
             y += sy;
         }
+        return (Player[]) dots.toArray(new Player[1]);
+    }
+
     void updateBoard(GameBoard board, int it) {
     }
 

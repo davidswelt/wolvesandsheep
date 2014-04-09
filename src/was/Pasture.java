@@ -25,9 +25,13 @@ final public class Pasture extends Player {
     {
         return null;
     }
+    
     @Override
     public Move move() {
-        return null;
+        // move is not called unless willNotMove is different.
+        Move m = requestedNextMove; // typically null!
+        requestedNextMove=null;
+        return m;
     }
     
     
