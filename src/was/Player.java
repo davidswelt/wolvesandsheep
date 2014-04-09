@@ -1,27 +1,21 @@
 package was;
 
 import ch.aplu.jgamegrid.Actor;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import static was.Tournament.crashLog;
 
 /**
  * This is a general player class.
@@ -36,21 +30,20 @@ public abstract class Player {
 
     // Timeout rules
     // we discard a player's move if it takes longer than 2*180 ms., and disqualify the player for the rest of the game.
-    final private static int individualRunFactor = 20; // 300; // overage for individual runs
+    final private static int individualRunFactor = 60; // 300; // overage for individual runs
     // we disqualify a player if on overage a function call takes more than this much time
-    final private static long TIMEOUT = 30; // 500; // 4 milliseconds
-    // permanent disqualification occurs if a player is disqualified due to overtime in 10 games.
-    final private static int permanentDisqualificationThreshold = 5; // 80;
+    final private static long TIMEOUT = 100; // 500; // 4 milliseconds
+    // permanent disqualification in a scenario occurs if a player is disqualified due to overtime in 80 games in that scenario.
+    final private static int permanentDisqualificationThreshold = 80; // 80;
     private static final int MOVE = 0;
     private static final int INITIALIZE = 1;
     private static final int IS_BEING_EATEN = 2;
     private static final int IS_EATING = 3;
     private static final int IS_ATTACKED = 4;
     boolean willNotMove = false;
-    
     static boolean debuggable = true; // is set to false by class tournament code
     // not accessible from outside of was package.
-    
+
     public static enum GamePiece {
 
         EMPTY, SHEEP, WOLF, OBSTACLE, PASTURE
@@ -71,8 +64,12 @@ public abstract class Player {
     private long totalRuns = 0;
     private boolean disqualified = false; // this player object is disqualified (i.e., player is gone for this game)
     // disqualified counts per class:
-    private static Map<String, Integer> disqualifiedCount = new TreeMap();
+    private static Map<String, Integer> disqualifiedCount = new HashMap();
     private Thread myThread = null;
+    // move requests by the scenario
+    // ignored by active players
+    // but useful for scenario-controlled players
+    Move requestedNextMove = null;
 
     /**
      * Constructor for Player objects.
@@ -161,25 +158,29 @@ public abstract class Player {
     abstract GamePiece getPiece();
 
     private boolean isDisqualified() {
-        Integer dc = (Integer) disqualifiedCount.get(this.getClass().getName());
+        int scenarioNum = gb.scenario.requested;
+        Integer dc = (Integer) disqualifiedCount.get(this.getClass().getName() + ".Sc" + new Integer(scenarioNum));
         if (dc == null) {
             dc = 0;
         }
-
+        // either disqualified permanently for the scenario, or just in this round
         return (dc > permanentDisqualificationThreshold || disqualified);
     }
 
     private void markDisqualified() {
-
-        Integer dc = (Integer) disqualifiedCount.get(this.getClass().getName());
+        int scenarioNum = gb.scenario.requested;
+        String playerID = this.getClass().getName() + ".Sc" + new Integer(scenarioNum);
+        Integer dc = (Integer) disqualifiedCount.get(playerID);
         if (dc == null) {
             dc = 0;
         }
-        disqualifiedCount.put(this.getClass().getName(), dc + 1);
-        disqualified = true;
+        dc++;
+        //the class is disqualified for this scenario
+        disqualifiedCount.put(playerID, dc);
+        disqualified = true; // disqualified in this round (this player object)
 
-        if (dc + 1 > permanentDisqualificationThreshold) {
-            Tournament.logPlayerCrash(this.getClass(), new RuntimeException("Player permanently disqualified."));
+        if (dc > permanentDisqualificationThreshold) {
+            Tournament.logPlayerCrash(this.getClass(), new RuntimeException("Player disqualified for scenario."));
         } else {
             Tournament.logPlayerCrash(this.getClass(), new RuntimeException("Player disqualified."));
         }
