@@ -308,9 +308,9 @@ public class Scenario {
     }
 
     Player setFigure(Class p, int x, int y) {
-        if (x > 0 && x < tmpGb.getCols() && y > 0 && y < tmpGb.getRows()) {
-            GameLocation l = loc(x, y);
-            if (l != null) {
+        GameLocation l = loc(x, y);
+        if (l != null) {
+            if (l.x > 0 && l.x < tmpGb.getCols() && l.y > 0 && l.y < tmpGb.getRows()) {
                 try {
                     if (tmpGb.isEmptyCell(l.x, l.y)) {
                         return tmpGb.addPlayer((Player) p.newInstance(), l);
