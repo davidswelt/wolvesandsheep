@@ -153,7 +153,7 @@ public class PlayerTest {
 
     }
 
-    public static void main(String args[]) {
+    public static int main(String args[]) {
 
         // parse the command line
         int i = 0;
@@ -174,6 +174,6 @@ public class PlayerTest {
             System.err.println("Usage: java -jar W -classpath .:./players/ was.PlayerTest PACKAGENAME.CLASS");
             System.err.println("Put player .jar files into players/");
         }
-        System.exit(pass ? 0 : 1);
+        return(pass ? 0 : 1);
     }
 }

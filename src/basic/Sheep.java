@@ -1,9 +1,7 @@
 package basic;
 
-import java.util.List;
 import java.util.Random;
 import was.GameBoard;
-import was.GameLocation;
 import was.Move;
 
 /**

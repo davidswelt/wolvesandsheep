@@ -51,28 +51,28 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
     static HighScore crashLog = new HighScore().setTitle("crashes");
     static HighScore moveLog = new HighScore().setTitle("total calls to move()");
     static int loadedScenario = -1; // used for logging crashes
-    
+
     static void logPlayerMoveAttempt(Class pl) {
         moveLog.inc(pl.getName() + ".Crash");
-        if (loadedScenario>-1)
-        {
-            String ss = "Scenario"+String.format("%2d",loadedScenario);
+        if (loadedScenario > -1) {
+            String ss = "Scenario" + String.format("%2d", loadedScenario);
 
-            moveLog.inc(pl.getName() + ".Crash."+ss);
+            moveLog.inc(pl.getName() + ".Crash." + ss);
         }
     }
+
     static void logPlayerCrash(Class pl, Throwable ex) {
         logPlayerCrash(pl, ex, loadedScenario);
     }
+
     static void logPlayerCrash(Class pl, Throwable ex, Integer info) {
         crashLog.inc(pl.getName() + ".Crash");
 //        crashLog.inc(pl.getName() + ".Crash\\" + ex);
-        
-        if (info>-1)
-        {
-            String ss = "Scenario"+String.format("%2s",info.toString());
-            crashLog.inc(pl.getName() + ".Crash." +ss );
-            crashLog.inc(pl.getName() + ".Crash." + ss + "\\"+ex );
+
+        if (info > -1) {
+            String ss = "Scenario" + String.format("%2s", info.toString());
+            crashLog.inc(pl.getName() + ".Crash." + ss);
+            crashLog.inc(pl.getName() + ".Crash." + ss + "\\" + ex);
         }
     }
     HighScore timing = new HighScore();
@@ -143,7 +143,7 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
 
         int totalgames = r * playerClasses.size() * Math.max(1, playerClasses.size() - 1) * Math.max(1, playerClasses.size() - 2) * Math.max(1, playerClasses.size() - 3);
 
-//        System.err.println("Total trials: " + totalgames);
+//        logerr("Total trials: " + totalgames);
 
 
 
@@ -188,12 +188,12 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
             }
         }
 //        if (sheep < numSheep) {
-//            System.err.println("Must specify at least " + numSheep + " sheep classes.  Have " + sheep + " sheep and " + wolves + " wolves.");
+//            logerr("Must specify at least " + numSheep + " sheep classes.  Have " + sheep + " sheep and " + wolves + " wolves.");
 //            return null;
 //
 //        }
 //        if (wolves < numWolves) {
-//            System.err.println("Must specify at least one wolf class.");
+//            logerr("Must specify at least one wolf class.");
 //            return null;
 //
 //        }
@@ -308,13 +308,13 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
                         GameBoard board = new GameBoard(scenario.boardSize(), scenario.boardSize(), boardUI, 80);
                         board.wolfEatSheepDelegate = this;
                         board.scenario = scenario;
-                        
+
                         Stack<GameLocation> wolfQueue = new Stack();
                         Stack<GameLocation> sheepQueue = new Stack();
 
                         scenario.addToBoard(board, wolfQueue, sheepQueue); // add scenario first to occupy these spaces
 
-//                      System.err.println("sel pl len="+selectedPlayers.size());
+//                      logerr("sel pl len="+selectedPlayers.size());
                         for (Integer i : selectedPlayers) {
                             Class pclass = players.get(i);
                             Stack<GameLocation> queue = isWolf(pclass) ? wolfQueue : sheepQueue;
@@ -329,8 +329,8 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
                             scenarioScore.noteUse("Scenario " + scenario.toString() + "\\" + pclass.getName());
 
                             if (teams.get(pclass) == null) {
-                                //System.err.println(i);
-                                //System.err.println("WARNING: can't get team for " + players.get(i));
+                                //logerr(i);
+                                //logerr("WARNING: can't get team for " + players.get(i));
                             } else {
                                 // note use of player so that team score can be normalized later
                                 highscore.noteUse(teams.get(pclass) + (isWolf(pclass) ? ".WolfTeam" : ".SheepTeam"));
@@ -367,7 +367,7 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
 
                                             highscore.inc(teams.get(cl) + (score.getKey() instanceof WolfPlayer ? ".WolfTeam" : ".SheepTeam"), score.getValue()[0]);
                                         }
-                                                                                
+
                                         timing.inc(cl.getName(), score.getKey().meanRunTime());
                                         final String scenPlayStr = "Scenario " + scenario.toString() + "\\" + cl.getName();
                                         scenarioTiming.inc(scenPlayStr, score.getKey().meanRunTime());
@@ -375,7 +375,7 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
                                         timing.noteUse(cl.getName());
                                         scenarioTiming.noteUse(scenPlayStr);
                                         score.getValue()[0] = 0; // set to 0 to make sure it doesn't get added twice
-                                        
+
                                     }
                                 }
                             } finally {
@@ -390,13 +390,10 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
                     }
                 }
             }
-        
-        } catch (Throwable ex) {
+
+        } catch (Exception ex) {
             Logger.getLogger(Tournament.class
-                    .getName()).log(Level.SEVERE, null, ex);            
-        } 
-        finally {
-            System.exit(0); // make sure end the JGameGrid thread as well.
+                    .getName()).log(Level.SEVERE, null, ex);
         }
     }
     boolean boardUI = false;
@@ -422,7 +419,7 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
                 if (!SheepPlayer.class
                         .isAssignableFrom(p) && !WolfPlayer.class
                         .isAssignableFrom(p)) {
-                    System.err.println(
+                    logerr(
                             "Error: " + p.getName() + " is not a subtype of was.SheepPlayer or was.WolfPlayer.");
                 } else {
                     if (PlayerTest.runUnitTest(p, crashLog)) {
@@ -453,89 +450,97 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
         }
 
     }
+    
+    static void logerr(String s)
+    {
+//        Logger.getLogger(Tournament.class
+//                    .getName()).log(Level.INFO, s);
+        System.err.println(s);
+    }
 
     public static void main(String args[]) {
 
-
-        ArrayList<Class> players = new ArrayList<Class>();
+        try {
+            ArrayList<Class> players = new ArrayList<Class>();
 //        int m = -1;
 //        int n = -;
 //        int k = 4;
-        int r = 1;
-        int sc = 0; // random scenario
-        boolean ui = true;
-        boolean tourn = false;
+            int r = 1;
+            int sc = 0; // random scenario
+            boolean ui = true;
+            boolean tourn = false;
 
 
-        // parse the command line
-        int i = 0;
-        while (i < args.length) {
-            String s = args[i++];
-            if (s.equals("-u")) {
-                ui = true;
-            } else if (s.equals("-c")) {
-                ui = false;
-            } else if (s.equals("-q")) {
-                quiet = true;
-            } else if (s.equals("-e")) {
-                Player.catchExceptions = true;
-                Player.logToFile = true;
-            } else if (s.equals("-r")) {
+            // parse the command line
+            int i = 0;
+            while (i < args.length) {
+                String s = args[i++];
+                if ("-u".equals(s)) {
+                    ui = true;
+                } else if ("-c".equals(s)) {
+                    ui = false;
+                } else if ("-q".equals(s)) {
+                    quiet = true;
+                } else if ("-e".equals(s)) {
+                    Player.catchExceptions = true;
+                    Player.logToFile = true;
+                } else if ("-r".equals(s)) {
 
-                r = Integer.parseInt(args[i++]);
+                    r = Integer.parseInt(args[i++]);
 
-            } else if (s.equals("-s")) {
+                } else if ("-s".equals(s)) {
 
-                sc = Integer.parseInt(args[i++]);
+                    sc = Integer.parseInt(args[i++]);
 
-            } else if (s.equals("-t")) {
+                } else if ("-t".equals(s)) {
 
-                tourn = true;
+                    tourn = true;
 
-            } else if (s.equals("-p")) {
+                } else if ("-p".equals(s)) {
 
-                pauseInitially = true;
+                    pauseInitially = true;
 
-            } else if (s.equals("--secret")) {
+                } else if ("--secret".equals(s)) {
 
-                Scenario.useSecretScenarioClass = true;
+                    Scenario.useSecretScenarioClass = true;
+
+                } else {
+                    players.add(PlayerFactory.getClassForName(s));
+                }
+            }
+
+
+
+            if (players.size() > 0) {
+
+                was.Tournament.run(players, r, ui, sc, tourn, true); // m, n, k,
 
             } else {
-                players.add(PlayerFactory.getClassForName(s));
+                logerr("Usage: java -jar WolvesAndSheep.jar -r R -s S -t -e -p -c -q CLASS1 CLASS2 CLASS3 CLASS4 CLASS5 (...)");
+                //logerr("       -t M,N,K  ==> play a M*N board with K sheep.");
+                logerr("       -r R      ==> play R repeats of each game.");
+                logerr("       -s S      ==> set up scenario no. S (0 or default for random)");
+                logerr("       -t        ==> play a tournament of all combinations of players (4 sheep, one wolf)");
+                logerr("       -e        ==> ignore player's exceptions");
+                logerr("       -p        ==> pause initially if using graphical UI");
+                logerr("       -c        ==> do not show the graphical user interface ");
+                logerr("       -q        ==> do not print progress info ");
+                logerr("Example: java -jar WolvesAndSheep.jar -r 10 basic.Wolf basic.Sheep basic.Sheep basic.Sheep basic.Sheep");
+                logerr("Example for NetBeans (Run Configuration, Program arguments): -r 10 basic.Wolf basic.Sheep basic.Sheep basic.Sheep basic.Sheep");
+                // do not run a default case to make sure it doesn't cause confusion.
+                //            was.Tournament.run("reitter.SheepPlayer,reitter.WolfPlayer,reitter.SheepPlayer,reitter.SheepPlayer, reitter.SheepPlayer", 100);
+
+                // for testing prposes:  greene.Wolf zielenski.Wolf Wilkinson.Wolf derhammer.Sheep chan.Sheep derhammer.Sheep tailor.Sheep
+                // (greene is one of the stronger wolves.)
             }
+        } finally {
+            System.exit(0);
         }
-
-
-
-        if (players.size() > 0) {
-
-            was.Tournament.run(players, r, ui, sc, tourn, true); // m, n, k,
-
-        } else {
-            System.err.println("Usage: java -jar WolvesAndSheep.jar -r R -s S -t -e -p -c -q CLASS1 CLASS2 CLASS3 CLASS4 CLASS5 (...)");
-            //System.err.println("       -t M,N,K  ==> play a M*N board with K sheep.");
-            System.err.println("       -r R      ==> play R repeats of each game.");
-            System.err.println("       -s S      ==> set up scenario no. S (0 or default for random)");
-            System.err.println("       -t        ==> play a tournament of all combinations of players (4 sheep, one wolf)");
-            System.err.println("       -e        ==> ignore player's exceptions");
-            System.err.println("       -p        ==> pause initially if using graphical UI");
-            System.err.println("       -c        ==> do not show the graphical user interface ");
-            System.err.println("       -q        ==> do not print progress info ");
-            System.err.println("Example: java -jar WolvesAndSheep.jar -r 10 basic.Wolf basic.Sheep basic.Sheep basic.Sheep basic.Sheep");
-            System.err.println("Example for NetBeans (Run Configuration, Program arguments): -r 10 basic.Wolf basic.Sheep basic.Sheep basic.Sheep basic.Sheep");
-            // do not run a default case to make sure it doesn't cause confusion.
-            //            was.Tournament.run("reitter.SheepPlayer,reitter.WolfPlayer,reitter.SheepPlayer,reitter.SheepPlayer, reitter.SheepPlayer", 100);
-
-            // for testing prposes:  greene.Wolf zielenski.Wolf Wilkinson.Wolf derhammer.Sheep chan.Sheep derhammer.Sheep tailor.Sheep
-            // (greene is one of the stronger wolves.)
-        }
-
-        System.exit(0);
     }
 
     @Override
-    public void wolfEatSheep(Player wolf, Player sheep) {        
+    public void wolfEatSheep(Player wolf, Player sheep) {
         // keep track
-        eatingScore.inc(wolf.getClass().getName()+"\\"+sheep.getClass().getName());
+        eatingScore.inc(wolf.getClass().getName() + "\\" + sheep.getClass().getName());
     }
 }

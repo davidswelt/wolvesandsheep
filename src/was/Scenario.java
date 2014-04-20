@@ -202,7 +202,7 @@ public class Scenario {
                 grey(-1, rows / 2 + 1);
                 grey(-2, rows / 2 - 2);
                 grey(-2, rows / 2 + 2);
-                board.MAXTIMESTEP = Math.max(board.MAXTIMESTEP, 500);
+                board.maxTimeStep = Math.max(board.maxTimeStep, 500);
                 break;
             case 8:
                 // 50x50
@@ -232,7 +232,7 @@ public class Scenario {
                 sheepP.add(loc(20, 22));
                 sheepP.add(loc(23, 22));
                 sheepP.add(loc(26, 22));
-                board.MAXTIMESTEP = Math.max(board.MAXTIMESTEP, 200);
+                board.maxTimeStep = Math.max(board.maxTimeStep, 200);
                 break;
             default:
                 throw new RuntimeException("Specified scenario unavailable.");

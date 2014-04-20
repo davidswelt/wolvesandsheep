@@ -24,19 +24,17 @@ import was.Player.GamePiece;
 public class GameBoard {
 
     interface WolfSheepDelegate {
-        public void wolfEatSheep (Player wolf, Player sheep);
+
+        public void wolfEatSheep(Player wolf, Player sheep);
     }
-    
     boolean ui = false;
     private final int cols;
     private final int rows;
     private List<Player> board = new ArrayList<Player>();
     Deque<Player> players = new ArrayDeque();
-    private HashMap<Player, int[]> scores = new HashMap();
-    HashMap<String, Object> sheepWhiteboard = new HashMap();
-    
+    private Map<Player, int[]> scores = new HashMap();
+    Map<String, Object> sheepWhiteboard = new HashMap();
     WolfSheepDelegate wolfEatSheepDelegate = null;
-    
     /**
      * distance in grid squares that a wolf can cover
      */
@@ -48,22 +46,22 @@ public class GameBoard {
     /**
      * maximal number of steps before game ends
      */
-    int MAXTIMESTEP;
+    int maxTimeStep;
     final int NUMWOLVES = 1;
     int currentTimeStep = 0;
     WasGameBackend wasgamegrid = null;
 
     // can move along line between a and b
     GameLocation clearShot(GameLocation a, GameLocation b) {
-        
+
         // diagonal steps are OK
         Move m = new Move(b.x - a.x, b.y - a.y);
 
         double maxlen = m.length();
         m = m.scaledToLength(Math.sqrt(2));
 
-        int lastempty_x = a.x;
-        int lastempty_y = a.y;
+        int lastemptyX = a.x;
+        int lastemptyY = a.y;
 
 
         double x = a.x + 0.5; // we'll start in the center of the cell
@@ -84,14 +82,14 @@ public class GameBoard {
 
             if (getPiece(xx, yy) == GamePiece.OBSTACLE) {
                 // return previous (known good) location
-                return new GameLocation(lastempty_x, lastempty_y);
+                return new GameLocation(lastemptyX, lastemptyY);
             }
             if (b.x == xx && b.y == yy) {
                 break;
             }
             if (isEmptyCell(xx, yy)) {
-                lastempty_x = xx;
-                lastempty_y = yy;
+                lastemptyX = xx;
+                lastemptyY = yy;
             }
         }
         return b;
@@ -106,16 +104,16 @@ public class GameBoard {
         {
             return true;
         }
-        
-        LOG(player + " moves " + m);
+
+        log(player + " moves " + m);
         if (player == null) {
             throw new RuntimeException("movePlayer: trying to move an empty cell.");
         }
-        
+
         GamePiece playerCellPiece = player.getPiece();
         GameLocation loc = player.getLocation();
 
-        
+
         if (playerCellPiece == GamePiece.WOLF) {
             // is move surrounded by sheep?
             // check all sheep in game
@@ -141,13 +139,13 @@ public class GameBoard {
 
         }
 
-        
-        
-        
+
+
+
         if (player.isBusy()) {
             return false; // can't move Player
         }
-        LOG(player + " " + player.getLocation() + " " + m);
+        log(player + " " + player.getLocation() + " " + m);
 
         if (player != board.get(getIndex(player.getLocation()))) {
             System.err.println("player " + player + "location mismatch. player thinks its at " + player.getLocation() + " while board has something else there.. ");
@@ -172,7 +170,7 @@ public class GameBoard {
         int idx = getIndex(x, y);
 
         if (idx == i) {
-          return true; // empty move
+            return true; // empty move
         }
 
         GameLocation nloc = clearShot(loc, new GameLocation(x, y));
@@ -181,7 +179,7 @@ public class GameBoard {
 
         idx = getIndex(x, y);
         if (idx == i) {
-          return true; // empty move
+            return true; // empty move
         }
         GamePiece targetCellPiece = getPiece(idx);
 
@@ -211,9 +209,9 @@ public class GameBoard {
         } else if (playerCellPiece == GamePiece.WOLF && targetCellPiece == GamePiece.PASTURE) {
             // wolf can't movePlayer onto pasture
             // do nothing
-            LOG("wolf tried to move onto pasture");
+            log("wolf tried to move onto pasture");
         } else if (targetCellPiece == GamePiece.OBSTACLE) {
-            LOG("hit obstacle");
+            log("hit obstacle");
         }
         // else: still can't movePlayer.
 
@@ -223,47 +221,46 @@ public class GameBoard {
     }
 
     void sheepSurroundWolf(Player wolfPlayer) {
-        LOG("Sheep have overpowered the wolf.  Poor wolf!");
+        log("Sheep have overpowered the wolf.  Poor wolf!");
         wolfPlayer.keepBusyFor(wolfEatingTime);
         wolfPlayer.shortenMaxAllowedDistance(0.75); // cut speed by 25%
         wolfPlayer.callIsAttacked();
     }
 
-    void wolfEatSheep(int WolfIndex, int SheepIndex) {
+    void wolfEatSheep(int wolfIndex, int sheepIndex) {
         // the sheep dies
         //  notify
         // the wolf eats
         //  notify
 
-        LOG("eating.");
+        log("eating.");
 
         // this will cause a runtime exception if they're not sheep/wolf
-        SheepPlayer sheep = (SheepPlayer) getPlayer(SheepIndex);
-        WolfPlayer wolf = (WolfPlayer) getPlayer(WolfIndex);
+        SheepPlayer sheep = (SheepPlayer) getPlayer(sheepIndex);
+        WolfPlayer wolf = (WolfPlayer) getPlayer(wolfIndex);
 
         if (sheep == null) {
-            System.err.println("wolfeatsheep: sheep is gone!" + getLoc(SheepIndex) + " wolf=" + getLoc(WolfIndex));
+            System.err.println("wolfeatsheep: sheep is gone!" + getLoc(sheepIndex) + " wolf=" + getLoc(wolfIndex));
         }
         if (wolf == null) {
-            System.err.println("wolfeatsheep: wolf is gone!" + getLoc(WolfIndex) + " sheep=" + getLoc(SheepIndex));
+            System.err.println("wolfeatsheep: wolf is gone!" + getLoc(wolfIndex) + " sheep=" + getLoc(sheepIndex));
             GameLocation wl = getWolfPosition();
             System.err.println("Wolf is now at " + wl);
         }
 
-        wolf.callIsEating();
-        sheep.callIsBeingEaten();
-
-        wolf.keepBusyFor(wolfEatingTime);
-
-        // scoring and removal of objects  
-        if (wolfEatSheepDelegate != null)
-        {
-            wolfEatSheepDelegate.wolfEatSheep(wolf,sheep); // logging
+        if (wolf != null && sheep != null) {
+            wolf.callIsEating();
+            sheep.callIsBeingEaten();
+            wolf.keepBusyFor(wolfEatingTime);
+            // scoring and removal of objects  
+            if (wolfEatSheepDelegate != null) {
+                wolfEatSheepDelegate.wolfEatSheep(wolf, sheep); // logging
+            }
+            playerWins(wolf);
+            playerLoses(sheep); // removes sheep
         }
-        playerWins(wolf);
-        playerLoses(sheep); // removes sheep
         // sheep is gone now, cell should be empty
-        swapCells(WolfIndex, SheepIndex); // move wolf to where the sheep was
+        swapCells(wolfIndex, sheepIndex); // move wolf to where the sheep was
 
     }
 
@@ -274,7 +271,7 @@ public class GameBoard {
     GameBoard(int width, int height, boolean ui, int maxTimeStep) {
         cols = width;
         rows = height;
-        this.MAXTIMESTEP = maxTimeStep;
+        this.maxTimeStep = maxTimeStep;
 
         for (int i = 0; i < cols * rows; i++) {
             board.add(null); // null is empty
@@ -289,7 +286,7 @@ public class GameBoard {
     }
 
     public int getMaxTimeStep() {
-        return this.MAXTIMESTEP;
+        return this.maxTimeStep;
     }
 
     public int getTime() {
@@ -379,15 +376,15 @@ public class GameBoard {
     }
 
     /**
-     * Get the position of a named player.
-     * Return null if this player does not or no longer exists.
+     * Get the position of a named player. Return null if this player does not
+     * or no longer exists.
+     *
      * @param playerIDString
      * @return a GameLocation object
      */
     public GameLocation getPlayerPositionByID(String playerIDString) {
         // Note: this is not very efficient.
         // To Do: maintain a map for this if people end up using it.
-        ArrayList<was.GameLocation> sp = new ArrayList();
         for (Player p : players) {
             if (p != null && !p.isGone() && p.getID().equals(playerIDString)) {
                 return p.getLocation(); // this is a copy
@@ -397,8 +394,9 @@ public class GameBoard {
     }
 
     /**
-     * Get the ID of the player at a given position.
-     * Return null if there is no player at that position.
+     * Get the ID of the player at a given position. Return null if there is no
+     * player at that position.
+     *
      * @param location
      * @return a String with the unique ID of the player instance
      */
@@ -408,14 +406,14 @@ public class GameBoard {
         }
         int idx = getIndex(loc.x, loc.y);
         Player p = getPlayer(idx);
-        if (p != null)
-        {
+        if (p != null) {
             return p.getID();
         }
         return null;
     }
-            
 
+    // we return an ArrayList,  not a List
+    // to make the public API down the line easier to Java novices
     ArrayList<GameLocation> findAllPlayersLoc(GamePiece type) {
         ArrayList<was.GameLocation> sp = new ArrayList();
         for (Player p : players) {
@@ -539,7 +537,7 @@ public class GameBoard {
 
     // player objects may not bleed over to players
     // (except for sheep, which share)
-    private ArrayList<Player> getPlayers() {
+    private List<Player> getPlayers() {
 
         return findAllPlayers(null);
     }
@@ -581,7 +579,7 @@ public class GameBoard {
     }
 
     private void swapCells(int i1, int i2) {
-        LOG("swap " + getLoc(i1) + board.get(i1) + " " + getLoc(i2) + board.get(i2));
+        log("swap " + getLoc(i1) + board.get(i1) + " " + getLoc(i2) + board.get(i2));
         Player tmp = board.get(i1);
 
         board.set(i1, null);
@@ -621,7 +619,6 @@ public class GameBoard {
 
     }
 
-    
     Player addPlayer(Player p, GameLocation loc) {
 
         p.setGameBoard(this);
@@ -681,22 +678,10 @@ public class GameBoard {
         return p.getMaxAllowedDistance();
     }
 
-    void makeMove() {
+    static void log(String s) {
+        /* No-op.  Used for debugging. */
     }
 
-    void test(int location) {
-    }
-
-    static void LOG(String s) {
-    }
-
-//    
-//    to do:
-//    implement second variant of the backing game (both implemnent the same interface)
-//       thread waiting interface
-//       gameNextTimeStep callback
-//       and a callback to update movePlayer (and check legality)  cell.movePlayer(movePlayer)
-//               
     // callback from game backend
     synchronized boolean noteMove(Player p, Move move) {
 
@@ -711,22 +696,20 @@ public class GameBoard {
         // set marker so that repetitive processes know to terminate
         Tournament.exitRequested = true;
     }
-
     Scenario scenario = null;
     // callback from game backend
+
     void gameNextTimeStep() {
-        test(7);
         currentTimeStep++; // advance time
-        if (scenario != null)
-        {
-        scenario.updateBoard(this, currentTimeStep);
-        }   
-            
+        if (scenario != null) {
+            scenario.updateBoard(this, currentTimeStep);
+        }
+
     }
 
     // callback from game backend
     boolean isFinished() {
-        return !(getSheepPositions().size() > 0 && currentTimeStep < MAXTIMESTEP);
+        return getSheepPositions().isEmpty() || (currentTimeStep >= maxTimeStep);
     }
 
     Map<Player, int[]> playGame(boolean pauseInitially) {
@@ -796,17 +779,13 @@ public class GameBoard {
     private void playerWins(Player p) {
         scores.get(p)[0]++;
         // remove player from list
-        test(2);
         if (p instanceof SheepPlayer) {
             removePlayer(p);
         }
-        test(3);
     }
 
     private void playerLoses(Player p) {
-        test(4);
         removePlayer(p);
-        test(5);
     }
 
     void removePlayer(Player p) {
@@ -823,7 +802,7 @@ public class GameBoard {
 
         // let's make sure there's no cell left
 
-        LOG("removing player.");
+        log("removing player.");
         int i = getIndex(p.getLocation());
         if (board.get(i) == p) {
             board.set(i, null);

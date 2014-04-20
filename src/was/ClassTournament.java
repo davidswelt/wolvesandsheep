@@ -15,6 +15,14 @@ import static was.Tournament.quiet;
  */
 public class ClassTournament extends Tournament {
 
+    static void out(String s) {
+        System.out.print(s);
+    }
+
+    static void outln(String s) {
+        System.out.println(s);
+    }
+
     public static void teamStructureInit(int repeats, int minutes) {
        String[] sheepteams = new String[]{"Lambchop:aaa,bbb,ccc",  // hegarty probably dropped
             "Splendiferous Sheep:ddd,eee,fff",
@@ -30,6 +38,11 @@ public class ClassTournament extends Tournament {
             "Team C:gg,hh,ii",
             "Meat Eater (Classic):jj,kk,ll,mm"};
         
+        run(wolves, sheepteams, repeats, minutes);
+    }
+
+    static void run(String[] wolves, String[] sheepteams, int repeats, int minutes) {
+
         HighScore totalHighscore = new HighScore().setTitle("total");
         HighScore totalTiming = new HighScore().setTitle("timing");
         Map<String, HighScore> scenarioHighScore = new TreeMap();
@@ -70,18 +83,17 @@ public class ClassTournament extends Tournament {
         long targetTimeSecs = Math.max(1, minutes * 60); // 10 minutes
         long startTime = System.currentTimeMillis();
         while ((System.currentTimeMillis() - startTime) < targetTimeSecs * 1000) {
-            Scenario.repeatCount ++;
+            Scenario.repeatCount++;
             for (String s : sheepteams) {
                 // each sheep team
-                String sheepteam = prefix(s);
                 for (String w : wolves) {
                     // each wolf team
                     String wolfteam = prefix(w);
-                    ArrayList<Class> wolves2 = PlayerFactory.string2classlist(w, ".Wolf");
-                    System.out.print("Wolf team:" + wolfteam + ": ");
+                    List<Class> wolves2 = PlayerFactory.string2classlist(w, ".Wolf");
+                    out("Wolf team:" + wolfteam + ": ");
                     for (Class w2 : wolves2) // for each wolf within a group
                     {
-                        ArrayList<Class> p = PlayerFactory.string2classlist(s, ".Sheep"); // all sheep
+                        List<Class> p = PlayerFactory.string2classlist(s, ".Sheep"); // all sheep
                         p.add(w2); // one wolf
                         // randomize order of sheep
                         Collections.shuffle(p);
@@ -90,7 +102,7 @@ public class ClassTournament extends Tournament {
                             avgtimeperrun = (System.currentTimeMillis() - startTime) / runcount;
                         }
                         // all scenarios
-             //           List x = Scenario.getParameterValues();
+                        //           List x = Scenario.getParameterValues();
                         for (int sp : Scenario.getParameterValues()) {
                             if (avgtimeperrun > 0) {
                                 System.out.printf("running (%s out of %s).  %s mins. left\n", runcount, totalRuns, (int) (((totalRuns - runcount) * avgtimeperrun) / 1000 / 60));
@@ -101,15 +113,15 @@ public class ClassTournament extends Tournament {
                             Tournament t = run(p, repeats, false, sp, false, false);
                             totalHighscore.addHighScore(t.highscore);
                             totalTiming.addHighScore(t.timing);
-                            totalEatingScore.addHighScore(t.eatingScore);  
+                            totalEatingScore.addHighScore(t.eatingScore);
                             if (scenarioHighScore.get(t.scenario.toString()) == null) {
                                 scenarioHighScore.put(t.scenario.toString(), new HighScore().setTitle(t.scenario.toString()));
                                 scenarioTiming.put(t.scenario.toString(), new HighScore().setTitle(t.scenario.toString()));
                             }
                             scenarioHighScore.get(t.scenario.toString()).addHighScore(t.highscore);
                             scenarioTiming.get(t.scenario.toString()).addHighScore(t.timing);
-                            
-                            System.out.println("Timing (ms.):");
+
+                            outln("Timing (ms.):");
                             t.timing.print();
                             totalTiming.print();
                             if (exitRequested) {
@@ -121,40 +133,40 @@ public class ClassTournament extends Tournament {
                 }
             }
         }
-        System.out.println("###########################"); // marker for processing script
-        System.out.print(dividerLine);
-        System.out.println("TOURNAMENT");
-        System.out.println("Sheep teams:");
+        outln("###########################"); // marker for processing script
+        out(dividerLine);
+        outln("TOURNAMENT");
+        outln("Sheep teams:");
         for (String s : sheepteams) {
-            System.out.println(s);
+            outln(s);
         }
-        System.out.println("Wolf teams:");
+        outln("Wolf teams:");
         for (String s : wolves) {
-            System.out.println(s);
+            outln(s);
         }
-        System.out.println("\n");
+        outln("\n");
         totalHighscore.printByClass(scenarioHighScore.values());
-        System.out.print(dividerLine);
-        System.out.println("Timing (ms.):");
+        out(dividerLine);
+        outln("Timing (ms.):");
         totalTiming.printByClass(scenarioTiming.values());
-        System.out.println(dividerLine);
-        System.out.println(dividerLine);
-        System.out.println("Wolf attacks:");
+        outln(dividerLine);
+        outln(dividerLine);
+        outln("Wolf attacks:");
         totalEatingScore.printAsTable();
-        System.out.println(dividerLine);
-        System.out.println("Player Crashes:");
-        
+        outln(dividerLine);
+        outln("Player Crashes:");
+
         List li = new ArrayList();
         li.add(moveLog);
         crashLog.printByCategory(li);
-        System.out.println(dividerLine);
-        
+        outln(dividerLine);
+
     }
 
     public ClassTournament(List<Class> playerClasses, int r, boolean ui) {
         super(playerClasses, r, ui);
         throw new RuntimeException("not implemented.");
-                
+
     }
 
     public static void main(String args[]) {
@@ -162,43 +174,42 @@ public class ClassTournament extends Tournament {
         Player.catchExceptions = true;
         Player.logToFile = true;
         Player.debuggable = false; // enables time-keeping
-        
-        ArrayList<Class> players = new ArrayList<Class>();
-//        int m = -1;
-//        int n = -;
-//        int k = 4;
-        int r = 1;
-        int sc = 0; // random scenario
 
-        boolean tourn = false;
+        int r = 1;
+
         int duration = 0;
 
+        boolean printUsage = args.length == 0;
         // parse the command line
         int i = 0;
         while (i < args.length) {
             String s = args[i++];
-            if (s.equals("-q")) {
+            if ("-q".equals(s)) {
                 quiet = true;
-            } else if (s.equals("-r")) {
+            } else if ("-r".equals(s)) {
 
                 r = Integer.parseInt(args[i++]);
 
-            } else if (s.equals("-d")) {
+            } else if ("-d".equals(s)) {
 
                 duration = Integer.parseInt(args[i++]);
 
-            } else if (s.equals("--secret")) {
+            } else if ("--secret".equals(s)) {
 
                 Scenario.useSecretScenarioClass = true;
 
+            } else {
+                System.err.println(s + ": unknown parameter.");
+                printUsage = true;
             }
         }
 
-        System.err.println("Usage: java -jar WolvesAndSheep.jar -r R -s S -t -e -p -c -q CLASS1 CLASS2 CLASS3 CLASS4 CLASS5 (...)");
-        //System.err.println("       -t M,N,K  ==> play a M*N board with K sheep.");
-        System.err.println("       -r R      ==> play R repeats of each game.");
-        System.err.println("       -q        ==> do not print progress info ");
-
+        if (printUsage) {
+            System.err.println("Usage: java -jar WolvesAndSheep.jar -r R -s S -t -e -p -c -q CLASS1 CLASS2 CLASS3 CLASS4 CLASS5 (...)");
+            //System.err.println("       -t M,N,K  ==> play a M*N board with K sheep.");
+            System.err.println("       -r R      ==> play R repeats of each game.");
+            System.err.println("       -q        ==> do not print progress info ");
+        }
         teamStructureInit(r, duration);
 
 

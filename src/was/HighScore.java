@@ -40,12 +40,10 @@ public class HighScore extends TreeMap<String, Double> {
     }
 
     void inc(String s) {
-        //            System.out.println("increase " + s);
         inc(s, 1.0);
     }
 
     void inc(String s, double by) {
-        //            System.out.println("increase " + s + " by " + by);
         put(s, new Double(get(s) + by));
     }
 
