@@ -391,7 +391,7 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
                 }
             }
 
-        } catch (Exception ex) {
+        } catch (Throwable ex) {
             Logger.getLogger(Tournament.class
                     .getName()).log(Level.SEVERE, null, ex);
         }
