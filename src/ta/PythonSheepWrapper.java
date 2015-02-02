@@ -7,6 +7,6 @@ import was.Move;
  * @author dr
  */
 public interface PythonSheepWrapper {
-
-//    public Move move();
+    public void initialize(Sheep myself);
+    public Move move();
 }
