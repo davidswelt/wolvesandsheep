@@ -1,4 +1,4 @@
-package ta;
+package pyplayers;
 
 import was.Move;
 

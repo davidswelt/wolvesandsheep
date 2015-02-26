@@ -1,4 +1,4 @@
-from ta import PythonSheepWrapper
+from pyplayers import PythonSheepWrapper
 
 from was import Move
 
