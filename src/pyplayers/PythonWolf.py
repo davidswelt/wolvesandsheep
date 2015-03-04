@@ -25,3 +25,7 @@ class PythonWolf(PythonWolfInterface):
                 distance = d
 
         return Move(target.x - me.x, target.y - me.y)
+    def isEating(self):
+        pass
+    def isAttacked(self):
+        pass

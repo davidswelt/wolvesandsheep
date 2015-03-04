@@ -25,3 +25,6 @@ class PythonSheep(PythonSheepInterface):
                 distance = d
 
         return Move(target.x - me.x, target.y - me.y)
+
+    def isBeingEaten(self):
+        pass
