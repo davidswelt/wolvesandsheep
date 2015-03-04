@@ -1,12 +1,14 @@
 package pyplayers;
 
 import was.Move;
+import was.SheepPlayer;
 
 /**
- * An example sheep
- * @author dr
+ * The Java-side superclass for the actual Python class.
+ * @author Yuan-Hsin Chen
  */
 public interface PythonSheepWrapper {
-    public void initialize(Sheep myself);
+    public void initialize(SheepPlayer myself);
     public Move move();
+    public void isBeingEaten ();
 }

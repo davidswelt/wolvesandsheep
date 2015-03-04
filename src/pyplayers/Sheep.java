@@ -4,8 +4,8 @@ import org.plyjy.factory.PySystemObjectFactory;
 import was.Move;
 
 /**
- * An example sheep
- * @author dr
+ * The Java-side sheep proxy
+ * @author Yuan-Hsin Chen
  */
 public class Sheep extends was.SheepPlayer{
     private static final PySystemObjectFactory factory = new PySystemObjectFactory(PythonSheepWrapper.class, "PythonSheep", "PythonSheep");
@@ -21,4 +21,11 @@ public class Sheep extends was.SheepPlayer{
     public Move move() {
         return pythonSheep.move();
     }
+    
+    @Override
+    public void isBeingEaten () {
+        pythonSheep.isBeingEaten();
+    };
+    
+    
 }

@@ -4,8 +4,8 @@ import org.plyjy.factory.PySystemObjectFactory;
 import was.Move;
 
 /**
- * An example sheep
- * @author dr
+ * The Java-side wolf proxy
+ * @author Yuan-Hsin Chen
  */
 public class Wolf extends was.WolfPlayer{
     private static final PySystemObjectFactory factory = new PySystemObjectFactory(PythonSheepWrapper.class, "PythonWolf", "PythonWolf");
@@ -20,5 +20,15 @@ public class Wolf extends was.WolfPlayer{
     @Override
     public Move move() {
         return pythonWolf.move();
+    }
+    
+    @Override
+    public void isEating() {
+        pythonWolf.isEating();
+    }
+     
+    @Override
+    public void isAttacked() {
+        pythonWolf.isAttacked();
     }
 }
