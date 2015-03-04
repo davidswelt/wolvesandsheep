@@ -1,4 +1,4 @@
-from pyplayers import PythonWolfWrapper
+from pyplayers import PythonWolfInterface
 
 from was import Move
 
@@ -6,7 +6,7 @@ import math
 
 ## Example Wolf in Python
 
-class PythonWolf(PythonWolfWrapper):
+class PythonWolf(PythonWolfInterface):
     def initialize(self, wolf):
         self.wolf = wolf
         self.board = self.wolf.getGameBoard()

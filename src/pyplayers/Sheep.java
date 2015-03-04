@@ -8,12 +8,12 @@ import was.Move;
  * @author Yuan-Hsin Chen
  */
 public class Sheep extends was.SheepPlayer{
-    private static final PySystemObjectFactory factory = new PySystemObjectFactory(PythonSheepWrapper.class, "PythonSheep", "PythonSheep");
-    private PythonSheepWrapper pythonSheep;
+    private static final PySystemObjectFactory factory = new PySystemObjectFactory(PythonSheepInterface.class, "PythonSheep", "PythonSheep");
+    private PythonSheepInterface pythonSheep;
 
     @Override
     public void initialize() {
-        pythonSheep = (PythonSheepWrapper) factory.createObject();
+        pythonSheep = (PythonSheepInterface) factory.createObject();
         pythonSheep.initialize(this);
     }
 

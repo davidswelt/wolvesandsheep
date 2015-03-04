@@ -8,12 +8,12 @@ import was.Move;
  * @author Yuan-Hsin Chen
  */
 public class Wolf extends was.WolfPlayer{
-    private static final PySystemObjectFactory factory = new PySystemObjectFactory(PythonSheepWrapper.class, "PythonWolf", "PythonWolf");
-    private PythonWolfWrapper pythonWolf;
+    private static final PySystemObjectFactory factory = new PySystemObjectFactory(PythonSheepInterface.class, "PythonWolf", "PythonWolf");
+    private PythonWolfInterface pythonWolf;
 
     @Override
     public void initialize() {
-        pythonWolf = (PythonWolfWrapper) factory.createObject();
+        pythonWolf = (PythonWolfInterface) factory.createObject();
         pythonWolf.initialize(this);
     }
 

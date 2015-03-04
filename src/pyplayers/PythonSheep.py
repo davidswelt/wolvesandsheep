@@ -1,4 +1,4 @@
-from pyplayers import PythonSheepWrapper
+from pyplayers import PythonSheepInterface
 
 from was import Move
 
@@ -6,7 +6,7 @@ import math
 
 ## Example Sheep in Python
 
-class PythonSheep(PythonSheepWrapper):
+class PythonSheep(PythonSheepInterface):
     def initialize(self, sheep):
         self.sheep = sheep
         self.board = sheep.getGameBoard()
