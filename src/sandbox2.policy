@@ -6,4 +6,5 @@ grant {
     permission java.io.FilePermission "pics\\*", "read";
     permission java.io.FilePermission "WolvesAndSheep.jar", "read";
     permission java.lang.RuntimePermission "setIO", "";
+    permission java.lang.RuntimePermission "accessClassInPackage.sun.reflect";
 };
