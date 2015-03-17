@@ -435,7 +435,7 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
     }
     static String dividerLine = "_______________________________________________________________________________________________________________________________\n\n";
     // static init
-    private static boolean secPolicySet = true;
+    private static boolean secPolicySet = false;
 
     {
         if (!secPolicySet) {
