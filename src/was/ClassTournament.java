@@ -24,19 +24,31 @@ public class ClassTournament extends Tournament {
     }
 
     public static void teamStructureInit(int repeats, int minutes) {
-       String[] sheepteams = new String[]{"Lambchop:aaa,bbb,ccc",  // hegarty probably dropped
-            "Splendiferous Sheep:ddd,eee,fff",
-            "Team C:ggg,hhh,iii",  // pipkin probably dropped
-            "Team D:jjj,kkk,lll", // li probably dropped
-            "Baaad Boys:mmm,nnn,ooo", // owen (dropped),   curtis, blickie
-            "Team F:ppp,qqq,rrr",
-            "Old Mutton (Classic):sss,ttt,uuu,vvv,xxx"};
+       String[] sheepteams = new String[]{
+            // Section 1
+            "001-Sheep1:lara,reed,vliet,weiland",
+            "001-Sheep2:daouphars,hatzell,ohliger,vella",
+            "001-Sheep3:dodds,stackpole,warner,williams",
+            "001-Sheep4:bardusch,mcdaniel,page,rath",
+            "001-Sheep5:agraviador,lee,myers,swatsworth",
+            // Section 2
+            "002-Sheep1:guzman,fabrizio,hanson,vining",
+            "002-Sheep2:butler,geroski,houstian,jordan",
+            "002-Sheep3:callahan,kahlbaugh,miao,signorino",
+            "002-Sheep4:hohman,kelly,stachniewicz,steitz",
+            "002-Sheep5:lin,moore,kavya,walton",
+            "002-Sheep6:akins,chiu,hersh,rickley"};
         // team scores are averages, not sums - so team size doesn't matter
         String[] wolves = new String[]{
-            "Wolfram Alphas:aa,bb,cc",  // mittal probably dropped
-            "Team Wolfenstein:dd,ee,ff",
-            "Team C:gg,hh,ii",
-            "Meat Eater (Classic):jj,kk,ll,mm"};
+            // Section 1
+            "001-Wolf1:allan,fritz,mak,schroeter",
+            "001-Wolf2:hanahan,kramer,mardis,preston",
+            "001-Wolf3:atkins,dehnert,hong,sullivan",
+            "001-Wolf4:gillin,kim,patel",
+            // Section 2
+            "002-Wolf1:anderson,barbone,ngwira,pham",
+            "002-Wolf2:alvarado,carney,nolasco,salonick"
+        };
         
         run(wolves, sheepteams, repeats, minutes);
     }
