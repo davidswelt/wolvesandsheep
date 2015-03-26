@@ -49,7 +49,7 @@ public abstract class SheepPlayer extends Player {
      */
     protected ArrayList<Player> getSheepObjects (String className)
     {
-        Class c = PlayerFactory.getClassForName(className,new String[] {"", ".Sheep"});
+        Class c = PlayerFactory.getClassForName(className,new String[] {"", ".Sheep"},false);
         ArrayList<Player> pl = getSheepObjects();
         ArrayList<Player> result = new ArrayList();
         for (Player p : pl)

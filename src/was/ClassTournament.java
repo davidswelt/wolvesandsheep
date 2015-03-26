@@ -137,15 +137,29 @@ public class ClassTournament extends Tournament {
         out(dividerLine);
         outln("TOURNAMENT");
         outln("Sheep teams:");
-        for (String s : sheepteams) {
-            outln(s);
+
+        for (String player : sheepteams) {
+            out(prefix(player)+": ");
+            for (String sh : PlayerFactory.string2bracketedClasslist(player, ".Sheep")) {
+                out(sh + " ");
+            }
+            outln("");
         }
+
         outln("Wolf teams:");
-        for (String s : wolves) {
-            outln(s);
+
+        for (String player : wolves) {
+            out(prefix(player)+": ");
+            for (String sh : PlayerFactory.string2bracketedClasslist(player, ".Wolf")) {
+                out(sh + " ");
+            }
+            outln("");
         }
+
         outln("\n");
         totalHighscore.printByClass(scenarioHighScore.values());
+        out(dividerLine);
+        outln(""+Scenario.repeatCount+" rounds played.");
         out(dividerLine);
         outln("Timing (ms.):");
         totalTiming.printByClass(scenarioTiming.values());
@@ -208,10 +222,10 @@ public class ClassTournament extends Tournament {
             System.err.println("Usage: java -jar WolvesAndSheep.jar -r R -s S -t -e -p -c -q CLASS1 CLASS2 CLASS3 CLASS4 CLASS5 (...)");
             //System.err.println("       -t M,N,K  ==> play a M*N board with K sheep.");
             System.err.println("       -r R      ==> play R repeats of each game.");
+            System.err.println("       -d M      ==> repeat for at least M minutes.");
             System.err.println("       -q        ==> do not print progress info ");
         }
         teamStructureInit(r, duration);
-
 
     }
 }

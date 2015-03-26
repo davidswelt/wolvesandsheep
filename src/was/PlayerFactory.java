@@ -18,28 +18,29 @@ import static was.Tournament.logPlayerCrash;
  */
 public class PlayerFactory {
 
-        
-    
-    
-
     static void logPlayerCrash(Class cl, Exception ex) {
         Tournament.logPlayerCrash(cl, ex);
     }
 
+    public static boolean playerClassExists(String name) {
+        return (null != getClassForName(name, new String[]{"", ".Wolf", ".Sheep"}, false));
+    }
+
     //new String[]{"", ".Wolf", ".Sheep"})
     public static Class getClassForName(String name) {
-        return getClassForName(name, new String[]{"", ".Wolf", ".Sheep"});
+        return getClassForName(name, new String[]{"", ".Wolf", ".Sheep"}, true);
     }
 //    public static Class getClassForName (String name, String[] postfix, Class def)
 
     public static Class getClassForName(String name, String[] postfix) {
+        return getClassForName(name, postfix, true);
+    }
+
+    public static Class getClassForName(String name, String[] postfix, boolean showError) {
         Class c = null;
         String n = "";
 
-
-
         // we'll try different variants
-
         String[] na = new String[4];
         na[0] = name;
         na[1] = name.toLowerCase();
@@ -66,9 +67,12 @@ public class PlayerFactory {
         }
 
         if (c == null) {
-            n = name + na[1];
-            System.err.print("No such class: " + na[1]);
-            System.err.println("");
+
+            if (showError) {
+                n = name + na[1];
+                System.err.print("No such class: " + na[1]);
+                System.err.println("");
+            }
 
         }
         return c;
@@ -110,23 +114,22 @@ public class PlayerFactory {
             Logger.getLogger(Tournament.class.getName()).log(Level.SEVERE, null, ex);
         }
 
-
-
         return null;
     }
 
-    static ArrayList<String> string2missingClasslist(String names, String postfix) 
-        {
-            return (ArrayList<String>) string2classlistI(names, postfix, true);
-        }  
-        
+    static ArrayList<String> string2missingClasslist(String names, String postfix) {
+        return (ArrayList<String>) string2classlistI(names, postfix, 2);
+    }
 
-    static ArrayList<Class> string2classlist(String names, String postfix) 
-        {
-            return (ArrayList<Class>) string2classlistI(names, postfix, false);
-        }
-    
-    private static ArrayList string2classlistI(String listofPlayerPClassNames, String postfix, boolean missing) {
+    static ArrayList<String> string2bracketedClasslist(String names, String postfix) {
+        return (ArrayList<String>) string2classlistI(names, postfix, 1);
+    }
+
+    static ArrayList<Class> string2classlist(String names, String postfix) {
+        return (ArrayList<Class>) string2classlistI(names, postfix, 0);
+    }
+
+    private static ArrayList string2classlistI(String listofPlayerPClassNames, String postfix, int missing) {
         StringTokenizer st = new StringTokenizer(listofPlayerPClassNames, ":");
         if (st.hasMoreElements()) {
             st.nextToken();
@@ -142,9 +145,16 @@ public class PlayerFactory {
 
         while (st.hasMoreElements()) {
             String name = st.nextToken();
-            Class cs = PlayerFactory.getClassForName(name, pfa);
-            if (missing == (cs == null)) {
-                players.add(missing ? name : cs);
+            Class cs = PlayerFactory.getClassForName(name, pfa, false);
+            if ((missing == 0 && cs != null)) {
+                players.add(cs);
+            } else if (missing == 2 && cs == null) {
+                players.add(name);
+            } else if (missing == 1) {
+                if (cs == null) {
+                    name = "(" + name + ")";
+                }
+                players.add(name);
             }
         }
 
