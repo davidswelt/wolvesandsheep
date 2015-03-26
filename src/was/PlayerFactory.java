@@ -53,6 +53,8 @@ public class PlayerFactory {
                         c = Class.forName(s + p);
                         n = s + p;
                     } catch (ClassNotFoundException ex) {
+                    } catch (NoClassDefFoundError ex) {
+                        // file found, but invalid
                     }
                 }
             } catch (SecurityException ex) {
