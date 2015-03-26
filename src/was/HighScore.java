@@ -20,6 +20,8 @@ import java.util.TreeSet;
 public class HighScore extends TreeMap<String, Double> {
 
     TreeMap<String, Integer> uses = new TreeMap();
+    TreeMap<String, ArrayList<Double>> vals = new TreeMap();
+    
     final int COLUMNWIDTH = 8;
     boolean normalizing = false;  // set to true if noteUse is called once
     public boolean printAsPercentage = false;
@@ -35,7 +37,10 @@ public class HighScore extends TreeMap<String, Double> {
             noteUse(e.getKey(), e.getValue());
         }
         for (Map.Entry<String, Double> e : other.entrySet()) {
-            inc(e.getKey(), e.getValue());
+            put(e.getKey(), get(e.getKey()) + e.getValue());
+        }
+        for (Map.Entry<String, ArrayList<Double>> e : other.vals.entrySet()) {
+            vals.get(e.getKey()).addAll(other.vals.get(e.getKey()));
         }
     }
 
@@ -45,6 +50,9 @@ public class HighScore extends TreeMap<String, Double> {
 
     void inc(String s, double by) {
         put(s, new Double(get(s) + by));
+        if (! vals.containsKey(s))
+            vals.put(s, new ArrayList<Double>());
+        vals.get(s).add(by);
     }
 
     void noteUse(String s) {
@@ -82,7 +90,19 @@ public class HighScore extends TreeMap<String, Double> {
             return (double) f.floatValue() / n;
         }
     }
-
+    public Double getSD(String s)
+    {
+        if (vals.size()==0)
+            return 0.0;
+        double m = getNormalized(s);
+        double v = 0.0;
+        for (double x : vals.get(s)) {
+            v += (x-m)*(x-m);
+        }
+        v /= vals.size();
+        return Math.sqrt(v);        
+    }
+    
     public void print() {
         setAlignment();
         printKeys(new ArrayList(keySet()), false, null);
@@ -143,6 +163,8 @@ public class HighScore extends TreeMap<String, Double> {
 
             System.out.print(rightAlign(removePrefix(k), printAlignment) + ": ");
             System.out.print(rightAlign(String.format(format, getNormalized(k)), COLUMNWIDTH));
+            if (normalizing)
+                System.out.print(rightAlign(String.format("+-"+format, getSD(k)*1.96), COLUMNWIDTH));
             if (extraColumns != null) {
                 for (HighScore h : extraColumns) {
 
