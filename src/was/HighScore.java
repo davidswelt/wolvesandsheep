@@ -99,15 +99,19 @@ public class HighScore extends TreeMap<String, Double> {
     }
 
     public Double getSD(String s) {
-        if (vals.size() == 0) {
+        if (super.get(s)==null || !vals.containsKey(s))
+            return 0.0;
+        ArrayList<Double> vs = vals.get(s);
+        int n = vs.size();
+        if (0 == n) {
             return 0.0;
         }
-        double m = getNormalized(s);
+        double m = super.get(s)/n;
         double v = 0.0;
-        for (double x : vals.get(s)) {
+        for (double x : vs) {
             v += (x - m) * (x - m);
         }
-        v /= vals.size();
+        v /= n;
         return Math.sqrt(v);
     }
 
@@ -143,6 +147,9 @@ public class HighScore extends TreeMap<String, Double> {
 
     void printHeader(Collection<HighScore> extraColumns) {
         System.out.printf("\n%" + printAlignment + "s  %s", "", leftAlign(title, COLUMNWIDTH));
+        if (normalizing)
+            System.out.printf("%s", leftAlign("CI", COLUMNWIDTH));
+            
         if (extraColumns != null) {
             for (HighScore h : extraColumns) {
                 if (h != null) {
