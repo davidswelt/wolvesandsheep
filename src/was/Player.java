@@ -79,7 +79,6 @@ public abstract class Player {
      * Note: do not expect to have the game board available at this time.
      * Perform player initialization instead in {@link #initialize()}.
      *
-     * @return true if the the test was passed, false otherwise.
      */
     public Player() {
         if (logToFile) {

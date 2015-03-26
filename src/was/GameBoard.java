@@ -379,7 +379,7 @@ public class GameBoard {
      * Get the position of a named player. Return null if this player does not
      * or no longer exists.
      *
-     * @param playerIDString
+     * @param playerIDString the ID of the player
      * @return a GameLocation object
      */
     public GameLocation getPlayerPositionByID(String playerIDString) {
@@ -397,7 +397,7 @@ public class GameBoard {
      * Get the ID of the player at a given position. Return null if there is no
      * player at that position.
      *
-     * @param location
+     * @param loc the GameLocation object identifying the location
      * @return a String with the unique ID of the player instance
      */
     public String getPlayerIDatPosition(GameLocation loc) {

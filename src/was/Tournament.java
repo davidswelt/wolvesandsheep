@@ -20,13 +20,13 @@ import java.util.logging.Logger;
  * 
  * This is the main (entry) class.
  * Usage: java -jar WolvesAndSheep.jar -r R -s S -t -e -p -c -q CLASS1 CLASS2 CLASS3 CLASS4 CLASS5 (...)
- *       -r R      ==> play R repeats of each game.
- *       -s S      ==> set up scenario no. S (0 or default for random)
- *       -t        ==> play a tournament of all combinations of players (4 sheep, one wolf)
- *       -e        ==> ignore player's exceptions
- *       -p        ==> pause initially if using graphical UI
- *       -c        ==> do not show the graphical user interface 
- *       -q        ==> do not print progress info 
+ *       -r R      == play R repeats of each game.
+ *       -s S      == set up scenario no. S (0 or default for random)
+ *       -t        == play a tournament of all combinations of players (4 sheep, one wolf)
+ *       -e        == ignore player's exceptions
+ *       -p        == pause initially if using graphical UI
+ *       -c        == do not show the graphical user interface 
+ *       -q        == do not print progress info 
  * Example: java -jar WolvesAndSheep.jar -r 10 basic.Wolf basic.Sheep basic.Sheep basic.Sheep basic.Sheep
  * Example for NetBeans (Run, Project Configuration, Arguments): -r 10 basic.Wolf basic.Sheep basic.Sheep basic.Sheep basic.Sheep
  * 
@@ -133,6 +133,8 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
      * @param comb true if the tournament should test all combinations of the
      * players. Otherwise, all given players will be added to the game board at
      * once.
+     * @param printHighScore print highscore if true.
+     * @return resulting Tournament object.
      */
     static public Tournament run(List<Class> playerClasses, int r, boolean ui, int scenario, boolean comb, boolean printHighScore) {
 

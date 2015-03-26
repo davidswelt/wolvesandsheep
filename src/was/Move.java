@@ -62,7 +62,7 @@ public class Move {
      * Converts move to integer
      * Attempts to round up/down so that length is as close as possible to maxLen
      * but lower or equal to maxLen
-     * @param maxLen
+     * @param maxLen upper bound for move length
      * @return quantized Move
      */
     public Move quantized (double maxLen)

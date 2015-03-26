@@ -17,8 +17,8 @@ final public class GameLocation /* implements Comparable */ {
     /**
      * Make a new position
      *
-     * @param x
-     * @param y
+     * @param x the X ordinate
+     * @param y the Y ordinate
      */
     public GameLocation(int x, int y) {
         this.x = x;
