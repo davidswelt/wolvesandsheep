@@ -15,6 +15,7 @@ import os
 
 os.system("rm -r players >/dev/null; mkdir players; cp -p ../submission/media/%s/*.jar %s"%(assignment_name,playerspath));
 
+os.system("./test-was.sh")
 if ist240:
     tourn_args = "-ist240 " + tourn_args
     jars = []

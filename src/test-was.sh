@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# This checks all the players in players/*.jar and removes unnecessary packages.
+# This cleans all the players in players/*.jar and removes unnecessary packages.
 #
 #
 
@@ -20,7 +20,7 @@ zip -d $file javafx/\*
 zip -d $file was/\*
 zip -d $file players/\*
 zip -d $file basic/\*
-zip -d $file sandbox2.policy test-was.sh reitter.jar
+zip -d $file sandbox2.policy test-was.sh reitter.jar run.py
 
 if [ "$file" != "players/reitter.jar" ]; then
    zip -d $file reitter/*
@@ -31,23 +31,6 @@ alljars="$alljars:$file"
 
 done
 
-#jar file must be named after last name.
 
-# compile
-rm $target
-ant
-
-# if jar exists...
-if [ -e $target ]; then
-
-    echo $alljars
-
-fi
-
-# sign jar file
-
-jarsigner -storepass javakey  -keypass javakey dist/WolvesAndSheep.jar dr
-
-
-echo "Suggsted run command:"
-echo "./java17 -Xmx1500m -classpath dist/WolvesAndSheep.jar:$alljars was.ClassTournament -e -c -r 3"
+#echo "Suggsted run command:"
+#echo "./java17 -Xmx1500m -classpath dist/WolvesAndSheep.jar:$alljars was.ClassTournament -e -c -r 3"
