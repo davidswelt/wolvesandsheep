@@ -39,8 +39,9 @@ public abstract class Player {
     private static final int MOVE = 0;
     private static final int INITIALIZE = 1;
     private static final int IS_BEING_EATEN = 2;
-    private static final int IS_EATING = 3;
-    private static final int IS_ATTACKED = 4;
+    private static final int IS_KEEPING_BUSY = 3;
+    private static final int WILL_EAT = 4;
+    private static final int IS_ATTACKED = 5;
     boolean willNotMove = false;
     static boolean debuggable = true; // is set to false by class tournament code
     // not accessible from outside of was package.
@@ -263,30 +264,27 @@ public abstract class Player {
     final void setPlayerProxy(PlayerProxy a) {
         playerProxy = a;
     }
-    
-        /*
+
+    /*
      * Add a list of GameLocations to be visualized.
      * Note: List is not copied and may be changed by caller
      * later.
      */
-    public void visualizeTrack (List<GameLocation> locList)
-    {
+    public void visualizeTrack(List<GameLocation> locList) {
         playerProxy.visualizeTrack(locList);
     }
     /*
      * Remove all additional visualizations.
      */
-    public void removeVisualizations ()
-    {
+
+    public void removeVisualizations() {
         playerProxy.removeVisualizations();
     }
-
 
     // can't be called by inheriting classes
     final void setLoc(int x, int y) {
 
         gb.checkPlayerAt(this, x, y);
-
 
         this.x = x;
         this.y = y;
@@ -328,6 +326,11 @@ public abstract class Player {
     }
 
     final Object callPlayerFunction(int fn) {
+        return callPlayerFunction(fn, null);
+    }
+
+    // arg should be immutable (multithreading).
+    final Object callPlayerFunction(int fn, Object arg) {
 
         if (fn == MOVE) {
             Tournament.logPlayerMoveAttempt(this.getClass());
@@ -353,13 +356,12 @@ public abstract class Player {
          * could halt the tournament.  D.R.
          * 
          */
-
         try {
             if (debuggable) {
                 ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
                 long startTime = threadMXBean.getCurrentThreadCpuTime();
 
-                Object m = callPlayerFunction_direct(fn);
+                Object m = callPlayerFunction_direct(fn, arg);
                 long dur = (Long) ((threadMXBean.getCurrentThreadCpuTime() - startTime) / 1000); // nanosec to 1000*millisec
                 if (dur > TIMEOUT * 1000) // convert to 1000*millisec
                 {
@@ -368,7 +370,7 @@ public abstract class Player {
                 return m;
             } else {
 
-                return callPlayerFunction_timed(fn);
+                return callPlayerFunction_timed(fn, arg);
             }
         } catch (RuntimeException ex) {
             if (catchExceptions) {
@@ -382,7 +384,7 @@ public abstract class Player {
         return null;
     }
 
-    final Object callPlayerFunction_direct(int func) {
+    final Object callPlayerFunction_direct(int func, Object arg) {
         // this function may be executed from the secondary thread.
         // (no direct try/catch in here to prevent re-entrance)
         final Player thePlayer = this;
@@ -401,10 +403,17 @@ public abstract class Player {
                     ((SheepPlayer) thePlayer).isBeingEaten();
                 }
                 break;
-            case IS_EATING:
+            case IS_KEEPING_BUSY:
                 m = null;
                 if (thePlayer instanceof WolfPlayer) {
-                    ((WolfPlayer) thePlayer).isEating();
+                    ((WolfPlayer) thePlayer).isKeepingBusy();
+                }
+                break;
+            case WILL_EAT:
+                m = null;
+                if (thePlayer instanceof WolfPlayer) {
+                    ((WolfPlayer) thePlayer).isEating(); // deprecated
+                    ((WolfPlayer) thePlayer).willEatSheep((String) arg);
                 }
                 break;
             case IS_ATTACKED:
@@ -418,7 +427,7 @@ public abstract class Player {
 
     }
 
-    final Object callPlayerFunction_timed(int fn) {
+    final Object callPlayerFunction_timed(int fn, final Object arg) {
         Object m = null; // return var
 
         PrintStream prevErrStream = System.err;
@@ -442,9 +451,7 @@ public abstract class Player {
                 long startTime = threadMXBean.getCurrentThreadCpuTime();
 
                 Object m = null;
-                m = callPlayerFunction_direct(func);
-
-
+                m = callPlayerFunction_direct(func, arg);
 
                 Object[] ret2 = new Object[4];
                 ret2[0] = m;
@@ -464,7 +471,6 @@ public abstract class Player {
             // must execute in separate thread for it to be stoppable
             myThread = new Thread(ft);
             myThread.start();
-
 
             // running it directly would just run it in the current thread
             // ft.run();
@@ -496,7 +502,6 @@ public abstract class Player {
             }
 
             if (dur > individualRunFactor * TIMEOUT * 1000 || (totalRuns > 10 && meanRunTime() > TIMEOUT)) {  // convert to 1000*millisec
-
 
                 // totalRunTime will be reset to 0 when a new player object is created.
                 throw new TimeoutException();
@@ -531,8 +536,11 @@ public abstract class Player {
                 case IS_BEING_EATEN:
                     reason = "is_being_eaten";
                     break;
-                case IS_EATING:
-                    reason = "is_eating";
+                case IS_KEEPING_BUSY:
+                    reason = "is_keeping_busy";
+                    break;
+                case WILL_EAT:
+                    reason = "will_eat";
                     break;
             }
 
@@ -586,8 +594,12 @@ public abstract class Player {
         callPlayerFunction(IS_BEING_EATEN);
     }
 
-    final void callIsEating() {
-        callPlayerFunction(IS_EATING);
+    final void callWillEat(String sheepID) {
+        callPlayerFunction(WILL_EAT, sheepID);
+    }
+
+    final void callIsKeepingBusy() {
+        callPlayerFunction(IS_KEEPING_BUSY);
     }
 
     final void callIsAttacked() {
@@ -597,15 +609,14 @@ public abstract class Player {
     final Move calcMove() {
 
         if (isBusy()) {
+            callPlayerFunction(IS_KEEPING_BUSY); // call "move"
 
             return null; // can't make a move
         }
 
-
         Move m;
 
         // redirect output if needed
-
         m = (Move) callPlayerFunction(MOVE); // call "move"
 
         if (m == null) {
@@ -620,7 +631,6 @@ public abstract class Player {
                     //System.err.println(this.getClass() + str);
 
                     Tournament.logPlayerCrash(this.getClass(), new RuntimeException("illegal move: too long"));
-
 
                     // trim move
                     // we penalize the player a little by reducing the maxAllowedDistance
@@ -688,6 +698,15 @@ public abstract class Player {
      * @return new object of type Move
      */
     abstract public Move move();
+
+    /**
+     * isKeepingBusy() is typically called while this wolf is eating a sheep.
+     *
+     * This is called once per iteration to allow for making observations.
+     * Overridden as public for WolfPlayer.
+     */
+    private void isKeepingBusy() {
+    }
 
     /**
      * Provide a string representation

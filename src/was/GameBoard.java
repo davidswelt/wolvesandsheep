@@ -249,7 +249,7 @@ public class GameBoard {
         }
 
         if (wolf != null && sheep != null) {
-            wolf.callIsEating();
+            wolf.callWillEat(sheep.getID());
             sheep.callIsBeingEaten();
             wolf.keepBusyFor(wolfEatingTime);
             // scoring and removal of objects  

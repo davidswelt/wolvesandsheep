@@ -27,11 +27,29 @@ abstract public class WolfPlayer extends Player {
     }
 
     // this inherits the move() method from Player.
+    
     /**
-     * isEating() is called just before this wolf is eating a sheep
+     * isKeepingBusy() is called while this wolf is eating a sheep.
      *
+     * This is called once per iteration to allow for making observations. 
+     */
+    public void isKeepingBusy() {
+    }
+    /**
+     * isEating() is called while this wolf is eating a sheep.
+     * Deprecated. Use willEatSheep() instead.
+     * This is called once per iteration to allow for making observations. 
      */
     public void isEating() {
+    }
+    
+    /**
+     * willEatSheep() is called just before the wolf is eating
+     *
+     * @param sheepID is the unique identifier for the sheep that is being
+     * eaten.
+     */
+    public void willEatSheep(String sheepID) {
     }
      
     /**
