@@ -344,6 +344,15 @@ public class GameBoard {
 
         return null;
     }
+    
+    /**
+     * Get the positions of all the wolves on the board
+     * 
+     * @return an ArrayList containing was.GameLocation objects, with x,y positions
+     */
+    public ArrayList<GameLocation> getWolfPositions() {
+        return findAllPlayersLoc(GamePiece.WOLF);
+    }
 
     /**
      * Get the positions of all the sheep on the board
