@@ -16,64 +16,85 @@ import static was.Tournament.logPlayerCrash;
 public class PlayerTest {
 
     static HighScore log;
+
     static boolean mayNotInheritFrom(Class playerClass, String other)
-            throws ClassNotFoundException
-    {
+            throws ClassNotFoundException {
         if (Class.forName(other).isAssignableFrom(playerClass) && Class.forName(other) != playerClass) {
-                String str = String.format("Class %s inherits from %s.\n", playerClass.getName(), other);
-                log.inc(str);
-                System.err.println(str);
-                return true;
-            }
+            String str = String.format("Class %s inherits from %s.\n", playerClass.getName(), other);
+            log.inc(str);
+            System.err.println(str);
+            return true;
+        }
         return false;
     }
+
+    /**
+     * Ensure player class is correctly inherited
+     *
+     */
+    public static boolean checkGeneralInheritance(Class c) {
+
+        Package pack = c.getPackage();
+        Class s = c.getSuperclass();
+        if (s != null) {
+                // we must inherit from the same class
+            // or from was.WolfPlayer or was.SheepPlayer
+
+            // inherited from within submitter's package - OK
+            if (s.getPackage().equals(pack)) {
+                return checkGeneralInheritance(s); // recursion
+            }
+            // not inherited from within same package - must extend was.XX
+            if (s != was.WolfPlayer.class && s != was.SheepPlayer.class) {
+                return false; // violation
+            }
+        }
+        return true;
+    }
+
     public static boolean runTest(Class playerClass, HighScore log) {
         PlayerTest.log = log;
-        
-            String str;
-            boolean isWolf;
-            if (SheepPlayer.class.isAssignableFrom(playerClass)) {
-                isWolf = false;
-            } else if (WolfPlayer.class.isAssignableFrom(playerClass)) {
-                isWolf = true;
-            } else {
-                str = String.format("Class %s is neither derived from was.WolfPlayer nor from was.SheepPlayer.\n", playerClass.getName());
-                log.inc(str);
-                System.err.println(str);
-                return false;
-            } 
- 
-            // If named Sheep, has to be a SheepPlayer
-            String st = playerClass.getSimpleName().toLowerCase();
-            if (playerClass.getSimpleName().toLowerCase().contains("sheep") && 
-                    ! SheepPlayer.class.isAssignableFrom(playerClass))
-            {
-                str = String.format("Class %s is named like a Sheep, but does not extend was.SheepPlayer.\n", playerClass.getName());
-                log.inc(str);
-                System.err.println(str);
-                return false;
-                
-            }
-            if (playerClass.getSimpleName().toLowerCase().contains("wolf") && 
-                    ! WolfPlayer.class.isAssignableFrom(playerClass))
-            {
-                str = String.format("Class %s is named like a Wolf, but does not extend was.WolfPlayer.\n", playerClass.getName());
-                log.inc(str);
-                System.err.println(str);
-                return false;
-            }
-            
-            // to do
-            // may not inherit from any other package
-//            if ( mayNotInheritFrom(playerClass, "reitter.Wolf") ||
-//                    mayNotInheritFrom(playerClass, "greene.Wolf") ||
-//                    mayNotInheritFrom(playerClass, "reitter.Sheep"))
-//            {
-//                return false;
-//            }
-//                    
-            return true;
-        
+
+        String str;
+        boolean isWolf;
+        if (SheepPlayer.class.isAssignableFrom(playerClass)) {
+            isWolf = false;
+        } else if (WolfPlayer.class.isAssignableFrom(playerClass)) {
+            isWolf = true;
+        } else {
+            str = String.format("Class %s is neither derived from was.WolfPlayer nor from was.SheepPlayer.\n", playerClass.getName());
+            log.inc(str);
+            System.err.println(str);
+            return false;
+        }
+
+        // If named Sheep, has to be a SheepPlayer
+        String st = playerClass.getSimpleName().toLowerCase();
+        if (playerClass.getSimpleName().toLowerCase().contains("sheep")
+                && !SheepPlayer.class.isAssignableFrom(playerClass)) {
+            str = String.format("Class %s is named like a Sheep, but does not extend was.SheepPlayer.\n", playerClass.getName());
+            log.inc(str);
+            System.err.println(str);
+            return false;
+
+        }
+        if (playerClass.getSimpleName().toLowerCase().contains("wolf")
+                && !WolfPlayer.class.isAssignableFrom(playerClass)) {
+            str = String.format("Class %s is named like a Wolf, but does not extend was.WolfPlayer.\n", playerClass.getName());
+            log.inc(str);
+            System.err.println(str);
+            return false;
+        }
+
+        if (!checkGeneralInheritance(playerClass)) {
+            str = String.format("Class %s illegally extends another class.\n", playerClass.getName());
+            log.inc(str);
+            System.err.println(str);
+            return false;
+
+        }
+        return true;
+
     }
 
     public static boolean runTest(String playerClassStr, HighScore log) {
@@ -82,7 +103,6 @@ public class PlayerTest {
         boolean isWolf;
 
         // we accept package names
-
         Class playerClass = null;
 
         String[] names = new String[]{playerClassStr + ".Wolf", playerClassStr + ".Sheep", playerClassStr};
@@ -116,14 +136,12 @@ public class PlayerTest {
             }
             try {
 
-
                 boolean result = (Boolean) method.invoke(null);
 
                 if (result) {
                     return true;
                 }
                 logPlayerCrash(cl, new RuntimeException("Player failed unit test."));
-
 
             } catch (IllegalAccessException ex) {
                 Logger.getLogger(Tournament.class.getName()).log(Level.SEVERE, null, ex);
@@ -163,9 +181,9 @@ public class PlayerTest {
 
             System.out.println("Testing " + s);
             if (runTest(s, new HighScore())) {
-                System.out.println(s+" passed.");
+                System.out.println(s + " passed.");
             } else {
-                System.out.println(s+" failed.");
+                System.out.println(s + " failed.");
                 pass = false;
             }
 
@@ -174,6 +192,6 @@ public class PlayerTest {
             System.err.println("Usage: java -jar W -classpath .:./players/ was.PlayerTest PACKAGENAME.CLASS");
             System.err.println("Put player .jar files into players/");
         }
-        return(pass ? 0 : 1);
+        return (pass ? 0 : 1);
     }
 }
