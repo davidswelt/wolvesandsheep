@@ -24,6 +24,11 @@ public class HighScore extends TreeMap<String, Double> {
 
     final int COLUMNWIDTH = 8;
     boolean normalizing = false;  // set to true if noteUse is called once
+    boolean showCI = false;
+    /* Currently, not showing confidence intervals as it would
+    be informative only if across players, i.e., aggregating all scenarios.
+    
+    */
     public boolean printAsPercentage = false;
     String title = "";
 
@@ -99,19 +104,20 @@ public class HighScore extends TreeMap<String, Double> {
     }
 
     public Double getSD(String s) {
-        if (super.get(s)==null || !vals.containsKey(s))
-            return 0.0;
-        ArrayList<Double> vs = vals.get(s);
-        int n = vs.size();
-        if (0 == n) {
+        if (super.get(s) == null || !vals.containsKey(s)) {
             return 0.0;
         }
-        double m = super.get(s)/n;
+        ArrayList<Double> vs = vals.get(s);
+        int n = vs.size();
+        if (n<2) {
+            return 0.0;
+        }
+        double m = super.get(s) / n;
         double v = 0.0;
         for (double x : vs) {
             v += (x - m) * (x - m);
         }
-        v /= n;
+        v /= n-1;
         return Math.sqrt(v);
     }
 
@@ -147,9 +153,10 @@ public class HighScore extends TreeMap<String, Double> {
 
     void printHeader(Collection<HighScore> extraColumns) {
         System.out.printf("\n%" + printAlignment + "s  %s", "", leftAlign(title, COLUMNWIDTH));
-        if (normalizing)
+        if (normalizing && showCI) {
             System.out.printf("%s", leftAlign("CI", COLUMNWIDTH));
-            
+        }
+
         if (extraColumns != null) {
             for (HighScore h : extraColumns) {
                 if (h != null) {
@@ -178,7 +185,7 @@ public class HighScore extends TreeMap<String, Double> {
 
             System.out.print(rightAlign(removePrefix(k), printAlignment) + ": ");
             System.out.print(rightAlign(String.format(format, getNormalized(k)), COLUMNWIDTH));
-            if (normalizing) {
+            if (normalizing && showCI) {
                 System.out.print(rightAlign(String.format("+-" + format, getSD(k) * 1.96), COLUMNWIDTH));
             }
             if (extraColumns != null) {
@@ -303,4 +310,57 @@ public class HighScore extends TreeMap<String, Double> {
             printKeys(cats.get(k), true, extraColumns);
         }
     }
+
+    static boolean testassert(double v, double gold) {
+        System.out.print("SD=" + v + "   should be: " + gold + " ");
+        if (Math.abs(v - gold) < Math.abs(v + gold) / 200.0) {
+            System.out.println("OK");
+            return true;
+        } else {
+            System.out.println("fail");
+        }
+
+        return false;
+    }
+
+    public static void test() {
+        System.out.println("Unit tests for Highscore class:");
+        HighScore h = new HighScore();
+        HighScore h2 = new HighScore();
+        int[] nums = {6, 3, 4, 6, 3, 0, -800, 20, 20};
+        double[] nums2 = {7.34, 59.3, 575.12, -547.3, -9.0, 0, 0};
+
+        for (int i : nums) {
+            h.inc("pos", i);
+            h.inc("neg", -i);
+            h.noteUse("neg");
+            h.inc("flt", i / 7.0);
+            h.noteUse("flt");
+        }
+        testassert(h.getSD("pos"), 269.3488);
+        testassert(h.getSD("neg"), 269.3488);
+        testassert(h.getSD("flt"), 38.47839);
+        for (double i : nums2) {
+            h2.inc("pos", i);
+            h2.inc("neg", -i);
+            h2.noteUse("neg"); // should not matter
+            h2.inc("flt", i / 771.0);
+            h2.noteUse("flt"); // should not matter
+        }
+        testassert(h2.getSD("pos"), 324.7841);
+        testassert(h2.getSD("neg"), 324.7841);
+        testassert(h2.getSD("flt"), 0.4212505);
+        h.addHighScore(h2);
+        testassert(h.getSD("pos"), 288.4724);
+        testassert(h.getSD("neg"), 288.4724);
+        testassert(h.getSD("flt"), 28.73736);
+        testassert(h.getNormalized("flt"), -6.582358);
+
+    }
+
+    public static void main(String a[]) {
+        HighScore.test();
+
+    }
+
 }

@@ -371,11 +371,11 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
                                         }
 
                                         timing.inc(cl.getName(), score.getKey().meanRunTime());
+                                        timing.noteUse(cl.getName());
                                         final String scenPlayStr = "Scenario " + scenario.toString() + "\\" + cl.getName();
                                         scenarioTiming.inc(scenPlayStr, score.getKey().meanRunTime());
-                                        scenarioScore.inc(scenPlayStr, score.getValue()[0]);
-                                        timing.noteUse(cl.getName());
                                         scenarioTiming.noteUse(scenPlayStr);
+                                        scenarioScore.inc(scenPlayStr, score.getValue()[0]);
                                         score.getValue()[0] = 0; // set to 0 to make sure it doesn't get added twice
 
                                     }
