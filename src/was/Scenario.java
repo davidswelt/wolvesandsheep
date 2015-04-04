@@ -308,20 +308,23 @@ public class Scenario {
     }
 
     Player setFigure(Class p, int x, int y) {
-        GameLocation l = loc(x, y);
-        if (l != null) {
-            if (l.x > 0 && l.x < tmpGb.getCols() && l.y > 0 && l.y < tmpGb.getRows()) {
-                try {
+        try {
+            GameLocation l = loc(x, y);
+            if (l != null) {
+                if (x > 0 && x < tmpGb.getCols() && y > 0 && y < tmpGb.getRows()) {
+
                     if (tmpGb.isEmptyCell(l.x, l.y)) {
                         return tmpGb.addPlayer((Player) p.newInstance(), l);
                     }
-                } catch (IndexOutOfBoundsException ex) {
-                } catch (InstantiationException ex) {
-                    Logger.getLogger(Scenario.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (IllegalAccessException ex) {
-                    Logger.getLogger(Scenario.class.getName()).log(Level.SEVERE, null, ex);
+
                 }
             }
+        } catch (CoordinatesOutOfBoundsException ex) {
+        } catch (IndexOutOfBoundsException ex) {
+        } catch (InstantiationException ex) {
+            Logger.getLogger(Scenario.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            Logger.getLogger(Scenario.class.getName()).log(Level.SEVERE, null, ex);
         }
         return null;
     }
@@ -372,7 +375,6 @@ public class Scenario {
                 sy = -1;
             }
         }
-
 
         double x = x1;
         double y = y1;

@@ -147,7 +147,7 @@ public class GameBoard {
         }
         log(player + " " + player.getLocation() + " " + m);
 
-        if (player != board.get(getIndex(player.getLocation()))) {
+        if (player != board.get(getIndexUnchecked(player.getLocation()))) {
             System.err.println("player " + player + "location mismatch. player thinks its at " + player.getLocation() + " while board has something else there.. ");
             System.err.println("The board has, at " + player.getLocation() + ":" + board.get(getIndex(player.getLocation())));
         }
@@ -158,7 +158,7 @@ public class GameBoard {
 
         int x = loc.x;
         int y = loc.y;
-        int i = getIndex(x, y);
+        int i = getIndexUnchecked(x, y);
 
         x += (int) m.delta_x;
         y += (int) m.delta_y;
@@ -167,7 +167,7 @@ public class GameBoard {
         x = Math.min(cols - 1, x);
         y = Math.min(rows - 1, y);
 
-        int idx = getIndex(x, y);
+        int idx = getIndexUnchecked(x, y);
 
         if (idx == i) {
             return true; // empty move
@@ -177,7 +177,7 @@ public class GameBoard {
         x = nloc.x;
         y = nloc.y;
 
-        idx = getIndex(x, y);
+        idx = getIndexUnchecked(x, y);
         if (idx == i) {
             return true; // empty move
         }
@@ -306,10 +306,20 @@ public class GameBoard {
     }
 
     int getIndex(GameLocation l) {
-        return l.y * cols + l.x;
+        return getIndex(l.x, l.y);
     }
 
     int getIndex(int x, int y) {
+        if (x < 0 || x >= cols || y < 0 || y >= rows) {
+            throw new CoordinatesOutOfBoundsException();
+        }
+        return getIndexUnchecked(x,y);
+    }
+    
+    int getIndexUnchecked(GameLocation l) {
+        return getIndexUnchecked(l.x, l.y);
+    }
+    int getIndexUnchecked(int x, int y) {
         return y * cols + x;
     }
 
@@ -404,7 +414,7 @@ public class GameBoard {
         if (loc.x < 0 || loc.x >= cols || loc.y < 0 || loc.y >= rows) {
             return null;
         }
-        int idx = getIndex(loc.x, loc.y);
+        int idx = getIndexUnchecked(loc.x, loc.y);
         Player p = getPlayer(idx);
         if (p != null) {
             return p.getID();
@@ -519,11 +529,11 @@ public class GameBoard {
             return GamePiece.OBSTACLE;  // out of bounds - instead of throwing an Exception
         }
 
-        return getPiece(getIndex(x, y));
+        return getPiece(getIndexUnchecked(x, y));
     }
 
     GamePiece getPiece(GameLocation i) {
-        return getPiece(getIndex(i.x, i.y));
+        return getPiece(i.x, i.y);
     }
 
     GamePiece getPiece(int i) {
@@ -803,7 +813,7 @@ public class GameBoard {
         // let's make sure there's no cell left
 
         log("removing player.");
-        int i = getIndex(p.getLocation());
+        int i = getIndexUnchecked(p.getLocation());
         if (board.get(i) == p) {
             board.set(i, null);
         }
