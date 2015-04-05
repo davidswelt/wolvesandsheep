@@ -80,6 +80,7 @@ public class ClassTournament extends Tournament {
         }
         totalRuns = totalRuns * sheepteams.length * Scenario.getParameterValues().size();
         int runcount = 1;
+        int totalGames = 0;
         long targetTimeSecs = Math.max(1, minutes * 60); // 10 minutes
         long startTime = System.currentTimeMillis();
         while ((System.currentTimeMillis() - startTime) < targetTimeSecs * 1000) {
@@ -120,7 +121,7 @@ public class ClassTournament extends Tournament {
                             }
                             scenarioHighScore.get(t.scenario.toString()).addHighScore(t.highscore);
                             scenarioTiming.get(t.scenario.toString()).addHighScore(t.timing);
-
+                            totalGames+=repeats;
                             outln("Timing (ms.):");
                             t.timing.print();
                             totalTiming.print();
@@ -159,7 +160,9 @@ public class ClassTournament extends Tournament {
         outln("\n");
         totalHighscore.printByClass(scenarioHighScore.values());
         out(dividerLine);
-        outln(""+Scenario.repeatCount+" rounds played.");
+        outln(""+Scenario.repeatCount+" tournaments with "+totalGames+" games in total played.");
+        outln("Time: "+(System.currentTimeMillis() - startTime)/1000.0+"s elapsed.");
+        
         out(dividerLine);
         outln("Timing (ms.):");
         totalTiming.printByClass(scenarioTiming.values());
