@@ -270,14 +270,16 @@ public abstract class Player {
      * later.
      */
     public void visualizeTrack(List<GameLocation> locList) {
-        playerProxy.visualizeTrack(locList);
+        if (playerProxy != null)
+            playerProxy.visualizeTrack(locList);
     }
     /*
      * Remove all additional visualizations.
      */
 
     public void removeVisualizations() {
-        playerProxy.removeVisualizations();
+        if (playerProxy != null)
+            playerProxy.removeVisualizations();
     }
 
     // can't be called by inheriting classes
