@@ -311,7 +311,7 @@ public class GameBoard {
 
     int getIndex(int x, int y) {
         if (x < 0 || x >= cols || y < 0 || y >= rows) {
-            throw new CoordinatesOutOfBoundsException();
+            throw new CoordinatesOutOfBoundsException(x,y,cols,rows);
         }
         return getIndexUnchecked(x,y);
     }
