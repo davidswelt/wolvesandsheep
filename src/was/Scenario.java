@@ -311,13 +311,11 @@ public class Scenario {
         try {
             GameLocation l = loc(x, y);
             if (l != null) {
-                if (x > 0 && x < tmpGb.getCols() && y > 0 && y < tmpGb.getRows()) {
 
-                    if (tmpGb.isEmptyCell(l.x, l.y)) {
-                        return tmpGb.addPlayer((Player) p.newInstance(), l);
-                    }
-
+                if (tmpGb.isEmptyCell(l.x, l.y)) {
+                    return tmpGb.addPlayer((Player) p.newInstance(), l);
                 }
+
             }
         } catch (CoordinatesOutOfBoundsException ex) {
         } catch (IndexOutOfBoundsException ex) {
