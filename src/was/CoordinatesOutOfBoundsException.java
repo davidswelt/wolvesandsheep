@@ -40,8 +40,8 @@ public class CoordinatesOutOfBoundsException extends RuntimeException {
     /**
      * Create CoordinatesOutOfBoundsException with additional information
      *
-     * @param x the x-ordinate that may be out of bound
-     * @param y the y-ordinate that may be out of bound
+     * @param x the x-ordinate that may be out of bounds
+     * @param y the y-ordinate that may be out of bounds
      * @param sizeW the width of the game board
      * @param sizeH the heigh of the game board
      */
