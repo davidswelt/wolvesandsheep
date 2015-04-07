@@ -264,22 +264,47 @@ public abstract class Player {
         playerProxy = a;
     }
 
-    /*
-     * Add a list of GameLocations to be visualized.
-     * Note: List is not copied and may be changed by caller
-     * later.
+    /**
+     * Add a list of GameLocations to be visualized later.
+     *
+     * A polygon will be drawn between the points given after the player's move
+     * is over. Note: List is not copied and may be changed by caller later. If
+     * the graphical interface is not in use, nothing happens. Use
+     * {@link removeVisualizations()} to remove all paths.
+     *
+     * @param locList the list of points
      */
     public void visualizeTrack(List<GameLocation> locList) {
-        if (playerProxy != null)
+        if (playerProxy != null) {
             playerProxy.visualizeTrack(locList);
+        }
     }
-    /*
-     * Remove all additional visualizations.
-     */
 
+    /**
+     * Add a list of GameLocations to be drawn as a path now.
+     *
+     * A polygon will be drawn immediately that connects all locations given.
+     * The polygon will disappear before the the next round. This function is
+     * useful for debugging.
+     *
+     * @param locList the list of points
+     * @param color the color (e.g, java.awt.Color.RED)
+     */
+    public void visualizeTrackNow(List<GameLocation> locList, java.awt.Color color) {
+        if (playerProxy != null) {
+            playerProxy.showTrack(locList, color, true);
+        }
+    }
+
+    /**
+     * Remove all visualized paths. Polygons drawn will be removed after the
+     * player's move. Call this function before adding visualizations to replace
+     * them.
+     */
     public void removeVisualizations() {
-        if (playerProxy != null)
+        if (playerProxy != null) {
             playerProxy.removeVisualizations();
+        }
     }
 
     // can't be called by inheriting classes

@@ -38,8 +38,6 @@ class PlayerProxy extends Actor {
         super(true, scaledImage(player));
         this.player = player;
 
-
-
     }
 
     static BufferedImage imageToBufferedImage(Image im) {
@@ -75,7 +73,6 @@ class PlayerProxy extends Actor {
             Logger.getLogger(PlayerProxy.class.getName()).log(Level.SEVERE, null, ex);
         }
 
-
         //java.awt.image.BufferedImage bim = new java.awt.image.BufferedImage(10, 10, java.awt.image.BufferedImage.TYPE_INT_RGB);
         return null;
     }
@@ -98,8 +95,6 @@ class PlayerProxy extends Actor {
         int prev_x = l.x;
         int prev_y = l.y;
 
-
-
         Move theMove = player.calcMove(); // this asks the player to decide its move
 
         if (theMove == null) {
@@ -112,10 +107,8 @@ class PlayerProxy extends Actor {
         int target_x = targetloc.x; // getX() + (int) theMove.delta_x;
         int target_y = targetloc.y; // getY() + (int) theMove.delta_y;
 
-
         // determine new direction
         // and calculate target angle
-
         // turn actor in the right direction (rotates sprite)
         double angle = 0;
 
@@ -129,44 +122,51 @@ class PlayerProxy extends Actor {
         }
 
         // let JGameGrid know...
-
         turn(angle - getDirection()); // relative turn
 
         // make the move (not precise - integer)
         move((int) theMove.length()); // round down so we don't overshoot
 
         // let's make sure we're in the right spot
-
         setX(target_x);
         setY(target_y);
 
         if (player instanceof WolfPlayer || player instanceof SheepPlayer) {
-
 
             // update the polygon
             Point pt = getPixelLocation();
             track.lineTo(pt.x, pt.y);
             showPath(track, player.trackColor(), player.shortName(), pt);
 
-            // now make polygon set by player
             for (List<GameLocation> path : generalTracks) {
-                GeneralPath p = new GeneralPath(GeneralPath.WIND_EVEN_ODD);
-                if (path.size() > 0) {
-                    boolean first = true;
-                    for (GameLocation point : path) {
-                        pt = gameGrid.toPoint(new Location(point.x, point.y));
-                        if (first)
-                        {
-                        p.moveTo(pt.x, pt.y);
-                        first = false;
-                        } else
-                        {
-                            p.lineTo(pt.x, pt.y);
-                        }
-                    }
-                    showPath(p, java.awt.Color.GRAY, null, pt);
-                }
+                showTrack(path, java.awt.Color.GRAY, false);
             }
+        }
+    }
+
+    void showTrack(List<GameLocation> path, java.awt.Color color, boolean showPoints) {
+        // now make polygon set by player
+        java.awt.Shape caret = new javax.swing.text.DefaultCaret();
+        
+        GeneralPath p = new GeneralPath(GeneralPath.WIND_EVEN_ODD);
+        if (path.size() > 0) {
+            boolean first = true;
+            Point pt = getPixelLocation(); // placeholder, probably
+            for (GameLocation point : path) {
+                pt = gameGrid.toPoint(new Location(point.x, point.y));
+                if (first) {
+                    p.moveTo(pt.x, pt.y);
+                    first = false;
+                } else {
+                    p.lineTo(pt.x, pt.y);
+                }
+//                if (showPoints)
+//                { // doesn't work - will draw line to origin 0,0
+//                    p.append(caret, first);
+//                }
+            }
+            if (path.size()>0)            
+                showPath(p, color, null, pt);
         }
     }
     /*
