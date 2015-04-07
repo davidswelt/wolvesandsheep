@@ -58,7 +58,7 @@ public class GameBoard {
         Move m = new Move(b.x - a.x, b.y - a.y);
 
         double maxlen = m.length();
-        m = m.scaledToLength(Math.sqrt(2));
+        m = m.scaledToLength(1.0);  // sqrt(2) will occasionally skip a step
 
         int lastemptyX = a.x;
         int lastemptyY = a.y;
