@@ -285,10 +285,18 @@ public class GameBoard {
         }
     }
 
+    /**
+     * Get the maximum number of iterations.
+     * @return the iteration count
+     */
     public int getMaxTimeStep() {
         return this.maxTimeStep;
     }
 
+    /**
+     * Get the current iteration, starting from 0 in each game.
+     * @return the iteration (0..)
+     */
     public int getTime() {
         return currentTimeStep;
     }
