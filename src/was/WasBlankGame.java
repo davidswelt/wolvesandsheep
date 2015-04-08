@@ -86,6 +86,9 @@ class WasBlankGame implements WasGameBackend {
             }
         }
     }
+    public void refresh()
+    {
+    }
 //
 //  public static void main(String[] args)
 //  {

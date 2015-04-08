@@ -164,9 +164,9 @@ class PlayerProxy extends Actor {
 //                { // doesn't work - will draw line to origin 0,0
 //                    p.append(caret, first);
 //                }
-            }
-            if (path.size()>0)            
-                showPath(p, color, null, pt);
+            }          
+            showPath(p, color, null, pt);
+            player.getGameBoard().wasgamegrid.refresh();
         }
     }
     /*

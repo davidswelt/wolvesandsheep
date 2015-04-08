@@ -21,4 +21,6 @@ interface WasGameBackend {
     public void doPause();
 
     public boolean removeActor(Actor actor);
+    
+    public void refresh();
 }
