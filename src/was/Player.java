@@ -319,8 +319,8 @@ public abstract class Player {
 
     /**
      * Get this player's location.
-     *
-     * @return a GameLocation object
+     * 
+     * @return a new GameLocation object
      */
     public final GameLocation getLocation() {
         if (!isActive()) {
