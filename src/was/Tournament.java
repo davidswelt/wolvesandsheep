@@ -161,7 +161,7 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
                 crashLog.printByCategory(Arrays.asList(moveLog));
 
                 System.out.println(dividerLine);
-                System.out.println("Timing:");
+                System.out.println("Timing (Timeout: "+Player.getTimeout()+"ms per move):");
                 t.timing.print();
 
             }

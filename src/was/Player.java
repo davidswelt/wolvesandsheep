@@ -250,6 +250,18 @@ public abstract class Player {
         }
         return gb;
     }
+    
+    /**
+     * Get the timeout set for players.
+     * Timeout is measured in milliseconds, per move.
+     * Player's move will be abandoned after this time.
+     * If timeouts occur in more than a certain number of games, player is
+     * disqualified from the tournament.
+     * @return the timeout in milliseconds
+     */
+    final public static long getTimeout() {
+        return TIMEOUT;
+    }
 
     final void setMaxAllowedDistance(double d) {
         maxAllowedDistance = d;
@@ -319,7 +331,7 @@ public abstract class Player {
 
     /**
      * Get this player's location.
-     * 
+     *
      * @return a new GameLocation object
      */
     public final GameLocation getLocation() {
@@ -348,6 +360,20 @@ public abstract class Player {
             return totalRunTime / totalRuns;
         } else {
             return 0.0;
+        }
+    }
+
+    final void noteRuntime(long dur, int fn) throws TimeoutException {
+        totalRunTime += dur / 1000.0; // millisec
+        if (fn == MOVE) // only count function 0 runs (others add up)
+        {
+            totalRuns++;
+        }
+
+        if (dur > individualRunFactor * TIMEOUT * 1000 || (totalRuns > 10 && meanRunTime() > TIMEOUT)) {  // convert to 1000*millisec
+
+            // totalRunTime will be reset to 0 when a new player object is created.
+            throw new TimeoutException();
         }
     }
 
@@ -391,8 +417,11 @@ public abstract class Player {
                 long dur = (Long) ((threadMXBean.getCurrentThreadCpuTime() - startTime) / 1000); // nanosec to 1000*millisec
                 if (dur > TIMEOUT * 1000) // convert to 1000*millisec
                 {
-                    System.err.println("Warning: player takes too long.");
+                    System.err.println("Warning: player "+getClass().getName()+" takes too long.");
                 }
+
+                noteRuntime(dur, fn);
+
                 return m;
             } else {
 
@@ -406,6 +435,29 @@ public abstract class Player {
             } else {
                 throw ex;
             }
+        } catch (TimeoutException ex) {
+            System.err.println("player TimeoutException");
+            String reason = "";
+            switch (fn) {
+                case MOVE:
+                    reason = "move";
+                    break;
+                case INITIALIZE:
+                    reason = "initialize";
+                    break;
+                case IS_BEING_EATEN:
+                    reason = "is_being_eaten";
+                    break;
+                case IS_KEEPING_BUSY:
+                    reason = "is_keeping_busy";
+                    break;
+                case WILL_EAT:
+                    reason = "will_eat";
+                    break;
+            }
+
+            System.err.println("Player " + getClass().getName() + " timed out " + TIMEOUT + "ms max." + " in function " + reason);
+            Tournament.logPlayerCrash(this.getClass(), ex);
         }
         return null;
     }
@@ -521,17 +573,8 @@ public abstract class Player {
             //timing.add(p.getClass().getName(), (double) dur / 1000.0);
             // we allow for 5 times the nominal average run time in certain cases
             // dur is sec/1000000
-            totalRunTime += dur / 1000.0; // millisec
-            if (func == MOVE) // only count function 0 runs (others add up)
-            {
-                totalRuns++;
-            }
 
-            if (dur > individualRunFactor * TIMEOUT * 1000 || (totalRuns > 10 && meanRunTime() > TIMEOUT)) {  // convert to 1000*millisec
-
-                // totalRunTime will be reset to 0 when a new player object is created.
-                throw new TimeoutException();
-            }
+            noteRuntime(dur, func);
 
         } catch (CancellationException ex) {
         } catch (InterruptedException ex) {
