@@ -133,6 +133,7 @@ public class Scenario {
                 sheepP.add(loc(10, -1));
                 sheepP.add(loc(20, -1));
                 sheepP.add(loc(25, -1));
+                wolfP.add(loc(-1,-1));
                 break;
             case 5:
                 green(1, 1);
