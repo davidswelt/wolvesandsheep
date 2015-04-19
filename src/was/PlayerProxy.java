@@ -55,7 +55,7 @@ class PlayerProxy extends Actor {
 
         int csize = (int) ((dim.height - 120) / board.getRows());
 
-        cellSize = Math.min(12, csize - 1);
+        cellSize = Math.min(15, csize - 1);
         return cellSize;
     }
 
