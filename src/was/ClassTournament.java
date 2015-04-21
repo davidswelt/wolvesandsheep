@@ -39,9 +39,11 @@ public class ClassTournament extends Tournament {
             "Meat Eater (Classic):jj,kk,ll,mm"};
         
         run(wolves, sheepteams, repeats, minutes);
+
+        run(wolves, sheepteams, repeats, minutes, numThreads);
     }
 
-    static void run(String[] wolves, String[] sheepteams, int repeats, int minutes) {
+    static void run(String[] wolves, String[] sheepteams, int repeats, int minutes, int numThreads) {
 
         HighScore totalHighscore = new HighScore().setTitle("total");
         HighScore totalTiming = new HighScore().setTitle("timing");
@@ -80,11 +82,10 @@ public class ClassTournament extends Tournament {
         }
         totalRuns = totalRuns * sheepteams.length * Scenario.getParameterValues().size();
         int runcount = 1;
-        int totalGames = 0;
         long targetTimeSecs = Math.max(1, minutes * 60); // 10 minutes
         long startTime = System.currentTimeMillis();
         while ((System.currentTimeMillis() - startTime) < targetTimeSecs * 1000) {
-            Scenario.repeatCount++;
+            Scenario.repeatCount+=numThreads;
             for (String s : sheepteams) {
                 // each sheep team
                 for (String w : wolves) {
@@ -104,6 +105,7 @@ public class ClassTournament extends Tournament {
                         }
                         // all scenarios
                         //           List x = Scenario.getParameterValues();
+                        // we're running one scenario at a time
                         for (int sp : Scenario.getParameterValues()) {
                             if (avgtimeperrun > 0) {
                                 System.out.printf("running (%s out of %s).  %s mins. left\n", runcount, totalRuns, (int) (((totalRuns - runcount) * avgtimeperrun) / 1000 / 60));
@@ -111,17 +113,19 @@ public class ClassTournament extends Tournament {
                             runcount++;
                             //Scenario sc = Scenario.makeScenario(sp);
                             //for (int sc = 1; sc < Scenario.NUMSCENARIOS && exitRequested==false; sc++) {
-                            Tournament t = run(p, repeats, false, sp, false, false);
+                            Tournament t = run(p, repeats, false, sp, false, false, numThreads);
                             totalHighscore.addHighScore(t.highscore);
                             totalTiming.addHighScore(t.timing);
                             totalEatingScore.addHighScore(t.eatingScore);
-                            if (scenarioHighScore.get(t.scenario.toString()) == null) {
-                                scenarioHighScore.put(t.scenario.toString(), new HighScore().setTitle(t.scenario.toString()));
-                                scenarioTiming.put(t.scenario.toString(), new HighScore().setTitle(t.scenario.toString()));
+                            
+                            String ss = Scenario.toString(sp);
+                            if (scenarioHighScore.get(ss) == null) {
+                                scenarioHighScore.put(ss, new HighScore().setTitle(ss));
+                                scenarioTiming.put(ss, new HighScore().setTitle(ss));
                             }
-                            scenarioHighScore.get(t.scenario.toString()).addHighScore(t.highscore);
-                            scenarioTiming.get(t.scenario.toString()).addHighScore(t.timing);
-                            totalGames+=repeats;
+                            scenarioHighScore.get(ss).addHighScore(t.highscore);
+                            scenarioTiming.get(ss).addHighScore(t.timing);
+
                             outln("Timing (ms.):");
                             t.timing.print();
                             totalTiming.print();
@@ -140,7 +144,7 @@ public class ClassTournament extends Tournament {
         outln("Sheep teams:");
 
         for (String player : sheepteams) {
-            out(prefix(player)+": ");
+            out(prefix(player) + ": ");
             for (String sh : PlayerFactory.string2bracketedClasslist(player, ".Sheep")) {
                 out(sh + " ");
             }
@@ -150,7 +154,7 @@ public class ClassTournament extends Tournament {
         outln("Wolf teams:");
 
         for (String player : wolves) {
-            out(prefix(player)+": ");
+            out(prefix(player) + ": ");
             for (String sh : PlayerFactory.string2bracketedClasslist(player, ".Wolf")) {
                 out(sh + " ");
             }
@@ -160,9 +164,9 @@ public class ClassTournament extends Tournament {
         outln("\n");
         totalHighscore.printByClass(scenarioHighScore.values());
         out(dividerLine);
-        outln(""+Scenario.repeatCount+" tournaments with "+totalGames+" games in total played.");
-        outln("Time: "+(System.currentTimeMillis() - startTime)/1000.0+"s elapsed.");
-        
+        outln("" + Scenario.repeatCount + " tournaments with " + Scenario.gameCount + " games in total played.");
+        outln("Time: " + (System.currentTimeMillis() - startTime) / 1000.0 + "s elapsed.");
+
         out(dividerLine);
         outln("Timing (ms.):");
         totalTiming.printByClass(scenarioTiming.values());
@@ -193,7 +197,7 @@ public class ClassTournament extends Tournament {
         Player.debuggable = false; // enables time-keeping
 
         int r = 1;
-
+        int numThreads = 1;
         int duration = 0;
 
         boolean printUsage = args.length == 0;
@@ -210,6 +214,10 @@ public class ClassTournament extends Tournament {
             } else if ("-d".equals(s)) {
 
                 duration = Integer.parseInt(args[i++]);
+
+            } else if ("-j".equals(s)) {
+
+                numThreads = Integer.parseInt(args[i++]);
 
             } else if ("--secret".equals(s)) {
 
@@ -228,7 +236,7 @@ public class ClassTournament extends Tournament {
             System.err.println("       -d M      ==> repeat for at least M minutes.");
             System.err.println("       -q        ==> do not print progress info ");
         }
-        teamStructureInit(r, duration);
+        teamStructureInit(r, duration, numThreads);
 
     }
 }

@@ -60,7 +60,7 @@ public abstract class Player {
     private int x = 0, y = 0;
     String team;
     static boolean catchExceptions = false;
-    static boolean logToFile = false;
+    static boolean logToFile = false; // warning, not thread safe
     PrintStream logstream = null;
     private double totalRunTime = 0.0;
     private long totalRuns = 0;
@@ -382,7 +382,10 @@ public abstract class Player {
     }
 
     // arg should be immutable (multithreading).
-    final Object callPlayerFunction(int fn, Object arg) {
+    // synchronized because of multi-threading in Tournament: we 
+    // assume that the student-supplied code might not be thread-safe
+    // due to the (unnecessary) use of static variables.  
+    synchronized final Object callPlayerFunction(int fn, Object arg) {
 
         if (fn == MOVE) {
             Tournament.logPlayerMoveAttempt(this.getClass());
@@ -731,7 +734,9 @@ public abstract class Player {
         }
 
     }
-
+    volatile static boolean isRunningInTournament = false;
+    
+    
     /**
      * Get the maximum allowed distance for this player Not available during
      * initialization of the object.

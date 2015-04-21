@@ -37,7 +37,7 @@ public class HighScore extends TreeMap<String, Double> {
         return this;
     }
 
-    void addHighScore(HighScore other) {
+    synchronized void addHighScore(HighScore other) {
         for (Map.Entry<String, Integer> e : other.uses.entrySet()) {
             noteUse(e.getKey(), e.getValue());
         }
@@ -59,7 +59,7 @@ public class HighScore extends TreeMap<String, Double> {
         inc(s, 1.0);
     }
 
-    void inc(String s, double by) {
+    synchronized void inc(String s, double by) {
         put(s, new Double(get(s) + by));
         if (!vals.containsKey(s)) {
             vals.put(s, new ArrayList<Double>());
@@ -71,7 +71,7 @@ public class HighScore extends TreeMap<String, Double> {
         noteUse(s, 1);
     }
 
-    void noteUse(String s, int by) {
+    synchronized void noteUse(String s, int by) {
         Integer prev = uses.get(s);
         uses.put(s, new Integer(prev == null ? by : prev + by));
         normalizing = true;
@@ -151,7 +151,7 @@ public class HighScore extends TreeMap<String, Double> {
         return String.format("%" + a + "s", s);
     }
 
-    void printHeader(Collection<HighScore> extraColumns) {
+    synchronized void printHeader(Collection<HighScore> extraColumns) {
         System.out.printf("\n%" + printAlignment + "s  %s", "", leftAlign(title, COLUMNWIDTH));
         if (normalizing && showCI) {
             System.out.printf("%s", leftAlign("CI", COLUMNWIDTH));
@@ -167,7 +167,7 @@ public class HighScore extends TreeMap<String, Double> {
         }
     }
 
-    public void printKeys(List<String> keys, boolean sorted, Collection<HighScore> extraColumns) {
+    synchronized public void printKeys(List<String> keys, boolean sorted, Collection<HighScore> extraColumns) {
 
         String format;
         if (normalizing) {
@@ -229,7 +229,7 @@ public class HighScore extends TreeMap<String, Double> {
     /* Print this high score as a 2-dimensional table
      * keys are assumed to be of form cat1//cat2
      */
-    public void printAsTable() {
+    synchronized public void printAsTable() {
         Set<String> keys = keySet();
         SortedSet<String> cols = new TreeSet();
         SortedSet<String> rows = new TreeSet();

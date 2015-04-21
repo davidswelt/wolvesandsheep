@@ -25,7 +25,8 @@ public class Scenario {
     GameBoard tmpGb = null;
     static List<Integer> parmValues = new ArrayList(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8));
     static boolean useSecretScenarioClass = false;
-    static int repeatCount = 0; // used to avoid randomization when repeating rounds
+    volatile static int repeatCount = 0; // used to avoid randomization when repeating rounds
+    volatile static int gameCount = 0; // counts total number of games played (for info)
     GameBoard gb = null;
 
     protected Scenario() {
@@ -64,8 +65,15 @@ public class Scenario {
 
         return parmValues;
     }
+    
+    static double getMaxWolfDistance () {
+        return 2.0;
+    }
+    static int getWolfEatingTime() {
+        return 7;
+    }
 
-    static Scenario makeScenario(int requestedScenario) {
+    static final Scenario makeScenario(int requestedScenario) {
         Scenario sc = null;
 
         try {
@@ -77,6 +85,8 @@ public class Scenario {
             throw new RuntimeException(ex);
         }
 
+        gameCount ++;
+        
         sc.requested = requestedScenario;
         // any parametrization should happen here
         if (sc.requested == 0) {
@@ -403,4 +413,9 @@ public class Scenario {
     public String toString() {
         return "Sc." + String.format("%02d", requested);
     }
+
+    static public String toString(int sc) {
+        return "Sc." + String.format("%02d", sc);
+    }
+    
 }
