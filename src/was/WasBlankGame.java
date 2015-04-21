@@ -13,6 +13,11 @@ import was.Player.GamePiece;
  * which also implemeents the WasGameBackend interface.
  */
 class WasBlankGame implements WasGameBackend {
+    static { 
+        // required to facilitate awt calls
+        // e.g., choosing colors in client code
+        System.setProperty("java.awt.headless", "true");
+    }
 
     final GameBoard board;
 
