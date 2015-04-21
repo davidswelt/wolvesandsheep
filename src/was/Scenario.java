@@ -171,6 +171,7 @@ public class Scenario {
                 wolfP.add(loc(-2, 3));
                 break;
             case 6:
+                grey(29,29);
                 wolfP.add(loc(15, 15));
                 sheepP.add(loc(10, 15));
                 sheepP.add(loc(15, 10));
