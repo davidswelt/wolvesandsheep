@@ -38,11 +38,11 @@ public class GameBoard {
     /**
      * distance in grid squares that a wolf can cover
      */
-    public final double maxWolfDistance = 2;
+    public final double maxWolfDistance;  // normally 2.  2.24 would allow one up, two over
     /**
      * number of steps it takes the wolf to eat a sheep
      */
-    public final int wolfEatingTime = 7;
+    public final int wolfEatingTime; // normally 7
     /**
      * maximal number of steps before game ends
      */
@@ -62,7 +62,6 @@ public class GameBoard {
 
         int lastemptyX = a.x;
         int lastemptyY = a.y;
-
 
         double x = a.x + 0.5; // we'll start in the center of the cell
         double y = a.y + 0.5;
@@ -113,7 +112,6 @@ public class GameBoard {
         GamePiece playerCellPiece = player.getPiece();
         GameLocation loc = player.getLocation();
 
-
         if (playerCellPiece == GamePiece.WOLF) {
             // is move surrounded by sheep?
             // check all sheep in game
@@ -121,7 +119,6 @@ public class GameBoard {
             // If there are at least three sheep next to the wolf (closer than
             // distance 2, they can hurt the wolf.  The wolf will need
             // time to recover, and it will then be only half as fast as before.
-
             int closeSheep = 0;
             // loc is pre-move location of this wolf.
             for (Player sp : findAllPlayers(GamePiece.SHEEP)) {
@@ -138,9 +135,6 @@ public class GameBoard {
             }
 
         }
-
-
-
 
         if (player.isBusy()) {
             return false; // can't move Player
@@ -188,7 +182,6 @@ public class GameBoard {
 
             swapCells(i, idx);
             player.keepBusyFor(1);
-
 
             return true;
 
@@ -264,13 +257,14 @@ public class GameBoard {
 
     }
 
-    GameBoard() {
-        this(30, 30, false, 80);
-    }
-
-    GameBoard(int width, int height, boolean ui, int maxTimeStep) {
-        cols = width;
-        rows = height;
+    GameBoard(Scenario scenario, boolean ui, int maxTimeStep) {
+        this.scenario = scenario;
+        // normally, the max wolf distance is 2.0, but 
+        // a secret scenario might increase this slightly.
+        this.maxWolfDistance = scenario.getMaxWolfDistance();
+        this.wolfEatingTime = scenario.getWolfEatingTime();
+        cols = scenario.boardSize();
+        rows = scenario.boardSize();
         this.maxTimeStep = maxTimeStep;
 
         for (int i = 0; i < cols * rows; i++) {
@@ -287,6 +281,7 @@ public class GameBoard {
 
     /**
      * Get the maximum number of iterations.
+     *
      * @return the iteration count
      */
     public int getMaxTimeStep() {
@@ -295,6 +290,7 @@ public class GameBoard {
 
     /**
      * Get the current iteration, starting from 0 in each game.
+     *
      * @return the iteration (0..)
      */
     public int getTime() {
@@ -319,14 +315,15 @@ public class GameBoard {
 
     int getIndex(int x, int y) {
         if (x < 0 || x >= cols || y < 0 || y >= rows) {
-            throw new CoordinatesOutOfBoundsException(x,y,cols,rows);
+            throw new CoordinatesOutOfBoundsException(x, y, cols, rows);
         }
-        return getIndexUnchecked(x,y);
+        return getIndexUnchecked(x, y);
     }
-    
+
     int getIndexUnchecked(GameLocation l) {
         return getIndexUnchecked(l.x, l.y);
     }
+
     int getIndexUnchecked(int x, int y) {
         return y * cols + x;
     }
@@ -591,7 +588,8 @@ public class GameBoard {
 
     void checkPlayerAt(Player p, int x, int y) {
         // check to make sure board is up to date
-        if (board.get(getIndex(x, y)) != p) {
+        Player actual = board.get(getIndex(x, y));
+        if (actual != p) {
             throw new RuntimeException("player setLoc called without player being in right new place on board.");
         }
     }
@@ -643,15 +641,13 @@ public class GameBoard {
 
         p.setMaxAllowedDistance(
                 (p instanceof SheepPlayer)
-                ? allowedMoveDistance(GamePiece.SHEEP)
-                : (p instanceof WolfPlayer)
-                ? allowedMoveDistance(GamePiece.WOLF)
-                : 0);
-
+                        ? allowedMoveDistance(GamePiece.SHEEP)
+                        : (p instanceof WolfPlayer)
+                                ? allowedMoveDistance(GamePiece.WOLF)
+                                : 0);
 
         // add a player
         // choose a cell
-
         if (loc == null) {
             loc = randomEmptyLocation(null, null);
         }
@@ -732,7 +728,6 @@ public class GameBoard {
 
     Map<Player, int[]> playGame(boolean pauseInitially) {
 
-
         // initialize the players
         for (Player p : players) {
             p.callInitialize();
@@ -740,14 +735,11 @@ public class GameBoard {
 
         try {
 
-
             if (wasgamegrid != null) {
-
 
                 wasgamegrid.show();
 
                 // we're not calling make movePlayer
-
                 wasgamegrid.doRun();
                 if (pauseInitially) {
                     wasgamegrid.doPause();
@@ -755,7 +747,6 @@ public class GameBoard {
 
                 // the JGameGrid version will spawn a separate thread,
                 // so we'll wait for it to finish:
-
                 if (!isFinished()) {
                     synchronized (this) {
                         try {
@@ -808,7 +799,6 @@ public class GameBoard {
 
     void removePlayer(Player p) {
 
-
         if (p == null || wasgamegrid == null) // already deleted
         {
             return;
@@ -819,7 +809,6 @@ public class GameBoard {
         }
 
         // let's make sure there's no cell left
-
         log("removing player.");
         int i = getIndexUnchecked(p.getLocation());
         if (board.get(i) == p) {

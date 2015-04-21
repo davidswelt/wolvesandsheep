@@ -246,7 +246,7 @@ public class Scenario {
                 board.maxTimeStep = Math.max(board.maxTimeStep, 200);
                 break;
             default:
-                throw new RuntimeException("Specified scenario unavailable.");
+                throw new RuntimeException("Specified scenario ("+requested+") unavailable.");
         }
     }
 

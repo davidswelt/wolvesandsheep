@@ -328,8 +328,10 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
             for (int r = 0; r < repeats && exitRequested == false; r++) {
 
                 int theSc = scenarioNum;
-                if (scenarioNum == 0 && repeats >= Scenario.getParameterValues().size()) {
-                    theSc = 1 + (r % Scenario.getParameterValues().size());
+                int numS = Scenario.getParameterValues().size();
+                // randomize, and enough repeats available?
+                if (scenarioNum == 0 && repeats > 1) {
+                    theSc = Scenario.getParameterValues().get(r % numS);
                 }
 
                 Scenario scenario = Scenario.makeScenario(theSc);
@@ -347,13 +349,11 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
                          * for a sheep-attacking-wolf scenario just before 
                          * executing the wolf's move.
                          */
-
                         selectedPlayers.addAll(selWolfComb);
                         selectedPlayers.addAll(selSheepComb);
 
-                        GameBoard board = new GameBoard(scenario.boardSize(), scenario.boardSize(), boardUI, 80);
+                        GameBoard board = new GameBoard(scenario, boardUI, 80);
                         board.wolfEatSheepDelegate = this;
-                        board.scenario = scenario;
 
                         Stack<GameLocation> wolfQueue = new Stack();
                         Stack<GameLocation> sheepQueue = new Stack();
