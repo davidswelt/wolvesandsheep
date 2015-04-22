@@ -19,7 +19,7 @@ import static was.Tournament.logPlayerCrash;
 public class PlayerFactory {
 
     static void logPlayerCrash(Class cl, Exception ex) {
-        Tournament.logPlayerCrash(cl, ex);
+        Tournament.logPlayerCrash(cl, ex, null);
     }
 
     public static boolean playerClassExists(String name) {

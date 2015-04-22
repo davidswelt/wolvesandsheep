@@ -131,7 +131,7 @@ public class PlayerTest {
         try {
             Method method = cl.getMethod("test", (Class[]) null);
             if (method == null) {
-                logPlayerCrash(cl, new RuntimeException("Player has no valid 'public static boolean test()' method.  Proceeding."));
+                logPlayerCrash(cl, new RuntimeException("Player has no valid 'public static boolean test()' method.  Proceeding."), null);
                 return true; // no unit test
             }
             try {
@@ -141,7 +141,7 @@ public class PlayerTest {
                 if (result) {
                     return true;
                 }
-                logPlayerCrash(cl, new RuntimeException("Player failed unit test."));
+                logPlayerCrash(cl, new RuntimeException("Player failed unit test."), null);
 
             } catch (IllegalAccessException ex) {
                 Logger.getLogger(Tournament.class.getName()).log(Level.SEVERE, null, ex);
@@ -151,7 +151,7 @@ public class PlayerTest {
                 Logger.getLogger(Tournament.class.getName()).log(Level.SEVERE, null, ex);
             } catch (RuntimeException ex) {
                 if (Player.catchExceptions) {
-                    logPlayerCrash(cl, new RuntimeException("Player crashed during unit test.  Proceeding."));
+                    logPlayerCrash(cl, new RuntimeException("Player crashed during unit test.  Proceeding."), null);
                     return true; // no unit test
                 } else {
                     throw ex;
@@ -159,11 +159,11 @@ public class PlayerTest {
             }
 
         } catch (NoSuchMethodException ex) {
-            logPlayerCrash(cl, new RuntimeException("Player has no unit test.  Proceeding."));
+            logPlayerCrash(cl, new RuntimeException("Player has no unit test.  Proceeding."), null);
             return true; // no unit test
         } catch (SecurityException ex) {
             Logger.getLogger(Tournament.class.getName()).log(Level.SEVERE, null, ex);
-            logPlayerCrash(cl, new RuntimeException("Player unit test violated security rule.  Proceeding."));
+            logPlayerCrash(cl, new RuntimeException("Player unit test violated security rule.  Proceeding."), null);
             return true;
         }
 

@@ -50,35 +50,30 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
     static boolean quiet = false;
     volatile static HighScore crashLog = new HighScore().setTitle("crashes");
     volatile static HighScore moveLog = new HighScore().setTitle("total calls to move()");
-    static ThreadLocal<Integer> loadedScenario = new ThreadLocal<Integer>(); // used for logging crashes
+    
 
-    static {
-        loadedScenario.set(-1);
-    }
-
-    static void logPlayerMoveAttempt(Class pl) {
+    static void logPlayerMoveAttempt(Class pl, GameBoard g) {
         moveLog.inc(pl.getName() + ".Crash");
-        if (loadedScenario.get() > -1) {
-            String ss = "Scenario" + String.format("%2d", loadedScenario.get());
+        if (g!=null && g.scenario!=null) {
+            String ss = "Scenario" + g.scenario.toString();
 
             moveLog.inc(pl.getName() + ".Crash." + ss);
         }
+        
     }
 
-    static void logPlayerCrash(Class pl, Throwable ex) {
-        logPlayerCrash(pl, ex, loadedScenario.get());
-    }
-
-    static void logPlayerCrash(Class pl, Throwable ex, Integer info) {
+    static void logPlayerCrash(Class pl, Throwable ex, GameBoard g) {
+     
         crashLog.inc(pl.getName() + ".Crash");
 //        crashLog.inc(pl.getName() + ".Crash\\" + ex);
 
-        if (info > -1) {
-            String ss = "Scenario" + String.format("%2s", info.toString());
+        if (g!=null && g.scenario!=null) {
+            String ss = "Scenario" + g.scenario.toString();
             crashLog.inc(pl.getName() + ".Crash." + ss);
             crashLog.inc(pl.getName() + ".Crash." + ss + "\\" + ex);
         }
-    }
+        
+    } 
     volatile HighScore timing = new HighScore();
     volatile HighScore scenarioTiming = new HighScore();
     volatile HighScore highscore = new HighScore();
@@ -335,8 +330,7 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
                 }
 
                 Scenario scenario = Scenario.makeScenario(theSc);
-                loadedScenario.set(theSc);
-
+                
                 for (ArrayList selWolfComb : wolvesComb) {
                     for (ArrayList selSheepComb : sheepComb) {
                         selectedPlayers = new ArrayList();

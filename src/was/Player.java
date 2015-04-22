@@ -181,9 +181,9 @@ public abstract class Player {
         disqualified = true; // disqualified in this round (this player object)
 
         if (dc > permanentDisqualificationThreshold) {
-            Tournament.logPlayerCrash(this.getClass(), new RuntimeException("Player disqualified for scenario."));
+            Tournament.logPlayerCrash(this.getClass(), new RuntimeException("Player disqualified for scenario."), gb);
         } else {
-            Tournament.logPlayerCrash(this.getClass(), new RuntimeException("Player disqualified."));
+            Tournament.logPlayerCrash(this.getClass(), new RuntimeException("Player disqualified."), gb);
         }
     }
 
@@ -388,12 +388,12 @@ public abstract class Player {
     synchronized final Object callPlayerFunction(int fn, Object arg) {
 
         if (fn == MOVE) {
-            Tournament.logPlayerMoveAttempt(this.getClass());
+            Tournament.logPlayerMoveAttempt(this.getClass(), gb);
         }
         if (isDisqualified()) {
 
             if (fn == MOVE) {
-                Tournament.logPlayerCrash(this.getClass(), new RuntimeException("not playing (disqualified)"));
+                Tournament.logPlayerCrash(this.getClass(), new RuntimeException("not playing (disqualified)"), gb);
             }
             return null;
         }
@@ -434,7 +434,7 @@ public abstract class Player {
             if (catchExceptions) {
                 LOG("Player " + this.getClass().getName() + " runtime exception " + ex);
                 Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex);
-                Tournament.logPlayerCrash(this.getClass(), ex);
+                Tournament.logPlayerCrash(this.getClass(), ex, gb);
             } else {
                 throw ex;
             }
@@ -460,7 +460,7 @@ public abstract class Player {
             }
 
             System.err.println("Player " + getClass().getName() + " timed out " + TIMEOUT + "ms max." + " in function " + reason);
-            Tournament.logPlayerCrash(this.getClass(), ex);
+            Tournament.logPlayerCrash(this.getClass(), ex,gb);
         }
         return null;
     }
@@ -582,7 +582,7 @@ public abstract class Player {
         } catch (CancellationException ex) {
         } catch (InterruptedException ex) {
             Logger.getLogger(Tournament.class.getName()).log(Level.SEVERE, null, ex);
-            Tournament.logPlayerCrash(this.getClass(), ex);
+            Tournament.logPlayerCrash(this.getClass(), ex,gb);
             //throw new IllegalGameMoveException("makeMove was interrupted.", p, null);
         } catch (ExecutionException ex) {
 
@@ -590,7 +590,7 @@ public abstract class Player {
 
                 LOG("Player " + this.getClass().getName() + " runtime exception " + ex.getCause());
                 Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex.getCause());
-                Tournament.logPlayerCrash(this.getClass(), ex.getCause());
+                Tournament.logPlayerCrash(this.getClass(), ex.getCause(),gb);
                 m = null;
             } else {
                 throw new RuntimeException("Exception in Player " + this.getClass(), ex.getCause());
@@ -617,7 +617,7 @@ public abstract class Player {
             }
 
             System.err.println("Player " + thePlayer.getClass().getName() + " timed out " + TIMEOUT + "ms max." + " in function " + reason);
-            Tournament.logPlayerCrash(this.getClass(), ex);
+            Tournament.logPlayerCrash(this.getClass(), ex,gb);
             //            int[][] availableMoves = (int[][]) board.getFreeCells();
             //            int chosen = random.nextInt(availableMoves.length);
             //            move = availableMoves[chosen];
@@ -702,7 +702,7 @@ public abstract class Player {
                     // String str = "illegal move: too long! " + m + ": " + m.length() + " > " + maxAllowedDistance;
                     //System.err.println(this.getClass() + str);
 
-                    Tournament.logPlayerCrash(this.getClass(), new RuntimeException("illegal move: too long"));
+                    Tournament.logPlayerCrash(this.getClass(), new RuntimeException("illegal move: too long"),gb);
 
                     // trim move
                     // we penalize the player a little by reducing the maxAllowedDistance

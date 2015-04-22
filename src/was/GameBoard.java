@@ -703,7 +703,7 @@ public class GameBoard {
     }
 
     synchronized void logPlayerCrash(Class pl, Exception ex) {
-        Tournament.logPlayerCrash(pl, ex);
+        Tournament.logPlayerCrash(pl, ex, this);
     }
 
     synchronized void exitRequested() {
