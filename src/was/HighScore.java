@@ -24,11 +24,12 @@ public class HighScore extends TreeMap<String, Double> {
 
     final int COLUMNWIDTH = 8;
     boolean normalizing = false;  // set to true if noteUse is called once
+    boolean trackIndividualValues = false; // true will cause a memory leak
     boolean showCI = false;
     /* Currently, not showing confidence intervals as it would
-    be informative only if across players, i.e., aggregating all scenarios.
+     be informative only if across players, i.e., aggregating all scenarios.
     
-    */
+     */
     public boolean printAsPercentage = false;
     String title = "";
 
@@ -61,10 +62,12 @@ public class HighScore extends TreeMap<String, Double> {
 
     synchronized void inc(String s, double by) {
         put(s, new Double(get(s) + by));
-        if (!vals.containsKey(s)) {
-            vals.put(s, new ArrayList<Double>());
+        if (trackIndividualValues) {
+            if (!vals.containsKey(s)) {
+                vals.put(s, new ArrayList<Double>());
+            }
+            vals.get(s).add(by);
         }
-        vals.get(s).add(by);
     }
 
     void noteUse(String s) {
@@ -109,7 +112,7 @@ public class HighScore extends TreeMap<String, Double> {
         }
         ArrayList<Double> vs = vals.get(s);
         int n = vs.size();
-        if (n<2) {
+        if (n < 2) {
             return 0.0;
         }
         double m = super.get(s) / n;
@@ -117,7 +120,7 @@ public class HighScore extends TreeMap<String, Double> {
         for (double x : vs) {
             v += (x - m) * (x - m);
         }
-        v /= n-1;
+        v /= n - 1;
         return Math.sqrt(v);
     }
 
