@@ -522,6 +522,7 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
                     quiet = true;
                 } else if ("-e".equals(s)) {
                     Player.catchExceptions = true;
+                    Player.debuggable = false; // enables time-keeping
                     Player.logToFile = true;
                 } else if ("-r".equals(s)) {
 
@@ -563,7 +564,7 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
                 logerr("       -j N      ==> use N threads simultaneously");
                 logerr("       -s S      ==> set up scenario no. S (0 or default for random)");
                 logerr("       -t        ==> play a tournament of all combinations of players (4 sheep, one wolf)");
-                logerr("       -e        ==> ignore player's exceptions");
+                logerr("       -e        ==> catch player's exceptions and timeouts");
                 logerr("       -p        ==> pause initially if using graphical UI");
                 logerr("       -c        ==> do not show the graphical user interface ");
                 logerr("       -q        ==> do not print progress info ");
