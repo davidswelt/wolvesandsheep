@@ -439,7 +439,7 @@ public class GameBoard {
         return sp;
     }
 
-    synchronized void printPlayerOverview() {
+    synchronized String playerOverviewToString() {
 
         String str = "";
         for (Player p : players) {
@@ -447,9 +447,8 @@ public class GameBoard {
                 str = p.getID() + p.getLocation() + " " + str; // reverse order
             }
         }
-        System.out.println("Players: " + str);
+        return str;
     }
-
     /**
      * Structure containing information about a player at a given point in time
      * This information is available to all other players.

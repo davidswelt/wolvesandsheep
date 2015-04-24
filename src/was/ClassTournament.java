@@ -128,9 +128,6 @@ public class ClassTournament extends Tournament {
                             scenarioHighScore.get(ss).addHighScore(t.highscore);
                             scenarioTiming.get(ss).addHighScore(t.timing);
 
-                            outln("Timing (ms.):");
-                            t.timing.print();
-                            totalTiming.print();
                             if (exitRequested) {
                                 break;
                             }

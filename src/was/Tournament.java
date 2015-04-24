@@ -243,7 +243,7 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
         if (threads == 1) {
             startT(printHighscores, sp, scenario, repeats, 0);
         } else {
-            System.out.println("Starting "+threads+" threads.");
+            System.out.println("Starting " + threads + " threads.");
             Thread[] ts = new Thread[threads];
             for (int t = 0; t < threads; t++) {
                 Runnable runner = new TournamentRunnable(t + 1, printHighscores, sp, scenario, Math.max(1, (int) (repeats / threads)));
@@ -336,9 +336,9 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
 
             }
 
-            if (!quiet) {
-                System.out.println("Thread " + threadID + ": " + sheepComb.size() + " sheep teams, " + wolvesComb.size() + " wolves, " + repeats + " reps.");
-            }
+//            if (!quiet) {
+//                logout("Thread " + threadID + ": " + sheepComb.size() + " sheep teams, " + wolvesComb.size() + " wolves, " + repeats + " reps.");
+//            }
 
             for (int r = 0; r < repeats && exitRequested == false; r++) {
 
@@ -374,16 +374,18 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
 
                         scenario.addToBoard(board, wolfQueue, sheepQueue); // add scenario first to occupy these spaces
 
-//                      logerr("sel pl len="+selectedPlayers.size());
                         for (Integer i : selectedPlayers) {
+
                             Class pclass = players.get(i);
                             Stack<GameLocation> queue = isWolf(pclass) ? wolfQueue : sheepQueue;
                             GameLocation initialLocation = queue.empty() ? board.randomEmptyLocation(wolfQueue, sheepQueue) : queue.pop();
 
+
                             Player player = PlayerFactory.makePlayerInstance(pclass);
                             if (player != null) {
+
                                 board.addPlayer(player, initialLocation);
-                            }
+                            } 
                             // note use even if player wasn't added (due to crash!)
                             highscore.noteUse(pclass.getName());
                             scenarioScore.noteUse("Scenario " + scenario.toString() + "\\" + pclass.getName());
@@ -409,11 +411,11 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
                         }
 
                         if (sheep >= minNumSheepRequiredToRun && wolves >= minNumWolvesRequiredToRun) {
-
+                            
                             if (r == 0 && !quiet) {
                                 synchronized (this) {
-                                    System.out.print("Thread " + threadID + " Scenario " + theSc + ": ");
-                                    board.printPlayerOverview();
+                                    logout("Thread " + threadID + " Scenario " + theSc + ": ");
+                                    logout(board.playerOverviewToString());
                                 }
                                 // board.print();
                             }
@@ -517,12 +519,23 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
 
     }
 
-    static void logerr(String s) {
-//        Logger.getLogger(Tournament.class
-//                    .getName()).log(Level.INFO, s);
-        System.err.println(s);
-    }
 
+    static final java.io.PrintStream standardSystemOut = System.out;
+    static final java.io.PrintStream standardSystemErr = System.err;
+    synchronized static void logout(String s) {
+        PrintStream previousStream = System.out;
+        System.setOut(standardSystemOut);
+        System.out.println(s);
+        System.setOut(previousStream);
+
+    }
+    synchronized static void logerr(String s) {
+        PrintStream previousStream = System.err;
+        System.setErr(standardSystemErr);
+        System.err.println(s);
+        System.setErr(previousStream);
+
+    }
     public static void main(String args[]) {
 
         try {
