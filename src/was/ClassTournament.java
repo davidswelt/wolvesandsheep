@@ -76,11 +76,11 @@ public class ClassTournament extends Tournament {
         }
         minNumSheepRequiredToRun = 1;
         minNumWolvesRequiredToRun = 1;
-        int totalRuns = 0;
+        int runsPerTournament = 0;
         for (String wteam : wolves) {
-            totalRuns += PlayerFactory.string2classlist(wteam, ".Wolf").size();
+            runsPerTournament += PlayerFactory.string2classlist(wteam, ".Wolf").size();
         }
-        totalRuns = totalRuns * sheepteams.length * Scenario.getParameterValues().size();
+        runsPerTournament = runsPerTournament * sheepteams.length * Scenario.getParameterValues().size();
         int runcount = 1;
         long targetTimeSecs = Math.max(1, minutes * 60); // 10 minutes
         long startTime = System.currentTimeMillis();
@@ -100,15 +100,17 @@ public class ClassTournament extends Tournament {
                         // randomize order of sheep
                         Collections.shuffle(p);
                         double avgtimeperrun = 0;
-                        if (runcount > Scenario.getParameterValues().size()) {
+                        if (runcount > runsPerTournament*.1) {
                             avgtimeperrun = (System.currentTimeMillis() - startTime) / runcount;
                         }
                         // all scenarios
                         //           List x = Scenario.getParameterValues();
                         // we're running one scenario at a time
                         for (int sp : Scenario.getParameterValues()) {
-                            if (avgtimeperrun > 0) {
-                                System.out.printf("running (%s out of %s).  %s mins. left\n", runcount, totalRuns, (int) (((totalRuns - runcount) * avgtimeperrun) / 1000 / 60));
+                            if (avgtimeperrun > 0 && runsPerTournament>0) {
+                                int runsleft = (((int) (runcount / runsPerTournament)) +1)*runsPerTournament-runcount;
+                                int timeleft = (int) ((runsleft/avgtimeperrun) / 1000.0 / 60.0);
+                                System.out.printf("running (%s matches run, %s matches per tournament).  %s mins. left\n", runcount, runsPerTournament, timeleft);
                             }
                             runcount++;
                             //Scenario sc = Scenario.makeScenario(sp);
