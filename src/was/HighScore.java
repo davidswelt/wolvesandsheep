@@ -283,7 +283,7 @@ public class HighScore extends TreeMap<String, Double> {
 
     }
 
-    void printInternal(Collection<HighScore> extraColumns, boolean byClass) {
+    synchronized void printInternal(Collection<HighScore> extraColumns, boolean byClass) {
 
         setAlignment();
         printHeader(extraColumns);

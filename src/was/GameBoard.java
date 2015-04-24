@@ -439,7 +439,7 @@ public class GameBoard {
         return sp;
     }
 
-    void printPlayerOverview() {
+    synchronized void printPlayerOverview() {
 
         String str = "";
         for (Player p : players) {

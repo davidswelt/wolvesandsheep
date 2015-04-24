@@ -48,37 +48,49 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
     static boolean exitRequested = false;
     static boolean pauseInitially = false;
     static boolean quiet = false;
-    volatile static HighScore crashLog = new HighScore().setTitle("crashes");
-    volatile static HighScore moveLog = new HighScore().setTitle("total calls to move()");
-    
 
     static void logPlayerMoveAttempt(Class pl, GameBoard g) {
         moveLog.inc(pl.getName() + ".Crash");
-        if (g!=null && g.scenario!=null) {
+        if (g != null && g.scenario != null) {
             String ss = "Scenario" + g.scenario.toString();
 
             moveLog.inc(pl.getName() + ".Crash." + ss);
         }
-        
+
     }
 
     static void logPlayerCrash(Class pl, Throwable ex, GameBoard g) {
-     
+
         crashLog.inc(pl.getName() + ".Crash");
 //        crashLog.inc(pl.getName() + ".Crash\\" + ex);
 
-        if (g!=null && g.scenario!=null) {
+        if (g != null && g.scenario != null) {
             String ss = "Scenario" + g.scenario.toString();
             crashLog.inc(pl.getName() + ".Crash." + ss);
             crashLog.inc(pl.getName() + ".Crash." + ss + "\\" + ex);
         }
-        
-    } 
-    volatile HighScore timing = new HighScore();
-    volatile HighScore scenarioTiming = new HighScore();
-    volatile HighScore highscore = new HighScore();
-    volatile HighScore scenarioScore = new HighScore();
-    volatile HighScore eatingScore = new HighScore();
+
+    }
+    volatile static HighScore crashLog = new HighScore().setTitle("crashes");
+    volatile static HighScore moveLog = new HighScore().setTitle("total calls to move()");
+
+    volatile HighScore timing;
+    volatile HighScore scenarioTiming;
+    volatile HighScore highscore;
+    volatile HighScore scenarioScore;
+    volatile HighScore eatingScore;
+
+    void initHighScores() {
+        crashLog = new HighScore().setTitle("crashes");
+        moveLog = new HighScore().setTitle("total calls to move()");
+
+        timing = new HighScore();
+        scenarioTiming = new HighScore();
+        highscore = new HighScore();
+        scenarioScore = new HighScore();
+        eatingScore = new HighScore();
+
+    }
 
     static String prefix(String s) {
         StringTokenizer st = new StringTokenizer(s, ":");
@@ -103,7 +115,6 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
      * @param repeats number of repetitions
      */
     static public void run(String listofPlayerClassNames, int repeats) {
-
 
         run(PlayerFactory.string2classlist(listofPlayerClassNames, ""), repeats);
 
@@ -172,8 +183,10 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
         List<Integer> selectedPlayers;
         int scenarioNum;
         int repeats;
+        int id;
 
-        public TournamentRunnable(boolean printHighscores, List<Integer> selectedPlayers, int scenarioNum, int repeats) {
+        public TournamentRunnable(int id, boolean printHighscores, List<Integer> selectedPlayers, int scenarioNum, int repeats) {
+            this.id = id;
             this.printHighscores = printHighscores;
             this.selectedPlayers = new ArrayList(selectedPlayers);
             this.scenarioNum = scenarioNum;
@@ -181,7 +194,7 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
         }
 
         public void run() {
-            startT(printHighscores, selectedPlayers, scenarioNum, repeats);
+            startT(printHighscores, selectedPlayers, scenarioNum, repeats, id);
         }
     }
 
@@ -228,13 +241,14 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
         PrintStream prevOutStream = System.out;
 
         if (threads == 1) {
-            startT(printHighscores, sp, scenario, repeats);
+            startT(printHighscores, sp, scenario, repeats, 0);
         } else {
+            System.out.println("Starting "+threads+" threads.");
             Thread[] ts = new Thread[threads];
             for (int t = 0; t < threads; t++) {
-                Runnable runner = new TournamentRunnable(printHighscores, sp, scenario, Math.max(1, (int) (repeats / threads)));
+                Runnable runner = new TournamentRunnable(t + 1, printHighscores, sp, scenario, Math.max(1, (int) (repeats / threads)));
                 ts[t] = new Thread(runner);
-                ts[t].start();
+                ts[t].start(); // thread start
 
             }
             // are we finished yet?
@@ -247,11 +261,12 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
 
                 }
             }
+            System.out.println("All threads synchronized.");
 
         }
         // with multi-threaded, we can't use logToFile properly and output will
         // not end up where it is supposed to be.
-        
+
         System.setOut(prevOutStream);
         System.setErr(prevErrStream);
 
@@ -274,7 +289,7 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
         return count;
     }
 
-    void startT(boolean printHighscores, List<Integer> selectedPlayers, int scenarioNum, int repeats) {
+    void startT(boolean printHighscores, List<Integer> selectedPlayers, int scenarioNum, int repeats, int threadID) {
 // 
         try {
 
@@ -296,6 +311,11 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
                 wolvesComb = new ArrayList();
                 wolvesComb.add(selWolves);
 
+                // Queues for the players come back from scenario in
+                // a deterministic order.  So, shuffle wolves/sheep
+                // in case they
+                Collections.shuffle(sheepComb);
+                Collections.shuffle(wolvesComb);
 
             } else {
                 for (Integer i = 0; i < players.size(); i++) {
@@ -317,7 +337,7 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
             }
 
             if (!quiet) {
-                System.out.println("" + sheepComb.size() + " sheep teams, " + wolvesComb.size() + " wolves, " + repeats + " reps.");
+                System.out.println("Thread " + threadID + ": " + sheepComb.size() + " sheep teams, " + wolvesComb.size() + " wolves, " + repeats + " reps.");
             }
 
             for (int r = 0; r < repeats && exitRequested == false; r++) {
@@ -330,7 +350,7 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
                 }
 
                 Scenario scenario = Scenario.makeScenario(theSc);
-                
+
                 for (ArrayList selWolfComb : wolvesComb) {
                     for (ArrayList selSheepComb : sheepComb) {
                         selectedPlayers = new ArrayList();
@@ -391,13 +411,19 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
                         if (sheep >= minNumSheepRequiredToRun && wolves >= minNumWolvesRequiredToRun) {
 
                             if (r == 0 && !quiet) {
-                                board.printPlayerOverview();
+                                synchronized (this) {
+                                    System.out.print("Thread " + threadID + " Scenario " + theSc + ": ");
+                                    board.printPlayerOverview();
+                                }
                                 // board.print();
                             }
 
                             try {
+
+                                // PLAY THE GAME
                                 Map<Player, int[]> s = board.playGame(pauseInitially);
 
+                                // DONE
                                 for (Map.Entry<Player, int[]> score : s.entrySet()) {
                                     Class cl = score.getKey().getClass();
                                     if (score.getKey().isIncludedInHighScore()) {
@@ -427,6 +453,9 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
                                 }
                             }
                         }
+                        // for some reason this helps... GC doesn't run that much otherwise.                        
+                        board = null;
+                        System.gc();
                     }
                 }
             }
@@ -441,18 +470,16 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
     Tournament(List<Class> playerClasses, int r, boolean ui) {
         //(Class[] playerClasses, int m, int n, int r) {
 
+        initHighScores();
+
         boardUI = ui;
 
         // Security Policy
         //System.setProperty("java.security.policy", "file:sandbox.policy");
         //System.setSecurityManager(new SecurityManager());
-
         players = new ArrayList();
 
-
-
         for (Class p : playerClasses) {
-
 
             if (PlayerTest.runTest(p, crashLog)) {
 
@@ -479,7 +506,6 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
 
     {
         if (!secPolicySet) {
-
 
             ClassLoader cl = Tournament.class.getClassLoader();
             java.net.URL policyURL = cl.getResource("sandbox2.policy");
