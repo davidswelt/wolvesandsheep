@@ -23,7 +23,7 @@ public class ClassTournament extends Tournament {
         System.out.println(s);
     }
 
-    public static void teamStructureInit(int repeats, int minutes) {
+    public static void teamStructureInit(int repeats, int minutes, int numThreads) {
        String[] sheepteams = new String[]{"Lambchop:aaa,bbb,ccc",  // hegarty probably dropped
             "Splendiferous Sheep:ddd,eee,fff",
             "Team C:ggg,hhh,iii",  // pipkin probably dropped
@@ -37,9 +37,7 @@ public class ClassTournament extends Tournament {
             "Team Wolfenstein:dd,ee,ff",
             "Team C:gg,hh,ii",
             "Meat Eater (Classic):jj,kk,ll,mm"};
-        
-        run(wolves, sheepteams, repeats, minutes);
-
+       
         run(wolves, sheepteams, repeats, minutes, numThreads);
     }
 
