@@ -1,8 +1,14 @@
 package was;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -17,20 +23,19 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * The Tournament class describes and manages the game tournament. 
- * 
- * This is the main (entry) class.
- * Usage: java -jar WolvesAndSheep.jar -r R -s S -t -e -p -c -q CLASS1 CLASS2 CLASS3 CLASS4 CLASS5 (...)
- *       -r R      == play R repeats of each game.
- *       -s S      == set up scenario no. S (0 or default for random)
- *       -t        == play a tournament of all combinations of players (4 sheep, one wolf)
- *       -e        == ignore player's exceptions
- *       -p        == pause initially if using graphical UI
- *       -c        == do not show the graphical user interface 
- *       -q        == do not print progress info 
- * Example: java -jar WolvesAndSheep.jar -r 10 basic.Wolf basic.Sheep basic.Sheep basic.Sheep basic.Sheep
- * Example for NetBeans (Run, Project Configuration, Arguments): -r 10 basic.Wolf basic.Sheep basic.Sheep basic.Sheep basic.Sheep
- * 
+ * The Tournament class describes and manages the game tournament.
+ *
+ * This is the main (entry) class. Usage: java -jar WolvesAndSheep.jar -r R -s S
+ * -t -e -p -c -q CLASS1 CLASS2 CLASS3 CLASS4 CLASS5 (...) -r R == play R
+ * repeats of each game. -s S == set up scenario no. S (0 or default for random)
+ * -t == play a tournament of all combinations of players (4 sheep, one wolf) -e
+ * == ignore player's exceptions -p == pause initially if using graphical UI -c
+ * == do not show the graphical user interface -q == do not print progress info
+ * Example: java -jar WolvesAndSheep.jar -r 10 basic.Wolf basic.Sheep
+ * basic.Sheep basic.Sheep basic.Sheep Example for NetBeans (Run, Project
+ * Configuration, Arguments): -r 10 basic.Wolf basic.Sheep basic.Sheep
+ * basic.Sheep basic.Sheep
+ *
  *
  * @author dr
  */
@@ -339,7 +344,6 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
 //            if (!quiet) {
 //                logout("Thread " + threadID + ": " + sheepComb.size() + " sheep teams, " + wolvesComb.size() + " wolves, " + repeats + " reps.");
 //            }
-
             for (int r = 0; r < repeats && exitRequested == false; r++) {
 
                 int theSc = scenarioNum;
@@ -380,12 +384,11 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
                             Stack<GameLocation> queue = isWolf(pclass) ? wolfQueue : sheepQueue;
                             GameLocation initialLocation = queue.empty() ? board.randomEmptyLocation(wolfQueue, sheepQueue) : queue.pop();
 
-
                             Player player = PlayerFactory.makePlayerInstance(pclass);
                             if (player != null) {
 
                                 board.addPlayer(player, initialLocation);
-                            } 
+                            }
                             // note use even if player wasn't added (due to crash!)
                             highscore.noteUse(pclass.getName());
                             scenarioScore.noteUse("Scenario " + scenario.toString() + "\\" + pclass.getName());
@@ -411,7 +414,7 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
                         }
 
                         if (sheep >= minNumSheepRequiredToRun && wolves >= minNumWolvesRequiredToRun) {
-                            
+
                             if (r == 0 && !quiet) {
                                 synchronized (this) {
                                     logout("Thread " + threadID + " Scenario " + theSc + ": ");
@@ -490,11 +493,9 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
                         .isAssignableFrom(p)) {
                     logerr(
                             "Error: " + p.getName() + " is not a subtype of was.SheepPlayer or was.WolfPlayer.");
-                } else {
-                    if (PlayerTest.runUnitTest(p, crashLog)) {
-                        highscore.inc(p.getName(), 0.0);
-                        players.add(p);
-                    }
+                } else if (PlayerTest.runUnitTest(p, crashLog)) {
+                    highscore.inc(p.getName(), 0.0);
+                    players.add(p);
                 }
             }
         }
@@ -504,24 +505,27 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
     }
     static String dividerLine = "_______________________________________________________________________________________________________________________________\n\n";
     // static init
-    private static boolean secPolicySet = true; // FIXME  should be false.
+    private static boolean secPolicySet = false;
 
     {
         if (!secPolicySet) {
 
             ClassLoader cl = Tournament.class.getClassLoader();
             java.net.URL policyURL = cl.getResource("sandbox2.policy");
-            System.setProperty("java.security.policy", policyURL.toString());
+            try {
+                System.setProperty("java.security.policy", Paths.get(policyURL.toURI()).toString());
+            } catch (URISyntaxException ex) {
+                Logger.getLogger(Tournament.class.getName()).log(Level.SEVERE, null, ex);
+            }
             SecurityManager sm = new SecurityManager();
             System.setSecurityManager(sm);
             secPolicySet = true;
         }
-
     }
-
 
     static final java.io.PrintStream standardSystemOut = System.out;
     static final java.io.PrintStream standardSystemErr = System.err;
+
     synchronized static void logout(String s) {
         PrintStream previousStream = System.out;
         System.setOut(standardSystemOut);
@@ -529,6 +533,7 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
         System.setOut(previousStream);
 
     }
+
     synchronized static void logerr(String s) {
         PrintStream previousStream = System.err;
         System.setErr(standardSystemErr);
@@ -536,6 +541,7 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
         System.setErr(previousStream);
 
     }
+
     public static void main(String args[]) {
 
         try {
