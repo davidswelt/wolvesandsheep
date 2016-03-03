@@ -99,6 +99,31 @@ You will get a test environment to run your class against basic other wolves or 
 Do not rely on any private field or function, or anything that is not documented.  You cannot extend (or change) the “was” package – it will be removed from your .jar file.
 
 
+Running the environment
+===
+
+You can run Wolves and Sheep with a graphical user interface to observe the players.
+The player classes that it runs with are configured via the program's "Arguments", which,
+in NetBeans, are set in Run -> Set Project Configuration -> Customize -> Run Category.
+
+In the following, we show the possible options and some examples (see below for the Netbeans 
+example).
+
+Usage: java -jar WolvesAndSheep.jar -r R -s S -t -e -p -c -q CLASS1 CLASS2 CLASS3 CLASS4 CLASS5 (...)
+       -r R      ==> play R repeats of each game.
+       -j N      ==> use N threads simultaneously
+       -s S      ==> set up scenario no. S (0 or default for random)
+       -t        ==> play a tournament of all combinations of players (4 sheep, one wolf)
+       -e        ==> catch player's exceptions and timeouts
+       -p        ==> pause initially if using graphical UI
+       -c        ==> do not show the graphical user interface 
+       -q        ==> do not print progress info 
+Example: java -jar WolvesAndSheep.jar -r 10 basic.Wolf basic.Sheep basic.Sheep basic.Sheep basic.Sheep
+Example for NetBeans (Run Configuration, Program arguments): -r 10 basic.Wolf basic.Sheep basic.Sheep basic.Sheep basic.Sheep
+
+  
+
+
 
 Performance Requirements
 ===
