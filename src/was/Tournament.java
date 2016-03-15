@@ -1,12 +1,6 @@
 package was;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.PrintStream;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -31,7 +25,8 @@ import java.util.logging.Logger;
  *       -s S      == set up scenario no. S (0 or default for random)
  *       -t        == play a tournament of all combinations of players (4 sheep, one wolf)
  *       -e        == ignore player's exceptions
- *       -m        == do not randomize player positions etc.
+ *       -m        ==> use same randomization of initial player positions etc.
+         -m S      ==> use randomization number S for initial player positions etc.
  *       -p        == pause initially if using graphical UI
  *       -c        == do not show the graphical user interface 
  *       -q        == do not print progress info 
@@ -589,6 +584,14 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
 
                 } else if ("-m".equals(s)) {
                     long randomSeed = 1L;
+                    try {
+                        randomSeed = Integer.parseInt(args[i]);
+                        i++; // parsing worked
+                    }
+                    catch (NumberFormatException  e)
+                    {
+                        // no number given
+                    }
                     random.setSeed(randomSeed++);
                     Scenario.rand.setSeed(randomSeed++);
                     GameBoard.rand.setSeed(randomSeed++);
@@ -616,7 +619,8 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
                 logerr("       -s S      ==> set up scenario no. S (0 or default for random)");
                 logerr("       -t        ==> play a tournament of all combinations of players (4 sheep, one wolf)");
                 logerr("       -e        ==> catch player's exceptions and timeouts");
-                logerr("       -m        ==> do not randomize initial player positions etc.");
+                logerr("       -m        ==> use same randomization of initial player positions etc.");
+                logerr("       -m S      ==> use randomization number S for initial player positions etc.");
                 logerr("       -p        ==> pause initially if using graphical UI");
                 logerr("       -c        ==> do not show the graphical user interface ");
                 logerr("       -q        ==> do not print progress info ");
