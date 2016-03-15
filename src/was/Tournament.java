@@ -25,6 +25,7 @@ import java.util.logging.Logger;
  *       -s S      == set up scenario no. S (0 or default for random)
  *       -t        == play a tournament of all combinations of players (4 sheep, one wolf)
  *       -e        == ignore player's exceptions
+ *       -m        == do not randomize player positions etc.
  *       -p        == pause initially if using graphical UI
  *       -c        == do not show the graphical user interface 
  *       -q        == do not print progress info 
@@ -579,10 +580,14 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
 
                     tourn = true;
 
+                } else if ("-m".equals(s)) {
+                    long randomSeed = 1L;
+                    random.setSeed(randomSeed++);
+                    Scenario.rand.setSeed(randomSeed++);
+                    GameBoard.rand.setSeed(randomSeed++);
+                    Move.rand.setSeed(randomSeed++);
                 } else if ("-p".equals(s)) {
-
                     pauseInitially = true;
-
                 } else if ("--secret".equals(s)) {
 
                     Scenario.useSecretScenarioClass = true;
@@ -604,6 +609,7 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
                 logerr("       -s S      ==> set up scenario no. S (0 or default for random)");
                 logerr("       -t        ==> play a tournament of all combinations of players (4 sheep, one wolf)");
                 logerr("       -e        ==> catch player's exceptions and timeouts");
+                logerr("       -m        ==> do not randomize initial player positions etc.");
                 logerr("       -p        ==> pause initially if using graphical UI");
                 logerr("       -c        ==> do not show the graphical user interface ");
                 logerr("       -q        ==> do not print progress info ");

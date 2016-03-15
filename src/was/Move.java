@@ -12,7 +12,7 @@ public class Move {
     public double delta_x;
     public double delta_y;
     
-    private static Random rand = new Random();
+    static Random rand = new Random();
     
     /**
      * Create a move
