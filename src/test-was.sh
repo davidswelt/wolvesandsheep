@@ -17,14 +17,14 @@ file=$file2
 touch -r "$file" /tmp/sametime.tmp
 
 # delete javafx and was packages if necessary
-zip -d $file javafx/\*
-zip -d $file was/\*
-zip -d $file players/\*
-zip -d $file basic/\*
-zip -d $file sandbox2.policy test-was.sh reitter.jar run.py
+zip -d $file javafx/\* >/dev/null
+zip -d $file was/\* >/dev/null
+zip -d $file players/\* >/dev/null
+zip -d $file basic/\* >/dev/null
+zip -d $file sandbox2.policy test-was.sh reitter.jar run.py >/dev/null
 
 if [ "$file" != "players/reitter.jar" ]; then
-   zip -d $file reitter/*
+   zip -d $file reitter/* >/dev/null
 fi
 
 touch -r /tmp/sametime.tmp "$file"
