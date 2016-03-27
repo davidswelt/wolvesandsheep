@@ -1,5 +1,9 @@
 package was;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -11,6 +15,8 @@ import java.util.SortedSet;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * This class contains hacks. To do: re-write.
@@ -26,6 +32,13 @@ public class HighScore extends TreeMap<String, Double> {
     boolean normalizing = false;  // set to true if noteUse is called once
     boolean trackIndividualValues = false; // true will cause a memory leak
     boolean showCI = false;
+    boolean tabSep = false;
+    String keyHeaderName = "";
+    String extraColumnName = null;
+    String extraColumnValue = null;
+    boolean printHeader = true;
+    PrintStream out = System.out;
+
     /* Currently, not showing confidence intervals as it would
      be informative only if across players, i.e., aggregating all scenarios.
     
@@ -33,8 +46,36 @@ public class HighScore extends TreeMap<String, Double> {
     public boolean printAsPercentage = false;
     String title = "";
 
-    HighScore setTitle(String t) {
+    HighScore setTitle(String t, String keytitle) {
         title = t;
+        keyHeaderName = keytitle;
+        return this;
+    }
+
+    HighScore setExtraColumn(String title, String value) {
+        extraColumnName = title;
+        extraColumnValue = value;
+        return this;
+    }
+
+    HighScore setOutputFile(String outputCSV) {
+        if (outputCSV == null) {
+            out = System.out;
+            tabSep = false;
+        } else {
+            try {
+                if (new File(outputCSV).exists()) {
+                    // if file (CSV) is already there, presumably
+                    // it's already got a header
+                    printHeader = false;
+                }
+                out = new PrintStream(
+                        new FileOutputStream(outputCSV, true));
+                tabSep = true;
+            } catch (IOException ex) {
+                Logger.getLogger(HighScore.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
         return this;
     }
 
@@ -139,57 +180,80 @@ public class HighScore extends TreeMap<String, Double> {
     int printAlignment = 20;
 
     void setAlignment() {
-        printAlignment = 10;
-        for (String k : keySet()) {
-            printAlignment = Math.max(printAlignment, removePrefix(k).length());
+        if (tabSep) {
+            printAlignment = 1;
+        } else {
+            printAlignment = 10;
+            for (String k : keySet()) {
+                printAlignment = Math.max(printAlignment, removePrefix(k).length());
+            }
         }
     }
 
     String leftAlign(String s, int a) {
+        if (tabSep) {
+            return s;
+        }
         return (a - s.length() > 0 ? String.format("%" + (a - s.length()) + "s", "") : "")
                 + String.format("%s", s);
     }
 
     String rightAlign(String s, int a) {
+        if (tabSep) {
+            return s;
+        }
         return String.format("%" + a + "s", s);
     }
 
     synchronized void printHeader(Collection<HighScore> extraColumns) {
-        System.out.printf("\n%" + printAlignment + "s  %s", "", leftAlign(title, COLUMNWIDTH));
+        String t = tabSep ? "\t" : "";
+        out.printf("%s " + t + " %s" + t, leftAlign(keyHeaderName, printAlignment), leftAlign(title, COLUMNWIDTH));
         if (normalizing && showCI) {
-            System.out.printf("%s", leftAlign("CI", COLUMNWIDTH));
+            out.printf("%s" + t, leftAlign("CI", COLUMNWIDTH));
         }
 
         if (extraColumns != null) {
             for (HighScore h : extraColumns) {
                 if (h != null) {
-                    System.out.printf("%s", leftAlign(h.title, COLUMNWIDTH));
+                    out.printf("%s" + t, leftAlign(h.title, COLUMNWIDTH));
                 }
             }
 
         }
+
+        if (extraColumnName != null) {
+            out.printf("%s" + t, leftAlign(extraColumnName, extraColumnValue.length()));
+        }
+
+        out.println();
     }
 
     synchronized public void printKeys(List<String> keys, boolean sorted, Collection<HighScore> extraColumns) {
 
+        String t = "";
         String format;
-        if (normalizing) {
-            format = "%.3f";
+        if (tabSep) {
+            format = "%f\t";
+            t = "\t";
         } else {
-            format = "%.0f";
-        }
+            if (normalizing) {
+                format = "%.3f";
+            } else {
+                format = "%.0f";
+            }
 
-        if (printAsPercentage) {
-            format += "%%";
+            if (printAsPercentage) {
+                format += "%%";
+            }
         }
         // sort it
         Collections.sort(keys, new TreeValueComparator());
         for (String k : keys) {
 
-            System.out.print(rightAlign(removePrefix(k), printAlignment) + ": ");
-            System.out.print(rightAlign(String.format(format, getNormalized(k)), COLUMNWIDTH));
+            out.print(rightAlign(removePrefix(k), printAlignment) + (tabSep ? t : ": "));
+            out.print(rightAlign(String.format(format, getNormalized(k)), COLUMNWIDTH));
             if (normalizing && showCI) {
-                System.out.print(rightAlign(String.format("+-" + format, getSD(k) * 1.96), COLUMNWIDTH));
+                out.print(rightAlign(String.format("+-" + format, getSD(k) * 1.96), COLUMNWIDTH));
             }
             if (extraColumns != null) {
                 for (HighScore h : extraColumns) {
@@ -201,13 +265,17 @@ public class HighScore extends TreeMap<String, Double> {
                             if (printAsPercentage) {
                                 n *= 100;
                             }
-                            System.out.print(rightAlign(String.format(format, n), COLUMNWIDTH));
+                            out.print(rightAlign(String.format(format, n), COLUMNWIDTH));
                         }
                     }
                 }
 
             }
-            System.out.println();
+
+            if (extraColumnName != null) {
+                out.printf(extraColumnValue + t);
+            }
+            out.println();
         }
     }
 
@@ -253,23 +321,23 @@ public class HighScore extends TreeMap<String, Double> {
         }
 
         // Header line (all column names)
-        System.out.print(rightAlign("", rowlen) + "\t");
+        out.print(rightAlign("", rowlen) + "\t");
         for (String c : cols) {
             String cs = getPackage(c);
-            System.out.print(leftAlign(cs, cs.length()) + "\t");
+            out.print(leftAlign(cs, cs.length()) + "\t");
 
         }
-        System.out.println();
+        out.println();
         for (String r : rows) {
-            System.out.print(rightAlign(getPackage(r), rowlen) + "\t");
+            out.print(rightAlign(getPackage(r), rowlen) + "\t");
             for (String c : cols) {
                 String key = r + "\\" + c;
                 Integer count = (int) get(key);
 
-                System.out.print(leftAlign(count.toString(), getPackage(c).length()) + "\t");
+                out.print(leftAlign(count.toString(), getPackage(c).length()) + "\t");
 
             }
-            System.out.println();
+            out.println();
 
         }
     }
@@ -308,8 +376,10 @@ public class HighScore extends TreeMap<String, Double> {
         }
         // for each category, print it, sorted
         for (String k : new TreeSet<String>(cats.keySet())) {
-            System.out.println();
-            System.out.println(k + ":");
+            if (!tabSep) {
+                out.println();
+                out.println(k + ":");
+            }
             printKeys(cats.get(k), true, extraColumns);
         }
     }

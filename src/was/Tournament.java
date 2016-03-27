@@ -73,8 +73,8 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
         }
 
     }
-    volatile static HighScore crashLog = new HighScore().setTitle("crashes");
-    volatile static HighScore moveLog = new HighScore().setTitle("total calls to move()");
+    volatile static HighScore crashLog = new HighScore().setTitle("crashes", "class");
+    volatile static HighScore moveLog = new HighScore().setTitle("total calls to move()", "class");
 
     volatile HighScore timing;
     volatile HighScore scenarioTiming;
@@ -83,8 +83,8 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
     volatile HighScore eatingScore;
 
     void initHighScores() {
-        crashLog = new HighScore().setTitle("crashes");
-        moveLog = new HighScore().setTitle("total calls to move()");
+        crashLog = new HighScore().setTitle("crashes", "class");
+        moveLog = new HighScore().setTitle("total calls to move()", "class");
 
         timing = new HighScore();
         scenarioTiming = new HighScore();
@@ -146,6 +146,7 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
      * players. Otherwise, all given players will be added to the game board at
      * once.
      * @param printHighScore print highscore if true.
+     * @param threads number of threads to run in parallel
      * @return resulting Tournament object.
      */
     static public Tournament run(List<Class> playerClasses, int r, boolean ui, int scenario, boolean comb, boolean printHighScore, int threads) {
@@ -587,9 +588,7 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
                     try {
                         randomSeed = Integer.parseInt(args[i]);
                         i++; // parsing worked
-                    }
-                    catch (NumberFormatException  e)
-                    {
+                    } catch (NumberFormatException e) {
                         // no number given
                     }
                     random.setSeed(randomSeed++);

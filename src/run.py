@@ -3,35 +3,51 @@
 import random
 
 assignment_name = 'wasJAR'
-targetfile = "/home/dreitter/submission/media/results/latest.html"
+homepath = '/Users/dreitter'
+targetfile = "/Users/dreitter/submission/media/results/latest.html"
 tmpf = "%s"%random.randint(1, 10000)
 ist240 = True # run actual 240 tournament
-tourn_args = "-d 20"  # run for 10 minutes
+tourn_args = "-d 45 -j 4 -c log/log.tsv"  # run for 45 minutes, four cores
 #tourn_args = "-q -r 8"
 
 playerspath = "players/"
 
 import os
+import zipfile
+import re
 
-os.system("rm -r players >/dev/null; mkdir players; cp -p ../submission/media/%s/*.jar %s"%(assignment_name,playerspath));
 
+os.system("rm -r players >/dev/null; mkdir players");
+os.system("scp -p dreitter@cc.ist.psu.edu:/home/dreitter/submission/media/%s/*.jar %s"%(assignment_name,playerspath))
 os.system("./test-was.sh")
 if ist240:
-    tourn_args = "-ist240 " + tourn_args
+    tourn_args = "" + tourn_args
     jars = []
 else:
-
-
-    # list of players
-
     jars = ['basic.Wolf','basic.Sheep']
 
-    for dir in ["players","classic.players"]:
-        for r,d,f in os.walk(dir):
-            for files in f:
-                if files.endswith(".jar"):
-                    jars += [files[:-4]]
 
+def readPackageNames(d,f):
+    
+
+    zip=zipfile.ZipFile(d+'/'+f)
+    l = zip.namelist()
+    regex = re.compile(r'^([a-zA-Z0-9_]+)/(Sheep|Wolf)\.(class|java)$')
+    packages = [m.group(1) for m in [regex.match(lib) for lib in l] if m] 
+    return packages
+
+# list of players
+
+
+packages = set()
+for dir in ["players","classic.players"]:
+    for r,d,f in os.walk(dir):
+        for files in f:
+            if not ist240 and files.endswith(".jar"):
+                jars += [files[:-4]]
+            packages = packages.union(readPackageNames(dir,files))
+
+print packages
 
 import datetime
 
@@ -79,5 +95,10 @@ with open(tmpfile, "a") as text_file:
 
     text_file.write("</pre>Finished:"+now()+".{% endblock content %}")
 
+
+os.system("R --vanilla < graphs.R")
+
+
 os.system("mv \"%s\" \"%s\""%(tmpfile,targetfile))
 os.system("rm \"%s\""%(cmdtmpfile))
+os.system("scp \"%s\" log/*.png dreitter@cc.ist.psu.edu:/home/dreitter/submission/media/results/"%(targetfile))
