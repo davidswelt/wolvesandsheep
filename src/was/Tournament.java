@@ -510,14 +510,31 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
 
             ClassLoader cl = Tournament.class.getClassLoader();
             java.net.URL policyURL = cl.getResource("sandbox2.policy");
-            try {
-                System.setProperty("java.security.policy", Paths.get(policyURL.toURI()).toString());
-            } catch (URISyntaxException ex) {
-                Logger.getLogger(Tournament.class.getName()).log(Level.SEVERE, null, ex);
+
+            System.out.println(policyURL.toString());
+           
+            if (! policyURL.toString().contains("!")) {
+                // the following is the correct version
+                // it works on windows
+                // but it fails when loading from a JAR file...
+                // so it can't run on the server
+                // see also: http://stackoverflow.com/questions/22605666/java-access-files-in-jar-causes-java-nio-file-filesystemnotfoundexception
+                try {
+                    System.setProperty("java.security.policy", Paths.get(policyURL.toURI()).toString());
+                } catch (URISyntaxException ex) {
+                    Logger.getLogger(Tournament.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
+            else
+            {    // this version will fail on windows
+            // but it runs from jar files
+                 System.setProperty("java.security.policy", policyURL.toString());
+            }
+
             SecurityManager sm = new SecurityManager();
             System.setSecurityManager(sm);
             secPolicySet = true;
+
         }
     }
 
