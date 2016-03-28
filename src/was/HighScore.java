@@ -354,7 +354,8 @@ public class HighScore extends TreeMap<String, Double> {
     synchronized void printInternal(Collection<HighScore> extraColumns, boolean byClass) {
 
         setAlignment();
-        printHeader(extraColumns);
+        if (printHeader)
+            printHeader(extraColumns);
         Set<String> keys = keySet();
         Map<String, List<String>> cats = new TreeMap(); // categories
         // categories
