@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+<key>UserName</key>
+<string>dreitter</string>
+<key>ProcessType</key>
+    <string>Standard</string>
+    <key>Label</key>
+    <string>com.david-reitter.wolvesandsheep</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Users/dreitter/was/run.py</string>
+    </array>
+<key>KeepAlive</key>
+    <false/>
+<key>StartCalendarInterval</key>
+<array>
+<dict><key>Hour</key><integer>01</integer></dict>
+<dict><key>Hour</key><integer>03</integer></dict>
+<dict><key>Hour</key><integer>05</integer></dict>
+<dict><key>Hour</key><integer>07</integer></dict>
+<dict><key>Hour</key><integer>09</integer></dict>
+<dict><key>Hour</key><integer>11</integer></dict>
+<dict><key>Hour</key><integer>13</integer></dict>
+<dict><key>Hour</key><integer>15</integer></dict>
+<dict><key>Hour</key><integer>17</integer></dict>
+<dict><key>Hour</key><integer>19</integer></dict>
+<dict><key>Hour</key><integer>21</integer></dict>
+<dict><key>Hour</key><integer>23</integer></dict>
+</array>
+<key>WorkingDirectory</key>
+    <string>/Users/dreitter/was/</string>
+</dict>
+</plist>
