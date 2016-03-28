@@ -10,6 +10,7 @@ pl <- function(title,da,outfile=NULL)
 
 d = read.table("log/log.tsv",sep="\t",header=T,quote="")
 d$total = as.numeric(as.character(d$total))  # in case of extraneous headers
+d$time = as.numeric(as.character(d$time))
 
 w <- d[grep(".Wolf$", d$class), ]
 s <- d[grep(".Sheep$", d$class), ]
