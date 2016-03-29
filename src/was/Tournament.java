@@ -25,8 +25,8 @@ import java.util.logging.Logger;
  *       -s S      == set up scenario no. S (0 or default for random)
  *       -t        == play a tournament of all combinations of players (4 sheep, one wolf)
  *       -e        == ignore player's exceptions
- *       -m        ==> use same randomization of initial player positions etc.
-         -m S      ==> use randomization number S for initial player positions etc.
+ *       -m        == use same randomization of initial player positions etc.
+         -m S      == use randomization number S for initial player positions etc.
  *       -p        == pause initially if using graphical UI
  *       -c        == do not show the graphical user interface 
  *       -q        == do not print progress info 
