@@ -510,7 +510,8 @@ public class GameBoard {
      * @return true if cell X, Y is empty.
      */
     public boolean isEmptyCell(int x, int y) {
-        return isEmptyCell(getIndex(x, y));
+        int index = getIndex(x, y);
+        return index < board.size() && isEmptyCell(index);
     }
 
     boolean isEmptyCell(int i) {
