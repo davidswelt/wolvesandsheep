@@ -15,6 +15,8 @@ playerspath = "players/"
 import os
 import zipfile
 import re
+import os.path,time
+import datetime
 
 
 os.system("rm -r players >/dev/null; mkdir players");
@@ -28,8 +30,6 @@ else:
 
 
 def readPackageNames(d,f):
-    
-
     zip=zipfile.ZipFile(d+'/'+f)
     l = zip.namelist()
     regex = re.compile(r'^([a-zA-Z0-9_]+)/(Sheep|Wolf)\.(class|java)$')
@@ -40,12 +40,19 @@ def readPackageNames(d,f):
 
 
 packages = set()
+packagetimes = {}
 for dir in ["players","classic.players"]:
     for r,d,f in os.walk(dir):
-        for files in f:
-            if not ist240 and files.endswith(".jar"):
+        for file in f:
+            if not ist240 and file.endswith(".jar"):
                 jars += [files[:-4]]
-            packages = packages.union(readPackageNames(dir,files))
+            t = os.path.getmtime(dir+'/'+file)
+            ps = readPackageNames(dir,file)
+            for p in ps:
+                packagetimes[p] = t
+            packages = packages.union(ps)
+            
+
 
 print packages
 
@@ -77,28 +84,26 @@ else:
     os.system("cat \"%s\" >>\"%s\""%(cmdtmpfile,tmpfile))
 
     
-import os.path,time
-import datetime
 with open(tmpfile, "a") as text_file:
-    
+#   with sys.stdout as text_file:
     print  >>text_file, "<h3>File versions</h3>"
     print  >>text_file, "<table border=0 cellspacing=10>"
-
-    l = os.listdir(playerspath)
-    l.sort(cmp)
-    for infile in l:
-   
-        t = os.path.getmtime(playerspath+infile)
-        print >>text_file, ("<tr><td>%s</td><td>%s</td></tr>"%(infile,datetime.datetime.fromtimestamp(t)))
-
+    recent_threshold = datetime.datetime.now() - datetime.timedelta(days=1)
+    for p,t in sorted(packagetimes.items()):
+        tdt = datetime.datetime.fromtimestamp(t)
+        new=""
+        if tdt>recent_threshold:
+            new=" <B>NEW</B>"
+        print >>text_file, ("<tr><td>%s</td><td>%s%s</td></tr>"%(p,tdt,new))
     print  >>text_file, "</table>"
-
     text_file.write("</pre>Finished:"+now()+".{% endblock content %}")
 
-
+# plotly needs pandoc (in local path)
+os.environ["PATH"] += os.pathsep + "/usr/local/bin"
 os.system("R --vanilla < graphs.R")
+
 
 
 os.system("mv \"%s\" \"%s\""%(tmpfile,targetfile))
 os.system("rm \"%s\""%(cmdtmpfile))
-os.system("scp \"%s\" log/*.png dreitter@cc.ist.psu.edu:/home/dreitter/submission/media/results/"%(targetfile))
+os.system("scp \"%s\" log/*.png log/*.html dreitter@cc.ist.psu.edu:/home/dreitter/submission/media/results/"%(targetfile))
