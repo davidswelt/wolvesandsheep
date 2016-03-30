@@ -342,8 +342,10 @@ public class HighScore extends TreeMap<String, Double> {
             out.print(rightAlign(getPackage(r), rowlen) + "\t");
             for (String c : cols) {
                 String key = r + "\\" + c;
-                Integer count = (int) get(key);
-
+                String key2 = c + "\\" + r;
+                // we don't know which one is which...
+                Integer count =  (int) (super.get(key)!=null?get(key):get(key2));
+                
                 out.print(leftAlign(count.toString(), getPackage(c).length()) + "\t");
 
             }
