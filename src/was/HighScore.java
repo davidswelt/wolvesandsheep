@@ -304,7 +304,7 @@ public class HighScore extends TreeMap<String, Double> {
         Set<String> keys = keySet();
         SortedSet<String> cols = new TreeSet();
         SortedSet<String> rows = new TreeSet();
-        int rowlen = 1;
+        int rowlen = 1, collen = 1;
 
         // categories
         for (String k : keys) {
@@ -315,11 +315,21 @@ public class HighScore extends TreeMap<String, Double> {
             String r = t.nextToken();
             rows.add(r);
             rowlen = Math.max(rowlen, getPackage(r).length());
+
             if (t.hasMoreTokens()) {
-                cols.add(t.nextToken());
+                String c = t.nextToken();
+                cols.add(c);
+                collen = Math.max(collen, getPackage(c).length());
             }
         }
+        if (cols.size() > rows.size()) {
+            printTable(collen, rows, cols);
+        } else {
+            printTable(rowlen, cols, rows);
+        }
+    }
 
+    private void printTable(int rowlen, SortedSet<String> cols, SortedSet<String> rows) {
         // Header line (all column names)
         out.print(rightAlign("", rowlen) + "\t");
         for (String c : cols) {
@@ -354,8 +364,9 @@ public class HighScore extends TreeMap<String, Double> {
     synchronized void printInternal(Collection<HighScore> extraColumns, boolean byClass) {
 
         setAlignment();
-        if (printHeader)
+        if (printHeader) {
             printHeader(extraColumns);
+        }
         Set<String> keys = keySet();
         Map<String, List<String>> cats = new TreeMap(); // categories
         // categories
