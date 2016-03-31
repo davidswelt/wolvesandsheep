@@ -705,9 +705,14 @@ public class GameBoard {
         Tournament.logPlayerCrash(pl, ex, this);
     }
 
-    synchronized void exitRequested() {
+    // callback from game backend (video game)
+    synchronized void exitRequested(boolean reset) {
         // set marker so that repetitive processes know to terminate
         Tournament.exitRequested = true;
+        if (reset)
+        {
+            Tournament.resetRequested = true;
+        }
     }
     Scenario scenario = null;
     // callback from game backend
@@ -724,6 +729,7 @@ public class GameBoard {
     boolean isFinished() {
         return getSheepPositions().isEmpty() || (currentTimeStep >= maxTimeStep);
     }
+    
 
     Map<Player, int[]> playGame(boolean pauseInitially) {
 

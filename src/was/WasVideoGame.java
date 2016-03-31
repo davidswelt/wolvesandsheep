@@ -2,6 +2,7 @@ package was;
 
 import ch.aplu.jgamegrid.Actor;
 import ch.aplu.jgamegrid.GGExitListener;
+import ch.aplu.jgamegrid.GGResetListener;
 import java.awt.Font;
 import java.awt.Point;
 import java.awt.RenderingHints;
@@ -12,7 +13,7 @@ import java.awt.RenderingHints;
  * If the graphical UI is not in use, GameBoard uses WasBlankGame instead, 
  * which also implemeents the WasGameBackend interface, but does essentially nothing.
  */
-class WasVideoGame extends ch.aplu.jgamegrid.GameGrid implements WasGameBackend, GGExitListener {
+class WasVideoGame extends ch.aplu.jgamegrid.GameGrid implements WasGameBackend, GGExitListener, GGResetListener {
 
     final GameBoard board;
 
@@ -24,6 +25,7 @@ class WasVideoGame extends ch.aplu.jgamegrid.GameGrid implements WasGameBackend,
         setSimulationPeriod(50);
 
         addExitListener(this);
+        addResetListener(this);
 
     }
 
@@ -61,7 +63,17 @@ class WasVideoGame extends ch.aplu.jgamegrid.GameGrid implements WasGameBackend,
     @Override
     public boolean notifyExit() {
         synchronized (board) {
-            board.exitRequested();
+            board.exitRequested(false);
+            board.notify();
+
+        }
+        return false; // do not exit on my behalf
+    }
+
+    @Override
+    public boolean resetted() {
+        synchronized (board) {
+            board.exitRequested(true);
             board.notify();
 
         }
