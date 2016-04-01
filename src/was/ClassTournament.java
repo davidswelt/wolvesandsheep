@@ -94,9 +94,18 @@ public class ClassTournament extends Tournament {
                     for (Class w2 : wolves2) // for each wolf within a group
                     {
                         List<Class> p = PlayerFactory.string2classlist(s, ".Sheep"); // all sheep
+
+                        // If we do not have four sheep, add a random one
+                        while (p.size()>0 && p.size()<4)
+                        {
+                            p.add(p.get(Tournament.random.nextInt(p.size())));
+                        }
+
                         p.add(w2); // one wolf
+
                         // randomize order of sheep
                         Collections.shuffle(p);
+
                         double avgtimeperrun = 0;
                         if (runcount > runsPerTournament * .1) {
                             avgtimeperrun = (System.currentTimeMillis() - startTime) / runcount;
