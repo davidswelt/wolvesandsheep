@@ -84,9 +84,6 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
     volatile HighScore eatingScore;
 
     void initHighScores() {
-        crashLog = new HighScore().setTitle("crashes", "class");
-        moveLog = new HighScore().setTitle("total calls to move()", "class");
-
         timing = new HighScore();
         scenarioTiming = new HighScore();
         highscore = new HighScore();
