@@ -121,6 +121,15 @@ public class HighScore extends TreeMap<String, Double> {
         normalizing = true;
     }
 
+    public void scale(String key, Double by) {
+        Integer u = uses.get(key);
+        if (u != null) {
+            u = (int) (u * (1.0/by) + .5);
+            uses.put(key, u);
+
+        }
+    }
+
     public double get(String s) {
         Double f = super.get(s);
         if (f == null) {

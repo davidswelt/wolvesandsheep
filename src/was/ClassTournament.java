@@ -14,7 +14,9 @@ import static was.Tournament.quiet;
  * @author dr
  */
 public class ClassTournament extends Tournament {
+
     private static String outputCSV;
+    private static boolean treatMissingPlayersAs0 = true;
 
     static void out(String s) {
         System.out.print(s);
@@ -49,29 +51,42 @@ public class ClassTournament extends Tournament {
         Map<String, HighScore> scenarioHighScore = new TreeMap();
         Map<String, HighScore> scenarioTiming = new TreeMap();
         HighScore totalEatingScore = new HighScore().setTitle("eating", "class");
+        
+        Map<String, Double> missingPlayerCorrection = new TreeMap();
+        
         for (String player : sheepteams) {
             // each sheep team
             String sheepteam = prefix(player);
             // all sheep
+            int members=0;
             for (Class sh : PlayerFactory.string2classlist(player, ".Sheep")) {
                 teams.put(sh.getName(), sheepteam);
                 teams.put(sh, sheepteam);
+                members++;
             }
+            int missing=0;
             for (String sh : PlayerFactory.string2missingClasslist(player, ".Sheep")) {
                 teams.put(sh, sheepteam);
+                missing++;
             }
+            missingPlayerCorrection.put(sheepteam+".SheepTeam", (Double)((double)(missing+members)/members));
         }
         for (String player : wolves) {
             // each wolf team
             String wolfteam = prefix(player);
             // all wolves
+            int members=0;
             for (Class sh : PlayerFactory.string2classlist(player, ".Wolf")) {
                 teams.put(sh.getName(), wolfteam);
                 teams.put(sh, wolfteam);
+                members++;
             }
+            int missing=0;
             for (String sh : PlayerFactory.string2missingClasslist(player, ".Wolf")) {
                 teams.put(sh, wolfteam);
+                missing++;
             }
+            missingPlayerCorrection.put(wolfteam+".WolfTeam", (Double)((double)(missing+members)/members));
         }
         minNumSheepRequiredToRun = 1;
         minNumWolvesRequiredToRun = 1;
@@ -169,6 +184,21 @@ public class ClassTournament extends Tournament {
 
         outln("\n");
 
+        if (treatMissingPlayersAs0)
+        {
+            
+            for (Map.Entry<String,Double> entry : missingPlayerCorrection.entrySet())
+            {
+                totalHighscore.scale(entry.getKey(),1.0/entry.getValue());
+                for (HighScore h : scenarioHighScore.values())
+                {
+                    h.scale(entry.getKey(),1.0/entry.getValue());
+                }
+                
+            }
+        }
+        
+        
         totalHighscore.printByClass(scenarioHighScore.values());
         if (outputCSV != null) {
             String timeString = "" + (int) ((System.currentTimeMillis() / (1000 * 60 * 60)) - 405000);
