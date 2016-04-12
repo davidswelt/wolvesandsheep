@@ -467,12 +467,14 @@ public class GameBoard {
          * The name of the class implementing the player.
          */
         public String className;
-        /*
+        /**
          * The current location of player.
          */
         public GameLocation loc;
-        /*
+        /**
          * The point in time for which the location and other info is valid.
+         * The value indicates the steps passed since the round began.
+         * Later times within a round are represented by higher values.
          */
         public int timeValid;
     }
