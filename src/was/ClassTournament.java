@@ -47,7 +47,7 @@ public class ClassTournament extends Tournament {
     static void run(String[] wolves, String[] sheepteams, int repeats, int minutes, int numThreads) {
 
         HighScore totalHighscore = new HighScore().setTitle("total", "class");
-        HighScore totalTiming = new HighScore().setTitle("timing", "class");
+        HighScore totalTiming = new HighScore().setTitle("timing", "class").setUnit("ms");
         Map<String, HighScore> scenarioHighScore = new TreeMap();
         Map<String, HighScore> scenarioTiming = new TreeMap();
         HighScore totalEatingScore = new HighScore().setTitle("eating", "class");
@@ -145,7 +145,7 @@ public class ClassTournament extends Tournament {
                             String ss = Scenario.toString(sp);
                             if (scenarioHighScore.get(ss) == null) {
                                 scenarioHighScore.put(ss, new HighScore().setTitle(ss, "class"));
-                                scenarioTiming.put(ss, new HighScore().setTitle(ss, "class"));
+                                scenarioTiming.put(ss, new HighScore().setTitle(ss, "class").setUnit("ms"));
                             }
                             scenarioHighScore.get(ss).addHighScore(t.highscore);
                             scenarioTiming.get(ss).addHighScore(t.timing);

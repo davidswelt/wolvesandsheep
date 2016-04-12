@@ -28,7 +28,6 @@ public class HighScore extends TreeMap<String, Double> {
     TreeMap<String, Integer> uses = new TreeMap();
     TreeMap<String, ArrayList<Double>> vals = new TreeMap();
 
-    final int COLUMNWIDTH = 8;
     boolean normalizing = false;  // set to true if noteUse is called once
     boolean trackIndividualValues = false; // true will cause a memory leak
     boolean showCI = false;
@@ -36,6 +35,7 @@ public class HighScore extends TreeMap<String, Double> {
     String keyHeaderName = "";
     String extraColumnName = null;
     String extraColumnValue = null;
+    String unitName = "";
     boolean printHeader = true;
     PrintStream out = System.out;
 
@@ -43,6 +43,8 @@ public class HighScore extends TreeMap<String, Double> {
      be informative only if across players, i.e., aggregating all scenarios.
     
      */
+    
+    private final int outputPrecision = 3;
     public boolean printAsPercentage = false;
     String title = "";
 
@@ -58,6 +60,12 @@ public class HighScore extends TreeMap<String, Double> {
         return this;
     }
 
+    
+    HighScore setUnit(String u) {
+        unitName = u;
+        return this;
+    }
+    
     HighScore setOutputFile(String outputCSV) {
         if (outputCSV == null) {
             out = System.out;
@@ -188,6 +196,7 @@ public class HighScore extends TreeMap<String, Double> {
     }
     int printAlignment = 20;
 
+    // alignment is for the key on the left (name of item)
     void setAlignment() {
         if (tabSep) {
             printAlignment = 1;
@@ -198,6 +207,13 @@ public class HighScore extends TreeMap<String, Double> {
             }
         }
     }
+    
+    // calculate width of a column
+    int columnWidth()
+    {
+        return 5+outputPrecision+unitName.length(); // to do, use max. width of actual values (this assumes <10)
+    }
+        
 
     String leftAlign(String s, int a) {
         if (tabSep) {
@@ -216,15 +232,15 @@ public class HighScore extends TreeMap<String, Double> {
 
     synchronized void printHeader(Collection<HighScore> extraColumns) {
         String t = tabSep ? "\t" : "";
-        out.printf("%s " + t + " %s" + t, leftAlign(keyHeaderName, printAlignment), leftAlign(title, COLUMNWIDTH));
+        out.printf("%s " + t + " %s" + t, leftAlign(keyHeaderName, printAlignment), leftAlign(title, columnWidth()));
         if (normalizing && showCI) {
-            out.printf("%s" + t, leftAlign("CI", COLUMNWIDTH));
+            out.printf("%s" + t, leftAlign("CI", columnWidth()));
         }
 
         if (extraColumns != null) {
             for (HighScore h : extraColumns) {
                 if (h != null) {
-                    out.printf("%s" + t, leftAlign(h.title, COLUMNWIDTH));
+                    out.printf("%s" + t, leftAlign(h.title, columnWidth()));
                 }
             }
 
@@ -246,7 +262,7 @@ public class HighScore extends TreeMap<String, Double> {
             t = "\t";
         } else {
             if (normalizing) {
-                format = "%.3f";
+                format = "%."+outputPrecision+"f";
             } else {
                 format = "%.0f";
             }
@@ -260,9 +276,9 @@ public class HighScore extends TreeMap<String, Double> {
         for (String k : keys) {
 
             out.print(rightAlign(removePrefix(k), printAlignment) + (tabSep ? t : ": "));
-            out.print(rightAlign(String.format(format, getNormalized(k)), COLUMNWIDTH));
+            out.print(rightAlign(String.format(format, getNormalized(k))+unitName, columnWidth()));
             if (normalizing && showCI) {
-                out.print(rightAlign(String.format("+-" + format, getSD(k) * 1.96), COLUMNWIDTH));
+                out.print(rightAlign(String.format("+-" + format, getSD(k) * 1.96), columnWidth()));
             }
             if (extraColumns != null) {
                 for (HighScore h : extraColumns) {
@@ -274,7 +290,7 @@ public class HighScore extends TreeMap<String, Double> {
                             if (printAsPercentage) {
                                 n *= 100;
                             }
-                            out.print(rightAlign(String.format(format, n), COLUMNWIDTH));
+                            out.print(rightAlign(String.format(format, n)+unitName, columnWidth()));
                         }
                     }
                 }
@@ -353,8 +369,8 @@ public class HighScore extends TreeMap<String, Double> {
                 String key = r + "\\" + c;
                 String key2 = c + "\\" + r;
                 // we don't know which one is which...
-                Integer count =  (int) (super.get(key)!=null?get(key):get(key2));
-                
+                Integer count = (int) (super.get(key) != null ? get(key) : get(key2));
+
                 out.print(leftAlign(count.toString(), getPackage(c).length()) + "\t");
 
             }
