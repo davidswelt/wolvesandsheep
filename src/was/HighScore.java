@@ -43,7 +43,6 @@ public class HighScore extends TreeMap<String, Double> {
      be informative only if across players, i.e., aggregating all scenarios.
     
      */
-    
     private final int outputPrecision = 3;
     public boolean printAsPercentage = false;
     String title = "";
@@ -60,12 +59,11 @@ public class HighScore extends TreeMap<String, Double> {
         return this;
     }
 
-    
     HighScore setUnit(String u) {
         unitName = u;
         return this;
     }
-    
+
     HighScore setOutputFile(String outputCSV) {
         if (outputCSV == null) {
             out = System.out;
@@ -132,7 +130,7 @@ public class HighScore extends TreeMap<String, Double> {
     public void scale(String key, Double by) {
         Integer u = uses.get(key);
         if (u != null) {
-            u = (int) (u * (1.0/by) + .5);
+            u = (int) (u * (1.0 / by) + .5);
             uses.put(key, u);
 
         }
@@ -207,13 +205,12 @@ public class HighScore extends TreeMap<String, Double> {
             }
         }
     }
-    
+
     // calculate width of a column
-    int columnWidth()
-    {
-        return 5+outputPrecision+unitName.length(); // to do, use max. width of actual values (this assumes <10)
-    }
+    int columnWidth() {
         
+        return 5 + outputPrecision + unitName.length(); // to do, use max. width of actual values (this assumes <10)
+    }
 
     String leftAlign(String s, int a) {
         if (tabSep) {
@@ -253,16 +250,13 @@ public class HighScore extends TreeMap<String, Double> {
         out.println();
     }
 
-    synchronized public void printKeys(List<String> keys, boolean sorted, Collection<HighScore> extraColumns) {
-
-        String t = "";
+    String getFormat() {
         String format;
         if (tabSep) {
             format = "%f\t";
-            t = "\t";
         } else {
             if (normalizing) {
-                format = "%."+outputPrecision+"f";
+                format = "%." + outputPrecision + "f";
             } else {
                 format = "%.0f";
             }
@@ -271,12 +265,22 @@ public class HighScore extends TreeMap<String, Double> {
                 format += "%%";
             }
         }
+        return format;
+    }
+
+    synchronized public void printKeys(List<String> keys, boolean sorted, Collection<HighScore> extraColumns) {
+
+        String t = "";
+        String format = getFormat();
+        if (tabSep) {
+            t = "\t";
+        }
         // sort it
         Collections.sort(keys, new TreeValueComparator());
         for (String k : keys) {
 
             out.print(rightAlign(removePrefix(k), printAlignment) + (tabSep ? t : ": "));
-            out.print(rightAlign(String.format(format, getNormalized(k))+unitName, columnWidth()));
+            out.print(rightAlign(String.format(format, getNormalized(k)) + unitName, columnWidth()));
             if (normalizing && showCI) {
                 out.print(rightAlign(String.format("+-" + format, getSD(k) * 1.96), columnWidth()));
             }
@@ -290,7 +294,7 @@ public class HighScore extends TreeMap<String, Double> {
                             if (printAsPercentage) {
                                 n *= 100;
                             }
-                            out.print(rightAlign(String.format(format, n)+unitName, columnWidth()));
+                            out.print(rightAlign(String.format(format, n) + unitName, columnWidth()));
                         }
                     }
                 }
