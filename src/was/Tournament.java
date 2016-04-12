@@ -636,7 +636,7 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
                 logerr("       -j N      ==> use N threads simultaneously");
                 logerr("       -s S      ==> set up scenario no. S (0 or default for random)");
                 logerr("       -t        ==> play a tournament of all combinations of players (4 sheep, one wolf)");
-                logerr("       -e        ==> catch player's exceptions and timeouts");
+                logerr("       -e        ==> catch and log player's exceptions and timeouts (reduces debuggability)");
                 logerr("       -m        ==> use same randomization of initial player positions etc.");
                 logerr("       -m S      ==> use randomization number S for initial player positions etc.");
                 logerr("       -p        ==> pause initially if using graphical UI");
