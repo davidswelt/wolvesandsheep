@@ -47,6 +47,7 @@ public class ClassTournament extends Tournament {
     static void run(String[] wolves, String[] sheepteams, int repeats, int minutes, int numThreads) {
 
         HighScore totalHighscore = new HighScore().setTitle("total", "class");
+        HighScore totalPerformance = new HighScore().setTitle("P/msec", "class"); // points / timing
         HighScore totalTiming = new HighScore().setTitle("timing", "class").setUnit("ms");
         Map<String, HighScore> scenarioHighScore = new TreeMap();
         Map<String, HighScore> scenarioTiming = new TreeMap();
@@ -197,8 +198,22 @@ public class ClassTournament extends Tournament {
                 
             }
         }
+        // calculate total performance
         
+        for (Map.Entry<String, Double> entry : totalHighscore.entrySet())
+        {
+            double n = totalTiming.get(entry.getKey());  
+            if (n>0)
+            {
+                // total points made divided by total time spent
+                // (rather than the averages)
+                // n (timing) is in milliseconds
+                // we want to record total performance in P/msec
+                totalPerformance.inc(entry.getKey(), (entry.getValue() / n));
+            }
+        }
         
+        scenarioHighScore.put("P/msec", totalPerformance);
         totalHighscore.printByClass(scenarioHighScore.values());
         if (outputCSV != null) {
             String timeString = "" + (int) ((System.currentTimeMillis() / (1000 * 60 * 60)) - 405000);

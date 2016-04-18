@@ -19,19 +19,7 @@ import java.util.logging.Logger;
 /**
  * The Tournament class describes and manages the game tournament.
  *
- * This is the main (entry) class.
- * Usage: java -jar WolvesAndSheep.jar -r R -s S -t -e -p -c -q CLASS1 CLASS2 CLASS3 CLASS4 CLASS5 (...)
- *       -r R      == play R repeats of each game.
- *       -s S      == set up scenario no. S (0 or default for random)
- *       -t        == play a tournament of all combinations of players (4 sheep, one wolf)
- *       -e        == ignore player's exceptions
- *       -m        == use same randomization of initial player positions etc.
-         -m S      == use randomization number S for initial player positions etc.
- *       -p        == pause initially if using graphical UI
- *       -c        == do not show the graphical user interface 
- *       -q        == do not print progress info 
- * Example: java -jar WolvesAndSheep.jar -r 10 basic.Wolf basic.Sheep basic.Sheep basic.Sheep basic.Sheep
- * Example for NetBeans (Run, Project Configuration, Arguments): -r 10 basic.Wolf basic.Sheep basic.Sheep basic.Sheep basic.Sheep
+ * This is the main (entry) class. See main() function for usage.
  *
  *
  * @author dr
@@ -433,26 +421,37 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
                                     for (Map.Entry<Player, int[]> score : s.entrySet()) {
                                         Class cl = score.getKey().getClass();
                                         if (score.getKey().isIncludedInHighScore()) {
-                                            highscore.inc(cl.getName(), score.getValue()[0]);
 
+                                            
+                                            double mrt = score.getKey().meanRunTime(); // in milliseconds
+                                            int scr = score.getValue()[0];
+                                            score.getValue()[0] = 0; // set to 0 to make sure it doesn't get added twice
+
+                                            highscore.inc(cl.getName(), scr);
+                                            // score.noteUse happens earlier
+
+                                            timing.inc(cl.getName(), mrt);
+                                            timing.noteUse(cl.getName());
+
+                                            final String scenPlayStr = "Scenario " + scenario.toString() + "\\" + cl.getName();
+                                            scenarioTiming.inc(scenPlayStr, mrt);
+                                            scenarioTiming.noteUse(scenPlayStr);
+                                            scenarioScore.inc(scenPlayStr, scr);
+
+                                            // for teams
                                             if (teams.get(cl) != null) { // Pastures etc don't have a team
 
-                                                highscore.inc(teams.get(cl) + (score.getKey() instanceof WolfPlayer ? ".WolfTeam" : ".SheepTeam"), score.getValue()[0]);
+                                                String tname = teams.get(cl) + (score.getKey() instanceof WolfPlayer ? ".WolfTeam" : ".SheepTeam");
+                                                highscore.inc(tname, scr);
+                                                timing.inc(tname, mrt);
+                                                timing.noteUse(tname);
                                             }
-
-                                            timing.inc(cl.getName(), score.getKey().meanRunTime());
-                                            timing.noteUse(cl.getName());
-                                            final String scenPlayStr = "Scenario " + scenario.toString() + "\\" + cl.getName();
-                                            scenarioTiming.inc(scenPlayStr, score.getKey().meanRunTime());
-                                            scenarioTiming.noteUse(scenPlayStr);
-                                            scenarioScore.inc(scenPlayStr, score.getValue()[0]);
-                                            score.getValue()[0] = 0; // set to 0 to make sure it doesn't get added twice
 
                                         }
                                     }
                                 } finally {
                                     if (printHighscores) {
-                                    //final String ESC = "\033[";
+                                        //final String ESC = "\033[";
                                         //System.out.println(ESC + "2J"); 
                                         highscore.printByCategory(null);
 
