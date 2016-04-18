@@ -254,6 +254,7 @@ public class ClassTournament extends Tournament {
 
         Player.catchExceptions = true;
         Player.logToFile = true;
+        Player.logToNull = true;
         Player.debuggable = false; // enables time-keeping
 
         int r = 1;
@@ -283,7 +284,15 @@ public class ClassTournament extends Tournament {
 
                 outputCSV = args[i++];
 
-            } else if ("--secret".equals(s)) {
+            } else if ("-i".equals(s)) {
+
+                Player.debuggable = true;
+
+            }else if ("-x".equals(s)) {
+
+                Tournament.secPolicySet = true;
+
+            }else if ("--secret".equals(s)) {
 
                 Scenario.useSecretScenarioClass = true;
 
@@ -301,8 +310,10 @@ public class ClassTournament extends Tournament {
             //System.err.println("       -t M,N,K  ==> play a M*N board with K sheep.");
             System.err.println("       -r R      ==> play R repeats of each game.");
             System.err.println("       -d M      ==> repeat for at least M minutes.");
-            System.err.println("       -q        ==> do not print progress info ");
+            System.err.println("       -q        ==> do not print progress info (faster)");
             System.err.println("       -j N      ==> use N threads in parallel ");
+            System.err.println("       -x        ==> turn off security");
+            System.err.println("       -i        ==> run players direct, untimed and without threads (faster)");
             System.err.println("       -c F      ==> log results, appending to tab-separated file F ");
         }
         teamStructureInit(r, duration, numThreads);
