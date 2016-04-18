@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -46,6 +47,13 @@ public class HighScore extends TreeMap<String, Double> {
     private final int outputPrecision = 3;
     public boolean printAsPercentage = false;
     String title = "";
+
+    public HighScore(int initialCapacity) {
+        //super(initialCapacity);
+    }
+    public HighScore() {
+        //super(128);
+    }
 
     HighScore setTitle(String t, String keytitle) {
         title = t;

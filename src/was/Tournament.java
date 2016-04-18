@@ -43,9 +43,7 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
     static void logPlayerMoveAttempt(Class pl, GameBoard g) {
         moveLog.inc(pl.getName() + ".Crash");
         if (g != null && g.scenario != null) {
-            String ss = "Scenario" + g.scenario.toString();
-
-            moveLog.inc(pl.getName() + ".Crash." + ss);
+            moveLog.inc(pl.getName() + ".Crash.Sc" + g.scenario.toString());
         }
 
     }
@@ -56,14 +54,13 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
 //        crashLog.inc(pl.getName() + ".Crash\\" + ex);
 
         if (g != null && g.scenario != null) {
-            String ss = "Scenario" + g.scenario.toString();
-            crashLog.inc(pl.getName() + ".Crash." + ss);
-            crashLog.inc(pl.getName() + ".Crash." + ss + "\\" + ex);
+            crashLog.inc(pl.getName() + ".Crash.Sc" + g.scenario.toString());
+            crashLog.inc(pl.getName() + ".Crash.Sc" + g.scenario.toString() + "\\" + ex);
         }
 
     }
-    volatile static HighScore crashLog = new HighScore().setTitle("crashes", "class");
-    volatile static HighScore moveLog = new HighScore().setTitle("total calls to move()", "class");
+    volatile static HighScore crashLog = new HighScore(1000).setTitle("crashes", "class");
+    volatile static HighScore moveLog = new HighScore(200).setTitle("total calls to move()", "class");
 
     volatile HighScore timing;
     volatile HighScore scenarioTiming;
@@ -72,11 +69,11 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
     volatile HighScore eatingScore;
 
     void initHighScores() {
-        timing = new HighScore();
-        scenarioTiming = new HighScore();
-        highscore = new HighScore();
-        scenarioScore = new HighScore();
-        eatingScore = new HighScore();
+        timing = new HighScore(64);
+        scenarioTiming = new HighScore(64);
+        highscore = new HighScore(64);
+        scenarioScore = new HighScore(64);
+        eatingScore = new HighScore(64);
 
     }
 
@@ -191,7 +188,7 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
      * starts the tournament.
      *
      */
-    TreeMap<String, Double> start(boolean printHighscores, int scenario, int repeats, boolean combinations, int threads) {
+    Map<String, Double> start(boolean printHighscores, int scenario, int repeats, boolean combinations, int threads) {
 
 // check players
         int wolves = 0;
@@ -383,7 +380,7 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
                                 scenarioScore.noteUse("Scenario " + scenario.toString() + "\\" + pclass.getName());
 
                                 if (teams.get(pclass) == null) {
-                                //logerr(i);
+                                    //logerr(i);
                                     //logerr("WARNING: can't get team for " + players.get(i));
                                 } else {
                                     // note use of player so that team score can be normalized later
@@ -460,7 +457,7 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
                             }
                             // for some reason this helps... GC doesn't run that much otherwise.                        
                             board = null;
-                            System.gc();
+                            // System.gc(); // takes 30% longer
                         }
                     }
                 }
@@ -660,4 +657,5 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
         // keep track
         eatingScore.inc(wolf.getClass().getName() + "\\" + sheep.getClass().getName());
     }
+
 }

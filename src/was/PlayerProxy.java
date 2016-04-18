@@ -88,7 +88,7 @@ class PlayerProxy extends Actor {
             track.moveTo(getPixelLocation().x, getPixelLocation().y);
         }
 
-        GameLocation l = player.getLocation();
+        GameLocation l = player.getLocationFast();
         int prev_x = l.x;
         int prev_y = l.y;
 
@@ -100,7 +100,7 @@ class PlayerProxy extends Actor {
         if (player.isGone()) {
             return;
         }
-        GameLocation targetloc = player.getLocation();
+        GameLocation targetloc = player.getLocationFast();
         int target_x = targetloc.x; // getX() + (int) theMove.delta_x;
         int target_y = targetloc.y; // getY() + (int) theMove.delta_y;
 

@@ -87,10 +87,10 @@ public class Scenario {
 
         gameCount ++;
         
-        sc.requested = requestedScenario;
+        sc.setRequested ( requestedScenario);
         // any parametrization should happen here
         if (sc.requested == 0) {
-            sc.requested = getParameterValues().get(rand.nextInt(getParameterValues().size()));
+            sc.setRequested (getParameterValues().get(rand.nextInt(getParameterValues().size())));
         }
         return sc;
     }
@@ -410,11 +410,24 @@ public class Scenario {
     void updateBoard(GameBoard board, int it) {
     }
 
-    @Override
-    public String toString() {
+    private String descrStr = null;  // set by setRequested
+    
+    private void setRequested(int r)
+    {
+        requested=r;
+        descrStr = toStringNow();
+        
+    }
+    
+    private String toStringNow() {
+        
         return "Sc." + String.format("%02d", requested);
     }
-
+    @Override
+    public String toString() {
+        return descrStr; // faster
+    }
+    
     static public String toString(int sc) {
         return "Sc." + String.format("%02d", sc);
     }

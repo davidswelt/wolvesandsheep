@@ -32,6 +32,13 @@ public class GameBoard {
     private final int rows;
     private List<Player> board = new ArrayList<Player>();
     Deque<Player> players = new ArrayDeque();
+    // the following contain duplicate references
+    // to speed up certain operations
+    Deque<Player> sheep = new ArrayDeque();
+    Player wolf = null;
+    Deque<Player> obstacles = new ArrayDeque();
+    Deque<Player> pastures = new ArrayDeque();
+    
     private Map<Player, int[]> scores = new HashMap();
     Map<String, Object> sheepWhiteboard = new HashMap();
     WolfSheepDelegate wolfEatSheepDelegate = null;
@@ -104,13 +111,13 @@ public class GameBoard {
             return true;
         }
 
-        log(player + " moves " + m);
+        // log(player + " moves " + m);
         if (player == null) {
             throw new RuntimeException("movePlayer: trying to move an empty cell.");
         }
 
         GamePiece playerCellPiece = player.getPiece();
-        GameLocation loc = player.getLocation();
+        GameLocation loc = player.loc;
 
         if (playerCellPiece == GamePiece.WOLF) {
             // is move surrounded by sheep?
@@ -122,7 +129,7 @@ public class GameBoard {
             int closeSheep = 0;
             // loc is pre-move location of this wolf.
             for (Player sp : findAllPlayers(GamePiece.SHEEP)) {
-                GameLocation sloc = sp.getLocation();
+                GameLocation sloc = sp.loc;
                 double d = Math.sqrt(Math.pow(loc.x - sloc.x, 2) + Math.pow(loc.y - sloc.y, 2));
                 if (d < 2) // close than distance 2?
                 {
@@ -139,11 +146,11 @@ public class GameBoard {
         if (player.isBusy()) {
             return false; // can't move Player
         }
-        log(player + " " + player.getLocation() + " " + m);
+        // log(player + " " + player.getLocation() + " " + m);
 
-        if (player != board.get(getIndexUnchecked(player.getLocation()))) {
-            System.err.println("player " + player + "location mismatch. player thinks its at " + player.getLocation() + " while board has something else there.. ");
-            System.err.println("The board has, at " + player.getLocation() + ":" + board.get(getIndex(player.getLocation())));
+        if (player != board.get(getIndexUnchecked(player.loc))) {
+            System.err.println("player " + player + "location mismatch. player thinks its at " + player.loc + " while board has something else there.. ");
+            System.err.println("The board has, at " + player.loc + ":" + board.get(getIndex(player.loc)));
         }
 
         if (m.length() > allowedMoveDistance(player) + 0.000005) {
@@ -226,8 +233,7 @@ public class GameBoard {
         // the wolf eats
         //  notify
 
-        log("eating.");
-
+        // log("eating.");
         // this will cause a runtime exception if they're not sheep/wolf
         SheepPlayer sheep = (SheepPlayer) getPlayer(sheepIndex);
         WolfPlayer wolf = (WolfPlayer) getPlayer(wolfIndex);
@@ -352,9 +358,9 @@ public class GameBoard {
      * @return a was.GameLocation object
      */
     public GameLocation getWolfPosition() {
-        ArrayList<was.GameLocation> p = findAllPlayersLoc(GamePiece.WOLF);
-        if (p.size() > 0) {
-            return p.get(0);
+        if (wolf != null)
+        {
+            return wolf.getLocationFast();
         }
 
         return null;
@@ -367,17 +373,41 @@ public class GameBoard {
      * positions
      */
     public ArrayList<GameLocation> getSheepPositions() {
-        return findAllPlayersLoc(GamePiece.SHEEP);
+        ArrayList<GameLocation> r = new ArrayList<GameLocation>(sheep.size());
+        for (Player p : sheep)
+        {
+            r.add(p.getLocationFast());
+        }
+        return r;
+        //return findAllPlayersLoc(GamePiece.SHEEP);
     }
+    
+    boolean noSheepLeftP() {
+        return (sheep.size()==0);
+    }
+    
 
+    // 375s: cache, but safe
+    // 260s: cache, not safe  ??
+    // 309s: no cache
+    // 289s,280,279: no cache separated sheep/obstacles 
+    // 318,302 - HashMap instead of TreeMap
+    // 296: use .loc directly where it's okay
+    
     /**
      * Get the positions of all the pastures on the board
      *
      * @return an ArrayList containing was.GameLocation objects, with x,y
      * positions
      */
+
     public ArrayList<GameLocation> getPasturePositions() {
-        return findAllPlayersLoc(GamePiece.PASTURE);
+        ArrayList<GameLocation> r = new ArrayList<GameLocation>(pastures.size());
+        for (Player p : pastures)
+        {
+            r.add(p.getLocationFast());
+        }
+        return r;
     }
 
     /**
@@ -387,7 +417,12 @@ public class GameBoard {
      * positions
      */
     public ArrayList<GameLocation> getObstaclePositions() {
-        return findAllPlayersLoc(GamePiece.OBSTACLE);
+        ArrayList<GameLocation> r = new ArrayList<GameLocation>(obstacles.size());
+        for (Player p : obstacles)
+        {
+            r.add(p.getLocationFast());
+        }
+        return r;
     }
 
     /**
@@ -402,7 +437,7 @@ public class GameBoard {
         // To Do: maintain a map for this if people end up using it.
         for (Player p : players) {
             if (p != null && !p.isGone() && p.getID().equals(playerIDString)) {
-                return p.getLocation(); // this is a copy
+                return p.getLocationFast(); // this is a copy
             }
         }
         return null;
@@ -429,11 +464,12 @@ public class GameBoard {
 
     // we return an ArrayList,  not a List
     // to make the public API down the line easier to Java novices
-    ArrayList<GameLocation> findAllPlayersLoc(GamePiece type) {
+    // THIS IS WHAT CONSUMES MOST TIME.
+    ArrayList<GameLocation> findAllPlayersLocUnsafe(GamePiece type) {
         ArrayList<was.GameLocation> sp = new ArrayList();
         for (Player p : players) {
-            if (p != null && !p.isGone() && p.getPiece() == type) {
-                sp.add(p.getLocation());// this is a copy
+            if (p != null && p.getPiece() == type && !p.isGone()) {
+                sp.add(p.loc);// this is NOT a copy.
             }
         }
         return sp;
@@ -449,6 +485,7 @@ public class GameBoard {
         }
         return str;
     }
+
     /**
      * Structure containing information about a player at a given point in time
      * This information is available to all other players.
@@ -472,9 +509,9 @@ public class GameBoard {
          */
         public GameLocation loc;
         /**
-         * The point in time for which the location and other info is valid.
-         * The value indicates the steps passed since the round began.
-         * Later times within a round are represented by higher values.
+         * The point in time for which the location and other info is valid. The
+         * value indicates the steps passed since the round began. Later times
+         * within a round are represented by higher values.
          */
         public int timeValid;
     }
@@ -495,7 +532,7 @@ public class GameBoard {
                 pi.type = p.getPiece();
                 pi.id = p.getID();
                 pi.className = p.getClass().getName();
-                pi.loc = p.getLocation();
+                pi.loc = p.getLocationFast();
                 pi.timeValid = getTime();
 
                 sp.put(pi.id, pi);
@@ -596,7 +633,6 @@ public class GameBoard {
     }
 
     private void swapCells(int i1, int i2) {
-        log("swap " + getLoc(i1) + board.get(i1) + " " + getLoc(i2) + board.get(i2));
         Player tmp = board.get(i1);
 
         board.set(i1, null);
@@ -637,7 +673,6 @@ public class GameBoard {
     }
 
     Player addPlayer(Player p, GameLocation loc) {
-
         p.setGameBoard(this);
 
         p.setMaxAllowedDistance(
@@ -656,7 +691,15 @@ public class GameBoard {
 
         setPlayerAt(locI, p);
         players.add(p);
-
+        
+        switch(p.getPiece())
+        {
+            case WOLF: wolf=p; break;
+            case OBSTACLE: obstacles.add(p); break;
+            case SHEEP: sheep.add(p); break;
+            case PASTURE: pastures.add(p); break;
+        }
+        
         scores.put(p, new int[1]);
 
         if (this.ui) {
@@ -711,8 +754,7 @@ public class GameBoard {
     synchronized void exitRequested(boolean reset) {
         // set marker so that repetitive processes know to terminate
         Tournament.exitRequested = true;
-        if (reset)
-        {
+        if (reset) {
             Tournament.resetRequested = true;
         }
     }
@@ -729,9 +771,8 @@ public class GameBoard {
 
     // callback from game backend
     boolean isFinished() {
-        return getSheepPositions().isEmpty() || (currentTimeStep >= maxTimeStep);
+        return noSheepLeftP() || (currentTimeStep >= maxTimeStep);
     }
-    
 
     Map<Player, int[]> playGame(boolean pauseInitially) {
 
@@ -817,7 +858,7 @@ public class GameBoard {
 
         // let's make sure there's no cell left
         log("removing player.");
-        int i = getIndexUnchecked(p.getLocation());
+        int i = getIndexUnchecked(p.loc);
         if (board.get(i) == p) {
             board.set(i, null);
         }
@@ -825,7 +866,17 @@ public class GameBoard {
 
         // can't actually remove the player (concurrentModificationException)
         //players.remove(p);
-//        
+        
+        // but we can remove them from the extra references
+        
+        switch(p.getPiece())
+        {
+            case WOLF: if (wolf==p) wolf=null; break;
+            case OBSTACLE: obstacles.remove(p); break;
+            case SHEEP: sheep.remove(p); break;
+            case PASTURE: pastures.remove(p); break;
+        }
+        
     }
 
     void printScores() {
