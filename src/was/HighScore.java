@@ -206,7 +206,7 @@ public class HighScore extends TreeMap<String, Double> {
         }
     }
 
-    // calculate width of a column
+    // calculate width of a column.  we use the same width for all columns. 
     int columnWidth() {
         
         return 5 + outputPrecision + unitName.length(); // to do, use max. width of actual values (this assumes <10)
@@ -227,6 +227,24 @@ public class HighScore extends TreeMap<String, Double> {
         return String.format("%" + a + "s", s);
     }
 
+    // formatStr should not print anything but the actual number
+    // so no tabs etc at the end
+    String rightAlign(String formatStr, double n, int a) {
+        String s = String.format(formatStr, n);
+        if (tabSep) {
+            return s;
+        }
+        
+        // reduce precision if necessary
+        int outputPrecision2 = outputPrecision;
+        while (s.length()>=a && outputPrecision2 > 0 && s.contains("."))
+        {
+            formatStr = getFormat(--outputPrecision2);
+            s = String.format(formatStr, n);
+        }
+        
+        return String.format("%" + a + "s", s);
+    }
     synchronized void printHeader(Collection<HighScore> extraColumns) {
         String t = tabSep ? "\t" : "";
         out.printf("%s " + t + " %s" + t, leftAlign(keyHeaderName, printAlignment), leftAlign(title, columnWidth()));
@@ -250,39 +268,50 @@ public class HighScore extends TreeMap<String, Double> {
         out.println();
     }
 
-    String getFormat() {
+    // just the actual number.
+    // rightAlign expects no tabs or units etc.
+    String getFormat(int prec) {
         String format;
         if (tabSep) {
-            format = "%f\t";
+            format = "%f";
         } else {
             if (normalizing) {
-                format = "%." + outputPrecision + "f";
+                format = "%." + prec + "f";
             } else {
                 format = "%.0f";
             }
-
-            if (printAsPercentage) {
-                format += "%%";
-            }
         }
         return format;
+    }
+    String getFormat() {
+        return getFormat(outputPrecision);
     }
 
     synchronized public void printKeys(List<String> keys, boolean sorted, Collection<HighScore> extraColumns) {
 
         String t = "";
         String format = getFormat();
+        String format2;
         if (tabSep) {
+            format2 = format + "\t";
             t = "\t";
+        } else
+        {
+            if (printAsPercentage) {
+                format2 = format + "%%";
+            } else
+            {
+                format2 = format + unitName;
+            }
         }
         // sort it
         Collections.sort(keys, new TreeValueComparator());
         for (String k : keys) {
 
             out.print(rightAlign(removePrefix(k), printAlignment) + (tabSep ? t : ": "));
-            out.print(rightAlign(String.format(format, getNormalized(k)) + unitName, columnWidth()));
+            out.print(rightAlign(format2, getNormalized(k) , columnWidth()));
             if (normalizing && showCI) {
-                out.print(rightAlign(String.format("+-" + format, getSD(k) * 1.96), columnWidth()));
+                out.print(rightAlign("+-" + format + t, getSD(k) * 1.96, columnWidth()));
             }
             if (extraColumns != null) {
                 for (HighScore h : extraColumns) {
@@ -294,7 +323,10 @@ public class HighScore extends TreeMap<String, Double> {
                             if (printAsPercentage) {
                                 n *= 100;
                             }
-                            out.print(rightAlign(String.format(format, n) + unitName, columnWidth()));
+                            out.print(rightAlign(format2, n, columnWidth()));
+                        } else
+                        {
+                            out.print(rightAlign(""+t, columnWidth()));
                         }
                     }
                 }
