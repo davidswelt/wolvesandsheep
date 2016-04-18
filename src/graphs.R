@@ -3,7 +3,7 @@ library(plotly)
 
 pl <- function(title,da,outfile=NULL)
 {
-    if (!is.null(outfile))    {png(paste(outfile,".png",sep=''),width=1000,height=600)}
+    if (!is.null(outfile))    {png(paste(outfile,".png",sep=''),width=600,height=360)}
     p <- ggplot(data=da, aes(x=time, y=total, col=class)) + geom_line() + geom_point(size=1) + xlab("time of tournament [hours]") + ggtitle(title)
     print(p)
     if (!is.null(outfile))  {dev.off()}
