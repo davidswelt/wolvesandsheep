@@ -43,15 +43,21 @@ public class Move {
             return new Move((delta_x / ratio ), (delta_y / ratio ));
     }
     static protected int roundUp (double a)
-    {
+    { 
+        /*
+            1.0 --> 1.0
+            1.1 --> 2.0
+            -1.0 --> -1.0
+            -1.1 --> -2.0
+        */
         if ((int) a == a)
             return (int) a;
         if (a > -0.0001 && a < 0.0001)
         {
             return 0;
         }
-        return (int) (a+(a>0?1.0:-1.0));
-        
+        //return (int) (a+(a>0?0.9999:-0.9999));
+        return (int) (a+(a>0?1:-1));
     }
     static protected int roundDown (double a)
     {
@@ -67,35 +73,39 @@ public class Move {
      */
     public Move quantized (double maxLen)
     {
+        // try rounding up both
         Move m=new Move(roundUp(delta_x), roundUp(delta_y));
         if (m.length()<=maxLen)
         {
             return m;
         }
+        // try rounding up either and choose better one
         Move m1=new Move(roundUp(delta_x), roundDown(delta_y));
         Move m2=new Move(roundDown(delta_x), roundUp(delta_y));
         if (m1.length()<=maxLen)
         {
             if (m2.length()<=maxLen)
-            {
+            {   // both are short enough, choose longer one
                 return m1.length()>m2.length() ? m1 : m2;
             }
             else
-            {
+            {   // only m1 is short enough, so return that.
                 return m1;
             }
             
         }
         else if (m2.length()<=maxLen)
-        {
+        {   // only m2 is short enough, so return that
             return m2;
         }
-        
+        // so, we must round both down.
         Move m3 = new Move(roundDown(delta_x), roundDown(delta_y));
         if (m3.length()<=maxLen)
-        {
+        {   // short enough?
             return m3;
         }
+        // that didn't work.  We scale to length, then we try
+        // quantizing again (it is guaranteed to work that time).
         return scaledToLength(maxLen).quantized(maxLen);
         
     }
