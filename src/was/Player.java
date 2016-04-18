@@ -3,6 +3,7 @@ package was;
 import ch.aplu.jgamegrid.Actor;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
@@ -62,6 +63,8 @@ public abstract class Player {
     String team;
     static boolean catchExceptions = false;
     static boolean logToFile = false; // warning, not thread safe
+    static boolean logToNull = false; // warning, not thread safe
+
     PrintStream logstream = null;
     private double totalRunTime = 0.0;
     private long totalRuns = 0;
@@ -82,11 +85,21 @@ public abstract class Player {
      *
      */
     public Player() {
-        if (logToFile) {
+        if (logToFile || logToNull) {
             String filename = "log/" + getClass().getName() + ".log";
 
             try {
-                logstream = new PrintStream(new FileOutputStream(filename, true));
+                if (logToNull) {
+                    logToFile = true;
+                    logstream = new PrintStream(new OutputStream() {
+                        @Override
+                        public void write(int b) {
+                            //DO NOTHING
+                        }
+                    });
+                } else {
+                    logstream = new PrintStream(new FileOutputStream(filename, true));
+                }
             } catch (FileNotFoundException ex) {
                 System.err.println("can't output to " + filename);
 
@@ -479,6 +492,59 @@ public abstract class Player {
         final Player thePlayer = this;
 
         Object m = null;
+        PrintStream prevErrStream = System.err;
+        PrintStream prevOutStream = System.out;
+
+        try {
+            if (logstream != null && logToFile) {
+                System.setOut(logstream);
+                System.setErr(logstream);
+            }
+
+            switch (func) {
+                case MOVE:
+                    m = move(); // move is defined by extending class
+                    break;
+                case INITIALIZE:
+                    initialize(); // move is defined by extending class
+                    break;
+                case IS_BEING_EATEN:
+                    m = null;
+                    if (thePlayer instanceof SheepPlayer) {
+                        ((SheepPlayer) thePlayer).isBeingEaten();
+                    }
+                    break;
+                case IS_KEEPING_BUSY:
+                    m = null;
+                    if (thePlayer instanceof WolfPlayer) {
+                        ((WolfPlayer) thePlayer).isKeepingBusy();
+                    }
+                    break;
+                case WILL_EAT:
+                    m = null;
+                    if (thePlayer instanceof WolfPlayer) {
+                        ((WolfPlayer) thePlayer).isEating(); // deprecated
+                        ((WolfPlayer) thePlayer).willEatSheep((String) arg);
+                    }
+                    break;
+                case IS_ATTACKED:
+                    m = null;
+                    if (thePlayer instanceof WolfPlayer) {
+                        ((WolfPlayer) thePlayer).isAttacked();
+                    }
+                    break;
+            }
+//        System.out.println(Thread.activeCount()-threadcount);
+//        if (Thread.activeCount() > threadcount)
+//        {
+//            System.out.println("Player may have created a thread.");
+//        }
+        } finally {
+            if (logstream != null && logToFile) {
+                System.setOut(prevOutStream);
+                System.setErr(prevErrStream);
+            }
+
         }
         return m;
 
