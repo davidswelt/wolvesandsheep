@@ -594,6 +594,10 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
 
                     sc = Integer.parseInt(args[i++]);
 
+                } else if ("-X".equals(s)) {
+
+                    secPolicySet = true; // turn off security
+
                 } else if ("-t".equals(s)) {
 
                     tourn = true;
@@ -639,6 +643,7 @@ public class Tournament implements GameBoard.WolfSheepDelegate {
                 logerr("       -p        ==> pause initially if using graphical UI");
                 logerr("       -c        ==> do not show the graphical user interface ");
                 logerr("       -q        ==> do not print progress info ");
+                logerr("       -x        ==> turn off security (needed for profiling)");
                 logerr("Example: java -jar WolvesAndSheep.jar -r 10 basic.Wolf basic.Sheep basic.Sheep basic.Sheep basic.Sheep");
                 logerr("Example for NetBeans (Run Configuration, Program arguments): -r 10 basic.Wolf basic.Sheep basic.Sheep basic.Sheep basic.Sheep");
                 // do not run a default case to make sure it doesn't cause confusion.
