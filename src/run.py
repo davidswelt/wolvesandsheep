@@ -100,6 +100,7 @@ with open(tmpfile, "a") as text_file:
 
 # plotly needs pandoc (in local path)
 os.environ["PATH"] += os.pathsep + "/usr/local/bin"
+os.system("cut -f1,2,3,4 log/log.tsv >log/log2.tsv")
 os.system("R --vanilla < graphs.R")
 
 

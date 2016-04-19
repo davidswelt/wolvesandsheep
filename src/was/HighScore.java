@@ -259,6 +259,11 @@ public class HighScore extends TreeMap<String, Double> {
         if (normalizing && showCI) {
             out.printf("%s" + t, leftAlign("CI", columnWidth()));
         }
+        
+        if (extraColumnName != null) {
+            out.printf("%s" + t, leftAlign(extraColumnName, extraColumnValue.length()));
+        }
+
 
         if (extraColumns != null) {
             for (HighScore h : extraColumns) {
@@ -267,10 +272,6 @@ public class HighScore extends TreeMap<String, Double> {
                 }
             }
 
-        }
-
-        if (extraColumnName != null) {
-            out.printf("%s" + t, leftAlign(extraColumnName, extraColumnValue.length()));
         }
 
         out.println();
@@ -321,6 +322,10 @@ public class HighScore extends TreeMap<String, Double> {
             if (normalizing && showCI) {
                 out.print(rightAlign("+-" + format + t, getSD(k) * 1.96, columnWidth()));
             }
+            
+            if (extraColumnName != null) {
+                out.printf(extraColumnValue + t);
+            }
             if (extraColumns != null) {
                 for (HighScore h : extraColumns) {
 
@@ -341,9 +346,6 @@ public class HighScore extends TreeMap<String, Double> {
 
             }
 
-            if (extraColumnName != null) {
-                out.printf(extraColumnValue + t);
-            }
             out.println();
         }
     }
