@@ -79,7 +79,7 @@ with open(tmpfile, "w") as text_file:
 
 if ist240:
     # insert portion after marker only
-    os.system("grep -A1000 -e '##########' \"%s\" >>\"%s\""%(cmdtmpfile,tmpfile))
+    os.system("grep -A20000 -e '##########' \"%s\" >>\"%s\""%(cmdtmpfile,tmpfile))
 else:
     os.system("cat \"%s\" >>\"%s\""%(cmdtmpfile,tmpfile))
 
