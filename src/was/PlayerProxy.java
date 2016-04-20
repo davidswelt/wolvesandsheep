@@ -163,7 +163,9 @@ class PlayerProxy extends Actor {
 //                }
             }          
             showPath(p, color, null, pt);
-            player.getGameBoard().wasgamegrid.refresh();
+            // wasgamegrid may be null at the end of a round
+            if (player.getGameBoard().wasgamegrid != null)
+                player.getGameBoard().wasgamegrid.refresh();
         }
     }
     /*
