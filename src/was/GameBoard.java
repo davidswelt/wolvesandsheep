@@ -358,8 +358,7 @@ public class GameBoard {
      * @return a was.GameLocation object
      */
     public GameLocation getWolfPosition() {
-        if (wolf != null)
-        {
+        if (wolf != null) {
             return wolf.getLocationFast();
         }
 
@@ -374,18 +373,16 @@ public class GameBoard {
      */
     public ArrayList<GameLocation> getSheepPositions() {
         ArrayList<GameLocation> r = new ArrayList<GameLocation>(sheep.size());
-        for (Player p : sheep)
-        {
+        for (Player p : sheep) {
             r.add(p.getLocationFast());
         }
         return r;
         //return findAllPlayersLoc(GamePiece.SHEEP);
     }
-    
+
     boolean noSheepLeftP() {
-        return (sheep.size()==0);
+        return (sheep.size() == 0);
     }
-    
 
     // 375s: cache, but safe
     // 260s: cache, not safe  ??
@@ -393,18 +390,15 @@ public class GameBoard {
     // 289s,280,279: no cache separated sheep/obstacles 
     // 318,302 - HashMap instead of TreeMap
     // 296: use .loc directly where it's okay
-    
     /**
      * Get the positions of all the pastures on the board
      *
      * @return an ArrayList containing was.GameLocation objects, with x,y
      * positions
      */
-
     public ArrayList<GameLocation> getPasturePositions() {
         ArrayList<GameLocation> r = new ArrayList<GameLocation>(pastures.size());
-        for (Player p : pastures)
-        {
+        for (Player p : pastures) {
             r.add(p.getLocationFast());
         }
         return r;
@@ -418,8 +412,7 @@ public class GameBoard {
      */
     public ArrayList<GameLocation> getObstaclePositions() {
         ArrayList<GameLocation> r = new ArrayList<GameLocation>(obstacles.size());
-        for (Player p : obstacles)
-        {
+        for (Player p : obstacles) {
             r.add(p.getLocationFast());
         }
         return r;
@@ -691,15 +684,22 @@ public class GameBoard {
 
         setPlayerAt(locI, p);
         players.add(p);
-        
-        switch(p.getPiece())
-        {
-            case WOLF: wolf=p; break;
-            case OBSTACLE: obstacles.add(p); break;
-            case SHEEP: sheep.add(p); break;
-            case PASTURE: pastures.add(p); break;
+
+        switch (p.getPiece()) {
+            case WOLF:
+                wolf = p;
+                break;
+            case OBSTACLE:
+                obstacles.add(p);
+                break;
+            case SHEEP:
+                sheep.add(p);
+                break;
+            case PASTURE:
+                pastures.add(p);
+                break;
         }
-        
+
         scores.put(p, new int[1]);
 
         if (this.ui) {
@@ -866,22 +866,42 @@ public class GameBoard {
 
         // can't actually remove the player (concurrentModificationException)
         //players.remove(p);
-        
         // but we can remove them from the extra references
-        
-        switch(p.getPiece())
-        {
-            case WOLF: if (wolf==p) wolf=null; break;
-            case OBSTACLE: obstacles.remove(p); break;
-            case SHEEP: sheep.remove(p); break;
-            case PASTURE: pastures.remove(p); break;
+        switch (p.getPiece()) {
+            case WOLF:
+                if (wolf == p) {
+                    wolf = null;
+                }
+                break;
+            case OBSTACLE:
+                obstacles.remove(p);
+                break;
+            case SHEEP:
+                sheep.remove(p);
+                break;
+            case PASTURE:
+                pastures.remove(p);
+                break;
         }
-        
+
     }
 
     void printScores() {
         for (Map.Entry<Player, int[]> s : scores.entrySet()) {
             System.out.println(s.getKey() + ": " + s.getValue()[0]);
         }
+    }
+
+    /**
+     * Get a scenario ID. The ID is guaranteed to uniquely identify the scenario
+     * in the current process (tournament). The IDs will change across processes
+     * so that they cannot be used to hard-code strategies for scenarios. They
+     * can, however, be used to learn good strategies for a unique scenario
+     * across several rounds of the game.
+     *
+     * @return unique ID
+     */
+    public int getUniqueScenarioID() {
+        return this.scenario.getUniqueScenarioID();
     }
 }

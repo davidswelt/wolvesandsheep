@@ -4,6 +4,10 @@
  */
 package was;
 
+import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -20,7 +24,7 @@ import java.util.logging.Logger;
 public class Scenario {
 
     //protected static List<Integer> scenarioParameterValues;
-    static Random rand = new Random();
+    static final Random rand = new Random();
     int requested = 0;
     GameBoard tmpGb = null;
     static List<Integer> parmValues = new ArrayList(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8));
@@ -28,6 +32,8 @@ public class Scenario {
     volatile static int repeatCount = 0; // used to avoid randomization when repeating rounds
     volatile static int gameCount = 0; // counts total number of games played (for info)
     GameBoard gb = null;
+
+    static final int scenarioIDsalt = rand.nextInt(5000);
 
     protected Scenario() {
     }
@@ -65,10 +71,11 @@ public class Scenario {
 
         return parmValues;
     }
-    
-    static double getMaxWolfDistance () {
+
+    static double getMaxWolfDistance() {
         return 2.0;
     }
+
     static int getWolfEatingTime() {
         return 7;
     }
@@ -85,13 +92,15 @@ public class Scenario {
             throw new RuntimeException(ex);
         }
 
-        gameCount ++;
-        
-        sc.setRequested ( requestedScenario);
+        gameCount++;
+
+        sc.setRequested(requestedScenario);
         // any parametrization should happen here
         if (sc.requested == 0) {
-            sc.setRequested (getParameterValues().get(rand.nextInt(getParameterValues().size())));
+            sc.setRequested(getParameterValues().get(rand.nextInt(getParameterValues().size())));
         }
+                
+               
         return sc;
     }
 
@@ -143,7 +152,7 @@ public class Scenario {
                 sheepP.add(loc(10, -1));
                 sheepP.add(loc(20, -1));
                 sheepP.add(loc(25, -1));
-                wolfP.add(loc(-1,-1));
+                wolfP.add(loc(-1, -1));
                 break;
             case 5:
                 green(1, 1);
@@ -171,7 +180,7 @@ public class Scenario {
                 wolfP.add(loc(-2, 3));
                 break;
             case 6:
-                grey(29,29);
+                grey(29, 29);
                 wolfP.add(loc(15, 15));
                 sheepP.add(loc(10, 15));
                 sheepP.add(loc(15, 10));
@@ -247,7 +256,7 @@ public class Scenario {
                 board.maxTimeStep = Math.max(board.maxTimeStep, 200);
                 break;
             default:
-                throw new RuntimeException("Specified scenario ("+requested+") unavailable.");
+                throw new RuntimeException("Specified scenario (" + requested + ") unavailable.");
         }
     }
 
@@ -411,25 +420,60 @@ public class Scenario {
     }
 
     private String descrStr = null;  // set by setRequested
-    
-    private void setRequested(int r)
-    {
-        requested=r;
+
+    private void setRequested(int r) {
+        requested = r;
         descrStr = toStringNow();
-        
+
     }
-    
+
     private String toStringNow() {
-        
+
         return "Sc." + String.format("%02d", requested);
     }
+
     @Override
     public String toString() {
         return descrStr; // faster
     }
-    
+
     static public String toString(int sc) {
         return "Sc." + String.format("%02d", sc);
     }
-    
+
+    /**
+     * Get a scenario ID. The ID is guaranteed to uniquely identify the scenario
+     * in the current process (tournament). The IDs will change across processes
+     * so that they cannot be used to hard-code strategies for scenarios. They
+     * can, however, be used to learn good strategies for a unique scenario
+     * across several rounds of the game.
+     *
+     * @return unique ID
+     */
+    Integer hashCode = null;
+
+    public int getUniqueScenarioID() {
+
+        try {
+            if (hashCode == null) {
+                MessageDigest md = MessageDigest.getInstance("SHA-256");
+
+                String text = Integer.toString(scenarioIDsalt) + toString();
+
+                md.update(text.getBytes("UTF-8"));
+                byte[] digest = md.digest();
+
+                BigInteger bigInt = new BigInteger(1, digest);
+                hashCode = bigInt.hashCode();
+            }
+            return hashCode;
+
+        } catch (NoSuchAlgorithmException ex) {
+            Logger.getLogger(Scenario.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (UnsupportedEncodingException ex) {
+            Logger.getLogger(Scenario.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return 0;
+    }
+
 }
