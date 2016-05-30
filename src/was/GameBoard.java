@@ -778,7 +778,6 @@ public class GameBoard {
 
         // initialize the players
         for (Player p : players) {
-            p.roundEnding();
             p.callInitialize();
         }
 
