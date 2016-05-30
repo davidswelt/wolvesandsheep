@@ -822,7 +822,16 @@ public abstract class Player {
      */
     private void isKeepingBusy() {
     }
-
+    
+    /**
+     * roundEnding()
+     * 
+     * Called once per round to allow the player to do any post-round 
+     * cleanup or results-saving actions
+     */
+    public void roundEnding() {
+    }
+    
     /**
      * Provide a string representation
      *

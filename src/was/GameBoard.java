@@ -778,6 +778,7 @@ public class GameBoard {
 
         // initialize the players
         for (Player p : players) {
+            p.roundEnding();
             p.callInitialize();
         }
 
@@ -814,6 +815,8 @@ public class GameBoard {
             // de-construct the players
             // right now this just releases some streams if needed.
             for (Player p : players) {
+                // Call round-end functions
+                p.roundEnding();
                 p.finished();
             }
         }
