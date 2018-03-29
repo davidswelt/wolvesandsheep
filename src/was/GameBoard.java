@@ -808,7 +808,7 @@ public class GameBoard {
                 // Allow players to perform tasks before the round ends
                 for (Player p : players) {
                     // Call round-end functions
-                    p.roundEnding();
+                    p.callRoundEnding();
                 }
                 
                 wasgamegrid.doPause();
