@@ -58,6 +58,7 @@ public abstract class Player {
     private double allowedDistanceDivider = 1; // none for now
     PlayerProxy playerProxy = null;
     private int isBusyUntilTime = 0; // wolf is eating
+    private int scenarioNum = 0;
     GameBoard gb = null;
     //private int x = 0, y = 0; // location of this player
     GameLocation loc = new GameLocation(0,0);
@@ -174,7 +175,6 @@ public abstract class Player {
     abstract GamePiece getPiece();
 
     private boolean isDisqualified() {
-        int scenarioNum = gb.scenario.requested;
         Integer dc = (Integer) disqualifiedCount.get(this.getClass().getName() + ".Sc" + new Integer(scenarioNum));
         if (dc == null) {
             dc = 0;
@@ -184,7 +184,6 @@ public abstract class Player {
     }
 
     private void markDisqualified() {
-        int scenarioNum = gb.scenario.requested;
         String playerID = this.getClass().getName() + ".Sc" + new Integer(scenarioNum);
         Integer dc = (Integer) disqualifiedCount.get(playerID);
         if (dc == null) {
@@ -206,6 +205,7 @@ public abstract class Player {
     {
         if (this.gb == null) {
             this.gb = gb;
+            this.scenarioNum = gb.scenario.requested;
         } else {
             // this may happen when gameboard is scaled
             //  throw new RuntimeException("Player's gameboard is already set.  Player added twice?");
@@ -412,7 +412,7 @@ public abstract class Player {
         if (fn == MOVE) {
             Tournament.logPlayerMoveAttempt(this.getClass(), gb);
         }
-        if (isDisqualified()) {
+        if (fn != ROUND_ENDING && isDisqualified()) {
 
             if (fn == MOVE) {
                 Tournament.logPlayerCrash(this.getClass(), new RuntimeException("not playing (disqualified)"), gb);
