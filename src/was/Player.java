@@ -43,6 +43,7 @@ public abstract class Player {
     private static final int IS_KEEPING_BUSY = 3;
     private static final int WILL_EAT = 4;
     private static final int IS_ATTACKED = 5;
+    private static final int ROUND_ENDING = 6;
     boolean willNotMove = false;
     static boolean debuggable = true; // is set to false by class tournament code
     // not accessible from outside of was package.
@@ -57,6 +58,7 @@ public abstract class Player {
     private double allowedDistanceDivider = 1; // none for now
     PlayerProxy playerProxy = null;
     private int isBusyUntilTime = 0; // wolf is eating
+    private int scenarioNum = 0;
     GameBoard gb = null;
     //private int x = 0, y = 0; // location of this player
     GameLocation loc = new GameLocation(0,0);
@@ -173,7 +175,6 @@ public abstract class Player {
     abstract GamePiece getPiece();
 
     private boolean isDisqualified() {
-        int scenarioNum = gb.scenario.requested;
         Integer dc = (Integer) disqualifiedCount.get(this.getClass().getName() + ".Sc" + new Integer(scenarioNum));
         if (dc == null) {
             dc = 0;
@@ -183,7 +184,6 @@ public abstract class Player {
     }
 
     private void markDisqualified() {
-        int scenarioNum = gb.scenario.requested;
         String playerID = this.getClass().getName() + ".Sc" + new Integer(scenarioNum);
         Integer dc = (Integer) disqualifiedCount.get(playerID);
         if (dc == null) {
@@ -205,6 +205,7 @@ public abstract class Player {
     {
         if (this.gb == null) {
             this.gb = gb;
+            this.scenarioNum = gb.scenario.requested;
         } else {
             // this may happen when gameboard is scaled
             //  throw new RuntimeException("Player's gameboard is already set.  Player added twice?");
@@ -411,7 +412,7 @@ public abstract class Player {
         if (fn == MOVE) {
             Tournament.logPlayerMoveAttempt(this.getClass(), gb);
         }
-        if (isDisqualified()) {
+        if (fn != ROUND_ENDING && isDisqualified()) {
 
             if (fn == MOVE) {
                 Tournament.logPlayerCrash(this.getClass(), new RuntimeException("not playing (disqualified)"), gb);
@@ -478,6 +479,9 @@ public abstract class Player {
                 case WILL_EAT:
                     reason = "will_eat";
                     break;
+                case ROUND_ENDING:
+                    reason = "round_ending";
+                    break;
             }
 
             System.err.println("Player " + getClass().getName() + " timed out " + TIMEOUT + "ms max." + " in function " + reason);
@@ -532,6 +536,10 @@ public abstract class Player {
                     if (thePlayer instanceof WolfPlayer) {
                         ((WolfPlayer) thePlayer).isAttacked();
                     }
+                    break;
+                case ROUND_ENDING:
+                    m = null; // No moves as round is ending
+                    roundEnding();
                     break;
             }
 //        System.out.println(Thread.activeCount()-threadcount);
@@ -656,6 +664,9 @@ public abstract class Player {
                 case WILL_EAT:
                     reason = "will_eat";
                     break;
+                case ROUND_ENDING:
+                    reason = "round_ending";
+                    break;
             }
 
             System.err.println("Player " + thePlayer.getClass().getName() + " timed out " + TIMEOUT + "ms max." + " in function " + reason);
@@ -718,6 +729,10 @@ public abstract class Player {
 
     final void callIsAttacked() {
         callPlayerFunction(IS_ATTACKED);
+    }
+    
+    final void callRoundEnding() {
+        callPlayerFunction(ROUND_ENDING);
     }
 
     final Move calcMove() {
@@ -822,7 +837,16 @@ public abstract class Player {
      */
     private void isKeepingBusy() {
     }
-
+    
+    /**
+     * roundEnding()
+     * 
+     * Called once per round to allow the player to do any post-round 
+     * cleanup or results-saving actions
+     */
+    public void roundEnding() {
+    }
+    
     /**
      * Provide a string representation
      *
