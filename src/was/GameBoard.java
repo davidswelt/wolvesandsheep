@@ -804,6 +804,13 @@ public class GameBoard {
                         }
                     }
                 }
+                
+                // Allow players to perform tasks before the round ends
+                for (Player p : players) {
+                    // Call round-end functions
+                    p.roundEnding();
+                }
+                
                 wasgamegrid.doPause();
                 wasgamegrid.hide();
                 wasgamegrid = null; // go away!
@@ -815,7 +822,6 @@ public class GameBoard {
             // right now this just releases some streams if needed.
             for (Player p : players) {
                 // Call round-end functions
-                p.roundEnding();
                 p.finished();
             }
         }

@@ -43,6 +43,7 @@ public abstract class Player {
     private static final int IS_KEEPING_BUSY = 3;
     private static final int WILL_EAT = 4;
     private static final int IS_ATTACKED = 5;
+    private static final int ROUND_ENDING = 6;
     boolean willNotMove = false;
     static boolean debuggable = true; // is set to false by class tournament code
     // not accessible from outside of was package.
@@ -478,6 +479,9 @@ public abstract class Player {
                 case WILL_EAT:
                     reason = "will_eat";
                     break;
+                case ROUND_ENDING:
+                    reason = "round_ending";
+                    break;
             }
 
             System.err.println("Player " + getClass().getName() + " timed out " + TIMEOUT + "ms max." + " in function " + reason);
@@ -532,6 +536,10 @@ public abstract class Player {
                     if (thePlayer instanceof WolfPlayer) {
                         ((WolfPlayer) thePlayer).isAttacked();
                     }
+                    break;
+                case ROUND_ENDING:
+                    m = null; // No moves as round is ending
+                    roundEnding();
                     break;
             }
 //        System.out.println(Thread.activeCount()-threadcount);
@@ -656,6 +664,9 @@ public abstract class Player {
                 case WILL_EAT:
                     reason = "will_eat";
                     break;
+                case ROUND_ENDING:
+                    reason = "round_ending";
+                    break;
             }
 
             System.err.println("Player " + thePlayer.getClass().getName() + " timed out " + TIMEOUT + "ms max." + " in function " + reason);
@@ -718,6 +729,10 @@ public abstract class Player {
 
     final void callIsAttacked() {
         callPlayerFunction(IS_ATTACKED);
+    }
+    
+    final void callRoundEnding() {
+        callPlayerFunction(ROUND_ENDING);
     }
 
     final Move calcMove() {
